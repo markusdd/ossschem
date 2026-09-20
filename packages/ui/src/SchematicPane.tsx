@@ -100,7 +100,9 @@ export function SchematicPane(props: {
         if (!sameView || props.viewportRequest?.fit) ctl.zoomToFit();
         else if (props.viewportRequest?.keys) ctl.focusElements(traceFocusKeys(laid.nodes, props.viewportRequest.keys));
         else if (props.viewportRequest?.direction) {
-          const trace = hopAtBoundary(design, props.viewportRequest.key, props.viewportRequest.direction, session);
+          const progress = session.trace;
+          const trace = progress?.origin === props.viewportRequest.key && progress.direction === props.viewportRequest.direction
+            ? progress.focus : hopAtBoundary(design, props.viewportRequest.key, props.viewportRequest.direction, session);
           const added = [...keys].filter(k => !previous.keys.has(k));
           ctl.focusElements(traceFocusKeys(laid.nodes, [...trace, ...added]));
         }

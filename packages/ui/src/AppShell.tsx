@@ -6,9 +6,8 @@ import {
   buildLevel0Connectivity,
   buildHierarchy, flattenHierarchy, prepareHierarchySelection,
   expandHierarchy, moduleRootKey, revealSignalConnection, type ExpansionMode, type SignalEndpoint,
-  copySession, collapseWire, expandComponent, flattenNodes, isolateComponent, revealTrace, sceneEdges,
+  copySession, collapseWire, expandComponent, flattenNodes, isolateComponent, advanceTrace, sceneEdges,
   type PinFace, type TraceDirection,
-  hopAtBoundary,
   selectionInfo,
   snippet,
   type ViewSession,
@@ -110,7 +109,7 @@ export function AppShell(props: {
   const snip = info?.span !== undefined && srcText !== undefined ? snippet(srcText, info.span, 2) : null;
 
   const mutateSession = useCallback((fn: (s: ViewSession) => ViewSession) => {
-    setSession((prev) => (prev === null ? prev : fn(copySession({ ...prev, fanoutLimit }))));
+    setSession((prev) => (prev === null ? prev : fn(copySession({ ...prev, fanoutLimit, trace: undefined }))));
   }, [fanoutLimit]);
 
   const hierarchy = useMemo(() => design && session ? buildHierarchy(design, session) : [], [design, session?.moduleId, session?.path]);
@@ -228,23 +227,35 @@ export function AppShell(props: {
     setSelectedKey(null);
   }, [history]);
 
+  const selectElement = useCallback((key: string | null) => {
+    setSelectedKey(key);
+    setTraceDirection(null);
+  }, []);
+
   const tracePin = useCallback((key: string, direction: TraceDirection, face?: PinFace) => {
     if (!design) return;
     setViewportRequest({ key, direction });
-    mutateSession(s => revealTrace(design, s, key, direction, face));
+    const restart = face !== undefined || traceDirection !== direction || selectedKey !== key;
+    setSession(previous => {
+      if (!previous) return previous;
+      if (!restart && previous.trace?.origin === key && previous.trace.direction === direction && !previous.trace.frontier.length) return previous;
+      return advanceTrace(design, { ...previous, fanoutLimit }, key, direction, { restart });
+    });
     setSelectedKey(key);
     setTraceDirection(direction);
-  }, [design, mutateSession]);
+  }, [design, fanoutLimit, traceDirection, selectedKey]);
 
   const trace = useCallback((direction: TraceDirection, into = false) => {
     if (!selectedKey) return;
     tracePin(selectedKey, direction, into ? "inside" : undefined);
   }, [selectedKey, tracePin]);
 
+  const activeTrace = traceDirection && session?.trace?.origin === selectedKey && session.trace.direction === traceDirection
+    ? session.trace : undefined;
   useEffect(() => {
-    ctl?.setCone(viewportRequest?.keys && viewportRequest.keys[0] === selectedKey ? viewportRequest.keys : design && session && selectedKey && traceDirection
-      ? hopAtBoundary(design, selectedKey, traceDirection, session) : []);
-  }, [ctl, design, session, selectedKey, traceDirection, viewportRequest]);
+    ctl?.setCone(viewportRequest?.keys && viewportRequest.keys[0] === selectedKey ? viewportRequest.keys : [...activeTrace?.keys ?? []],
+      activeTrace?.frontier.map(key => key.split("::")[0]));
+  }, [ctl, selectedKey, viewportRequest, activeTrace]);
 
   useEffect(() => {
     const onKey = (ev: KeyboardEvent): void => {
@@ -353,7 +364,7 @@ export function AppShell(props: {
           key={session?.path.join("/")}
           moduleName={top?.name} moduleKey={rootKey ?? undefined} items={hierarchy} selectedKey={rootSelected ? rootKey : selectedNode?.key ?? null}
           canIsolate={!!selectedNode} canExpand={canExpand} canExpandStructure={canExpandStructure} canCollapse={canCollapse}
-          onSelect={setSelectedKey} onExpand={key => expandOrExplode(key, true)}
+          onSelect={selectElement} onExpand={key => expandOrExplode(key, true)}
           onExpandStructure={() => expandSubtree("structure")} onExpandLogic={() => expandSubtree("logic")}
           onIsolate={() => { if (selectedNode) isolate(selectedNode.key); }} onCollapse={collapse}
         />
@@ -382,7 +393,7 @@ export function AppShell(props: {
               <h2>{role === "drivers" ? "Drivers" : "Loads"} ({info.signal![role].length})</h2>
               {info.signal![role].length === 0 ? <p className="ossschem-muted">No {role} recorded.</p> : <ul>
                 {info.signal![role].map(endpoint => <li key={endpoint.pinKey}>
-                  <button type="button" className="ossschem-connection-select" onClick={() => setSelectedKey(endpoint.nodeKey)} title="Select component and show its source">{endpoint.title}</button>
+                  <button type="button" className="ossschem-connection-select" onClick={() => selectElement(endpoint.nodeKey)} title="Select component and show its source">{endpoint.title}</button>
                   <button type="button" onClick={() => revealEndpoint(endpoint)}>Reveal</button>
                   {endpoint.canExpand && <button type="button" onClick={() => revealEndpoint(endpoint, true)}>Expand logic</button>}
                 </li>)}
@@ -399,7 +410,7 @@ export function AppShell(props: {
             viewportRequest={viewportRequest}
             showWorldMap={showWorldMap}
             theme={theme}
-            onSelect={setSelectedKey}
+            onSelect={selectElement}
             onDblClick={expandOrExplode}
             onTracePin={tracePin}
             onReady={onReady}
@@ -410,6 +421,9 @@ export function AppShell(props: {
         {top === undefined
           ? "No design · canvas ready"
           : `${session?.visible ? "Isolated view · " : ""}${top.name} · ${top.ports.length} ports · ${top.boxes.length} boxes · ${arrays.length} arrays`}
+        {activeTrace && <span className="ossschem-trace-status" role="status">
+          {` · ${activeTrace.direction === "forward" ? "Forward" : "Backward"} trace · step ${activeTrace.step} · ${activeTrace.frontier.length ? `${activeTrace.frontier.length} active branches` : "complete"}`}
+        </span>}
       </footer>
       {overlay !== null && (
         <div className="ossschem-dialog-backdrop" role="presentation"
@@ -444,7 +458,7 @@ export function AppShell(props: {
                     <div><dt><kbd>Drag</kbd></dt><dd>Draw a rectangle to zoom to an area</dd></div>
                     <div><dt><kbd>Space</kbd> + drag</dt><dd>Pan the schematic</dd></div>
                     <div><dt><kbd>Double-click</kbd></dt><dd>Expand a component or trace from a pin</dd></div>
-                    <div><dt><kbd>B</kbd> / <kbd>F</kbd></dt><dd>Trace backward to drivers or forward to loads</dd></div>
+                    <div><dt><kbd>B</kbd> / <kbd>F</kbd></dt><dd>Trace backward to drivers or forward to loads; repeat to advance the cone</dd></div>
                     <div><dt><kbd>Shift</kbd> + <kbd>B/F</kbd></dt><dd>Trace through a boundary</dd></div>
                     <div><dt><kbd>E</kbd></dt><dd>Expand the selected component's structure</dd></div>
                     <div><dt><kbd>L</kbd></dt><dd>Expand logic beneath the selected component</dd></div>
@@ -456,6 +470,7 @@ export function AppShell(props: {
                 <section>
                   <h2>Useful operations</h2>
                   <ul className="ossschem-help-list">
+                    <li>Press <strong>F</strong> or <strong>B</strong> repeatedly to advance all active trace branches. Registers pass through to Q going forward; backward tracing follows data and enable, excluding clock and reset. Select another element or press Escape to start fresh.</li>
                     <li>Toggle <strong>World map</strong> in the toolbar. Click the map to recenter or drag its view box to pan without changing zoom. Drag its upper-left corner to resize it, up to 30% of the schematic viewport area.</li>
                     <li>Use <strong>Expand structure</strong> to reveal processes, assignments, and sub-instances.</li>
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>

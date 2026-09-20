@@ -1,8 +1,11 @@
 import type { Design } from "@ossschem/ir";
+import type { TraceProgress } from "./trace-step.js";
 
 export const DEFAULT_FANOUT_LIMIT = 8;
 
 export interface ViewSession {
+  /** Transient progress for repeated directional tracing. */
+  trace?: TraceProgress;
   moduleId: string;
   path: string[];
   exploded: Set<string>;

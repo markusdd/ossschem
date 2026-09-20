@@ -493,6 +493,14 @@ input:disabled {
 }
 .ossschem-port-label { font-size: 15px; font-weight: 600; }
 
+.ossschem-node-body.ossschem-trace-frontier,
+.ossschem-trace-frontier > .ossschem-primitive-selection {
+  stroke: var(--node-color, var(--accent));
+  stroke-width: 4;
+  stroke-dasharray: 6 3;
+  vector-effect: non-scaling-stroke;
+}
+
 .ossschem-wire-hit, .ossschem-wire {
   cursor: pointer;
 }

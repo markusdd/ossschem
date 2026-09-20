@@ -34,7 +34,7 @@ export interface CanvasController {
   setScene(scene: CanvasScene): void;
   setSelection(key: string | null): void;
   setAnnotate(values: Record<string, string>): void;
-  setCone(keys: readonly string[]): void;
+  setCone(keys: readonly string[], frontierKeys?: readonly string[]): void;
   onSelect: ((key: string | null) => void) | null;
   onDblClick: ((key: string) => void) | null;
   onTracePin: ((key: string, direction: TraceDirection, face?: PinFace) => void) | null;
@@ -111,6 +111,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
   let collapsed: CollapsedNetView[] = [];
   let selected: string | null = null;
   let cone = new Set<string>();
+  let frontier = new Set<string>();
   let annotate: Record<string, string> = {};
   let drag: { pointerId: number; px: number; py: number; cx: number; cy: number } | null = null;
   let zoomDrag: { pointerId: number; start: ScreenPoint; end: ScreenPoint; hit: Element | null; moved: boolean } | null = null;
@@ -199,7 +200,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       const g = svgEl("g", { class: `ossschem-kind-${n.kind}`, transform: `translate(${x} ${y})` });
       g.appendChild(
         svgEl(n.kind === "port" ? "path" : "rect", {
-          class: `ossschem-node-body${expanded ? " ossschem-compound" : ""}${selected === n.key ? " ossschem-selected" : ""}${cone.has(n.key) ? " ossschem-cone" : ""}`,
+          class: `ossschem-node-body${expanded ? " ossschem-compound" : ""}${selected === n.key ? " ossschem-selected" : ""}${cone.has(n.key) ? " ossschem-cone" : ""}${frontier.has(n.key) ? " ossschem-trace-frontier" : ""}`,
           width: String(n.w),
           height: String(n.h),
           rx: "5",
@@ -224,7 +225,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     const expanded = n.children !== undefined && n.children.length > 0;
     const isGate = n.kind === "primitive" && n.symbol !== undefined && !expanded;
     const g = svgEl("g", {
-      class: `ossschem-node ossschem-kind-${n.kind} ossschem-node-${n.kind}${selected === n.key ? " ossschem-selected" : ""}${cone.has(n.key) ? " ossschem-cone" : ""}`,
+      class: `ossschem-node ossschem-kind-${n.kind} ossschem-node-${n.kind}${selected === n.key ? " ossschem-selected" : ""}${cone.has(n.key) ? " ossschem-cone" : ""}${frontier.has(n.key) ? " ossschem-trace-frontier" : ""}`,
       "data-id": n.key,
       transform: `translate(${x} ${y})`,
     });
@@ -415,8 +416,9 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       annotate = values;
       draw();
     },
-    setCone(keys) {
+    setCone(keys, frontierKeys = []) {
       cone = new Set(keys);
+      frontier = new Set(frontierKeys);
       draw();
     },
     zoomToFit(keys) {

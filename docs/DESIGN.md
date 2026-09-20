@@ -127,6 +127,7 @@ interface ViewSession {
   revealedEdges?: Set<string>;
   hiddenEdges?: Set<string>;
   partial?: Map<string, Set<string>>;
+  trace?: TraceProgress;
 }
 ```
 
@@ -148,6 +149,8 @@ The default fanout limit is 8 loads. A limit of 0 disables ordinary fanout hidin
 Stubbed edges are omitted from the drawn edge list, but the nodes and pins remain. Pins receive independent `inside` and `outside` handle state. This makes it possible to trace into a compound while leaving its external branch collapsed, or trace out of it while leaving its internal branch collapsed. A collapsed wire branch is hidden through `hiddenEdges`, without removing sibling branches.
 
 Tracing uses `hopAtBoundary` and `revealTrace`. A selected node, pin, or wire is followed in the requested direction until the next meaningful boundary. An inside trace can partially open a process or instance and add only the relevant child branch. An outside trace can reveal neighboring module nodes without opening the selected compound. Explicit expansion remains the way to display the complete contents.
+
+Repeated toolbar/keyboard tracing uses `advanceTrace`. Its transient `TraceProgress` retains the origin, direction, step, frontier pins, visited pins, accumulated highlight keys, and focus keys for the latest step. Each action advances all frontier branches through one leaf component or closed boundary; already open boundaries are traversed transparently. Closed boxes are opened partially, and exploded array endpoints are remapped to member-instance pins. Primitive dependencies follow output pins going forward and input pins going backward. Register traversal crosses to Q going forward and follows only D/EN going backward; explicitly selected clock/reset pins can still be traced directly. Visited pins stop cycles and duplicate traversal after reconvergence. Completed traces are a no-op until restarted. Selection or direction changes restart the active cone; other exploration mutations discard its transient progress. The UI retains origin selection, highlights the accumulated cone, marks frontier components with dashed outlines, and frames only the newest step.
 
 The source pane also lists drivers and loads for a selected signal. `revealSignalConnection` walks the selected signal's local graph to a chosen endpoint and reveals only that route. Expanded boundaries are treated as pass-through connections in the endpoint list rather than being reported as duplicate drivers or loads.
 

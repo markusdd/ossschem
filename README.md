@@ -39,6 +39,8 @@ The **World map** toolbar toggle shows or hides a navigation overview at the sch
 
 The ossschem logo opens an About screen with the project banner. The **Help** button or `H` opens the shortcut and operations guide; pressing `H` again or `Escape` closes it.
 
+Press **F** or **B** repeatedly (or use the Trace buttons) to advance a signal's cone one step at a time across all unfinished branches. The origin stays selected, the accumulated cone remains highlighted, and dashed outlines mark the current endpoints. Forward tracing continues through registers to Q; backward tracing through registers follows D and EN, excluding clock/reset controls. Explicitly selecting a clock or reset pin still allows tracing that signal. Closed processes and instances open only along the followed paths, and visited pins prevent feedback loops from retracing forever. The status bar reports the step and active branches, or completion. Changing direction restarts at the origin; selecting another element or pressing Escape clears the active trace. The camera follows the latest step rather than fitting the whole accumulated cone.
+
 ## License
 
 MIT.
