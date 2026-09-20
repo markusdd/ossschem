@@ -1,10 +1,31 @@
-# ossschem
+# ossschem - A snappy, cool and feature-rich open source RTL Schematic Tracer
 
-Open-source RTL schematic tracer. It turns a Verilator `--json-only` dump into a hierarchical schematic: process/assign boxes first, gates on demand, with forward/back tracing, source mapping, and reconstructed expressions.
+<p align="center">
+  <img src="assets/ossschem_banner.svg" alt="ossschem open-source RTL schematic tracer banner" width="100%">
+</p>
+
+ossschem is an open-source RTL schematic tracer - for now for (System-)Verilog designs that are compileable with Verilator. It reads Verilator's `--json-only` output directly and turns it into an interactive hierarchical schematic without requiring a separate netlister. Start with process and instance structure, expand gates and expressions when needed, and trace signals forward or backward through the design.
+
+The viewer combines schematic navigation with source mapping: select a port, pin, wire, or component to inspect its declaration, expression, drivers, loads, and source code. It is designed for exploring large RTL designs while keeping the initial view readable and focused.
+
+It is planned to support other input formats and also waveform coss-probing.
+
+![ossschem interactive schematic viewer](assets/screenshot.png)
+
+## Quick start
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in a browser. The bundled viewer loads the `svb_afifo` example from the checked-in fixture data.
+
+In the schematic, click to select and use **Fit** to restore the full view. Double-click a process or instance, or press `E`, to expand its structure; press `L` to expand its logic. Select a pin or wire and press `F` or `B` to trace forward or backward. Use **Isolate** or `I` to focus on one component, and `Backspace` to return to the parent view. The **Help** button or `H` shows all shortcuts.
 
 v1 golden design is `svb_afifo` from the adjacent `sv_base_lib` tree. Architecture and acceptance scenes: [`docs/DESIGN.md`](docs/DESIGN.md).
 
-## Develop
+## Development
 
 ```bash
 npm install
