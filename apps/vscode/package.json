@@ -1,0 +1,30 @@
+{
+  "name": "ossschem-vscode",
+  "displayName": "ossschem",
+  "description": "RTL schematic tracer webview (opens .ir.json)",
+  "version": "0.0.0",
+  "publisher": "ossschem",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Visualization"],
+  "activationEvents": ["onCommand:ossschem.open"],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ossschem.open",
+        "title": "ossschem: Open schematic"
+      }
+    ],
+    "languages": [
+      {
+        "id": "ossschem-ir",
+        "extensions": [".ir.json"],
+        "aliases": ["ossschem IR"]
+      }
+    ]
+  }
+}

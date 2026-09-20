@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/ir" },
+    { "path": "packages/ingest-verilator" },
+    { "path": "packages/graph" },
+    { "path": "packages/layout" },
+    { "path": "packages/render" },
+    { "path": "packages/ui" },
+    { "path": "packages/cli" },
+    { "path": "apps/web" }
+  ]
+}

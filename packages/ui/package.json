@@ -1,0 +1,20 @@
+{
+  "name": "@ossschem/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@ossschem/graph": "0.0.0",
+    "@ossschem/ir": "0.0.0",
+    "@ossschem/layout": "0.0.0",
+    "@ossschem/render": "0.0.0",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.13"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@ossschem/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ossschem": "./src/index.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@ossschem/ingest-verilator": "0.0.0",
+    "@ossschem/ir": "0.0.0"
+  }
+}

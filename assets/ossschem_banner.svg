@@ -1,0 +1,1041 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 2048 682"
+   role="img"
+   aria-labelledby="title desc"
+   version="1.1"
+   id="svg73"
+   sodipodi:docname="ossschem_banner.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   inkscape:export-filename="ossschem_banner.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview73"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.29528809"
+     inkscape:cx="1728.8202"
+     inkscape:cy="247.2162"
+     inkscape:window-width="2560"
+     inkscape:window-height="1362"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g52" />
+  <title
+     id="title">ossschem</title>
+  <desc
+     id="desc">Wide ossschem banner with the triple-S mark, shadowed logic gates, routed schematic traces and orange via highlights.</desc>
+  <defs
+     id="defs46">
+    <linearGradient
+       id="background"
+       x1="0"
+       y1="0"
+       x2="2048"
+       y2="682"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#0A1928"
+         id="stop1" />
+      <stop
+         offset=".43"
+         stop-color="#071724"
+         id="stop2" />
+      <stop
+         offset=".72"
+         stop-color="#05131F"
+         id="stop3" />
+      <stop
+         offset="1"
+         stop-color="#030B13"
+         id="stop4" />
+    </linearGradient>
+    <radialGradient
+       id="backgroundGlow"
+       cx="0"
+       cy="0"
+       r="1"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(650 280) rotate(8) scale(930 470)">
+      <stop
+         offset="0"
+         stop-color="#12334B"
+         stop-opacity=".27"
+         id="stop5" />
+      <stop
+         offset=".52"
+         stop-color="#0C2639"
+         stop-opacity=".11"
+         id="stop6" />
+      <stop
+         offset="1"
+         stop-color="#07111C"
+         stop-opacity="0"
+         id="stop7" />
+    </radialGradient>
+    <radialGradient
+       id="centerGlow"
+       cx="0"
+       cy="0"
+       r="1"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(1180 345) scale(820 330)">
+      <stop
+         offset="0"
+         stop-color="#0B2A40"
+         stop-opacity=".15"
+         id="stop8" />
+      <stop
+         offset="1"
+         stop-color="#06111B"
+         stop-opacity="0"
+         id="stop9" />
+    </radialGradient>
+    <linearGradient
+       id="tripleSGradient"
+       x1="255"
+       y1="12"
+       x2="158"
+       y2="501"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#08E7F2"
+         id="stop10" />
+      <stop
+         offset=".42"
+         stop-color="#03D0F6"
+         id="stop11" />
+      <stop
+         offset=".72"
+         stop-color="#06A9FA"
+         id="stop12" />
+      <stop
+         offset="1"
+         stop-color="#0879FA"
+         id="stop13" />
+    </linearGradient>
+    <radialGradient
+       id="tripleSSheen"
+       cx="0"
+       cy="0"
+       r="1"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(214 48) rotate(104) scale(310 272)">
+      <stop
+         offset="0"
+         stop-color="#A1F9FF"
+         stop-opacity=".19"
+         id="stop14" />
+      <stop
+         offset=".48"
+         stop-color="#5DE9FF"
+         stop-opacity=".06"
+         id="stop15" />
+      <stop
+         offset="1"
+         stop-color="#2BCBFF"
+         stop-opacity="0"
+         id="stop16" />
+    </radialGradient>
+    <linearGradient
+       id="wordGradient"
+       x1="0"
+       y1="15"
+       x2="1035"
+       y2="184"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#7AF2FC"
+         id="stop17" />
+      <stop
+         offset=".14"
+         stop-color="#16E2F8"
+         id="stop18" />
+      <stop
+         offset=".34"
+         stop-color="#05CBF8"
+         id="stop19" />
+      <stop
+         offset=".61"
+         stop-color="#079EFA"
+         id="stop20" />
+      <stop
+         offset=".82"
+         stop-color="#087FF9"
+         id="stop21" />
+      <stop
+         offset="1"
+         stop-color="#0875F7"
+         id="stop22" />
+    </linearGradient>
+    <linearGradient
+       id="traceDim"
+       x1="0"
+       y1="40"
+       x2="2048"
+       y2="630"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#194B74"
+         id="stop23" />
+      <stop
+         offset=".5"
+         stop-color="#0E3B61"
+         id="stop24" />
+      <stop
+         offset="1"
+         stop-color="#092842"
+         id="stop25" />
+    </linearGradient>
+    <linearGradient
+       id="traceLit"
+       x1="0"
+       y1="0"
+       x2="2048"
+       y2="0"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#1287FF"
+         id="stop26" />
+      <stop
+         offset=".44"
+         stop-color="#0A66D2"
+         id="stop27" />
+      <stop
+         offset=".72"
+         stop-color="#0B75E4"
+         id="stop28" />
+      <stop
+         offset="1"
+         stop-color="#0C82F2"
+         id="stop29" />
+    </linearGradient>
+    <linearGradient
+       id="gateFill"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#14304A"
+         stop-opacity=".78"
+         id="stop30" />
+      <stop
+         offset="1"
+         stop-color="#091A2A"
+         stop-opacity=".73"
+         id="stop31" />
+    </linearGradient>
+    <radialGradient
+       id="viaGradient"
+       cx="34%"
+       cy="28%"
+       r="75%">
+      <stop
+         offset="0"
+         stop-color="#FFD94C"
+         id="stop32" />
+      <stop
+         offset=".48"
+         stop-color="#FFAA1D"
+         id="stop33" />
+      <stop
+         offset=".78"
+         stop-color="#FF870D"
+         id="stop34" />
+      <stop
+         offset="1"
+         stop-color="#F36A08"
+         id="stop35" />
+    </radialGradient>
+    <filter
+       id="markShadow"
+       x="-0.12140085"
+       y="-0.087216848"
+       width="1.2428017"
+       height="1.1936727"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="13"
+         result="wideBlur"
+         id="feGaussianBlur35" />
+      <feFlood
+         flood-color="#029DFF"
+         flood-opacity=".18"
+         result="wideColor"
+         id="feFlood35" />
+      <feComposite
+         in="wideColor"
+         in2="wideBlur"
+         operator="in"
+         result="wideGlow"
+         id="feComposite35" />
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="4"
+         result="tightBlur"
+         id="feGaussianBlur36" />
+      <feOffset
+         in="tightBlur"
+         dy="9"
+         result="offsetBlur"
+         id="feOffset36" />
+      <feFlood
+         flood-color="#000610"
+         flood-opacity=".66"
+         result="shadowColor"
+         id="feFlood36" />
+      <feComposite
+         in="shadowColor"
+         in2="offsetBlur"
+         operator="in"
+         result="shadow"
+         id="feComposite36" />
+      <feMerge
+         id="feMerge38">
+        <feMergeNode
+           in="shadow"
+           id="feMergeNode36" />
+        <feMergeNode
+           in="wideGlow"
+           id="feMergeNode37" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode38" />
+      </feMerge>
+    </filter>
+    <filter
+       id="wordGlow"
+       x="-0.030006105"
+       y="-0.18159967"
+       width="1.0600122"
+       height="1.3929893"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="10"
+         result="blur"
+         id="feGaussianBlur38" />
+      <feFlood
+         flood-color="#009DFF"
+         flood-opacity=".19"
+         result="color"
+         id="feFlood38" />
+      <feComposite
+         in="color"
+         in2="blur"
+         operator="in"
+         result="glow"
+         id="feComposite38" />
+      <feGaussianBlur
+         in="SourceAlpha"
+         stdDeviation="2.7"
+         result="shadowBlur"
+         id="feGaussianBlur39" />
+      <feOffset
+         in="shadowBlur"
+         dy="5"
+         result="shadowOffset"
+         id="feOffset39" />
+      <feFlood
+         flood-color="#00101B"
+         flood-opacity=".58"
+         result="shadowColor"
+         id="feFlood39" />
+      <feComposite
+         in="shadowColor"
+         in2="shadowOffset"
+         operator="in"
+         result="shadow"
+         id="feComposite39" />
+      <feMerge
+         id="feMerge41">
+        <feMergeNode
+           in="shadow"
+           id="feMergeNode39" />
+        <feMergeNode
+           in="glow"
+           id="feMergeNode40" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode41" />
+      </feMerge>
+    </filter>
+    <filter
+       id="viaGlow"
+       x="-0.50526316"
+       y="-0.50526316"
+       width="2.0105263"
+       height="2.0105263"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="8"
+         result="blur"
+         id="feGaussianBlur41" />
+      <feFlood
+         flood-color="#FF8B08"
+         flood-opacity=".58"
+         result="color"
+         id="feFlood41" />
+      <feComposite
+         in="color"
+         in2="blur"
+         operator="in"
+         result="glow"
+         id="feComposite41" />
+      <feMerge
+         id="feMerge43">
+        <feMergeNode
+           in="glow"
+           id="feMergeNode42" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode43" />
+      </feMerge>
+    </filter>
+    <filter
+       id="traceGlow"
+       x="-0.021704509"
+       y="-0.15213115"
+       width="1.043409"
+       height="1.3042623"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="2.2"
+         result="blur"
+         id="feGaussianBlur43" />
+      <feFlood
+         flood-color="#087CFF"
+         flood-opacity=".17"
+         result="color"
+         id="feFlood43" />
+      <feComposite
+         in="color"
+         in2="blur"
+         operator="in"
+         result="glow"
+         id="feComposite43" />
+      <feMerge
+         id="feMerge45">
+        <feMergeNode
+           in="glow"
+           id="feMergeNode44" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode45" />
+      </feMerge>
+    </filter>
+    <filter
+       id="grain"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
+      <feTurbulence
+         type="fractalNoise"
+         baseFrequency=".74"
+         numOctaves="2"
+         seed="23"
+         stitchTiles="stitch"
+         id="feTurbulence45" />
+      <feColorMatrix
+         values="1 0 0 0 0                              0 1 0 0 0                              0 0 1 0 0                              0 0 0 .08 0"
+         id="feColorMatrix45" />
+    </filter>
+    <g
+       id="via"
+       filter="url(#viaGlow)">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle45" />
+      <circle
+         r="7.3"
+         fill="#07111C"
+         id="circle46" />
+    </g>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#traceDim"
+       id="linearGradient73"
+       gradientUnits="userSpaceOnUse"
+       x1="0"
+       y1="40"
+       x2="2048"
+       y2="630"
+       gradientTransform="translate(-111.6498,-309.99969)" />
+    <filter
+       id="viaGlow-5"
+       x="-0.50526316"
+       y="-0.50526316"
+       width="2.0105263"
+       height="2.0105263"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="8"
+         result="blur"
+         id="feGaussianBlur41-6" />
+      <feFlood
+         flood-color="#FF8B08"
+         flood-opacity=".58"
+         result="color"
+         id="feFlood41-2" />
+      <feComposite
+         in="color"
+         in2="blur"
+         operator="in"
+         result="glow"
+         id="feComposite41-9" />
+      <feMerge
+         id="feMerge43-1">
+        <feMergeNode
+           in="glow"
+           id="feMergeNode42-2" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode43-7" />
+      </feMerge>
+    </filter>
+    <radialGradient
+       id="viaGradient-0"
+       cx="-6.0799999"
+       cy="-8.36"
+       r="28.5"
+       fx="-6.0799999"
+       fy="-8.36"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#FFD94C"
+         id="stop32-9" />
+      <stop
+         offset=".48"
+         stop-color="#FFAA1D"
+         id="stop33-3" />
+      <stop
+         offset=".78"
+         stop-color="#FF870D"
+         id="stop34-6" />
+      <stop
+         offset="1"
+         stop-color="#F36A08"
+         id="stop35-0" />
+    </radialGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#viaGradient"
+       id="radialGradient73"
+       cx="-6.0799999"
+       cy="-8.36"
+       r="28.5"
+       fx="-6.0799999"
+       fy="-8.36"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#traceDim"
+       id="linearGradient74"
+       gradientUnits="userSpaceOnUse"
+       x1="0"
+       y1="40"
+       x2="2048"
+       y2="630"
+       gradientTransform="translate(-0.59865841,6.2859133)" />
+    <filter
+       id="viaGlow-8"
+       x="-0.50526316"
+       y="-0.50526316"
+       width="2.0105263"
+       height="2.0105263"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="8"
+         result="blur"
+         id="feGaussianBlur41-7" />
+      <feFlood
+         flood-color="#FF8B08"
+         flood-opacity=".58"
+         result="color"
+         id="feFlood41-9" />
+      <feComposite
+         in="color"
+         in2="blur"
+         operator="in"
+         result="glow"
+         id="feComposite41-2" />
+      <feMerge
+         id="feMerge43-0">
+        <feMergeNode
+           in="glow"
+           id="feMergeNode42-23" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode43-75" />
+      </feMerge>
+    </filter>
+    <radialGradient
+       id="viaGradient-9"
+       cx="-6.0799999"
+       cy="-8.36"
+       r="28.5"
+       fx="-6.0799999"
+       fy="-8.36"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#FFD94C"
+         id="stop32-2" />
+      <stop
+         offset=".48"
+         stop-color="#FFAA1D"
+         id="stop33-2" />
+      <stop
+         offset=".78"
+         stop-color="#FF870D"
+         id="stop34-8" />
+      <stop
+         offset="1"
+         stop-color="#F36A08"
+         id="stop35-9" />
+    </radialGradient>
+    <filter
+       id="viaGlow-8-2"
+       x="-0.50526316"
+       y="-0.50526316"
+       width="2.0105263"
+       height="2.0105263"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         in="SourceGraphic"
+         stdDeviation="8"
+         result="blur"
+         id="feGaussianBlur41-7-9" />
+      <feFlood
+         flood-color="#FF8B08"
+         flood-opacity=".58"
+         result="color"
+         id="feFlood41-9-3" />
+      <feComposite
+         in="color"
+         in2="blur"
+         operator="in"
+         result="glow"
+         id="feComposite41-2-1" />
+      <feMerge
+         id="feMerge43-0-9">
+        <feMergeNode
+           in="glow"
+           id="feMergeNode42-23-4" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode43-75-7" />
+      </feMerge>
+    </filter>
+    <radialGradient
+       id="viaGradient-9-8"
+       cx="-6.0799999"
+       cy="-8.3599997"
+       r="28.5"
+       fx="-6.0799999"
+       fy="-8.3599997"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#FFD94C"
+         id="stop32-2-4" />
+      <stop
+         offset=".48"
+         stop-color="#FFAA1D"
+         id="stop33-2-5" />
+      <stop
+         offset=".78"
+         stop-color="#FF870D"
+         id="stop34-8-0" />
+      <stop
+         offset="1"
+         stop-color="#F36A08"
+         id="stop35-9-3" />
+    </radialGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#traceDim"
+       id="linearGradient75"
+       gradientUnits="userSpaceOnUse"
+       x1="0"
+       y1="40"
+       x2="2048"
+       y2="630"
+       gradientTransform="translate(0,14)" />
+  </defs>
+  <rect
+     width="2048"
+     height="682"
+     fill="url(#background)"
+     id="rect46" />
+  <rect
+     width="2048"
+     height="682"
+     fill="url(#backgroundGlow)"
+     id="rect47" />
+  <rect
+     width="2048"
+     height="682"
+     fill="url(#centerGlow)"
+     id="rect48" />
+  <rect
+     width="2048"
+     height="682"
+     opacity=".045"
+     filter="url(#grain)"
+     id="rect49" />
+  <g
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g71">
+    <!-- Cropped upper-left AND gate -->
+    <g
+       opacity=".72"
+       id="g52">
+      <path
+         d="M 0,123 H 158 M 0,167 h 158"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path49"
+         style="stroke:url(#linearGradient75)" />
+      <path
+         d="M158 72H240C284 72 313 104 313 144C313 184 284 216 240 216H158Z"
+         fill="url(#gateFill)"
+         stroke="#18446C"
+         stroke-width="7"
+         id="path50" />
+      <path
+         d="M 313,143 H 414 L 494.13828,69.36172 824.32709,71.4969"
+         fill="none"
+         stroke="url(#traceLit)"
+         stroke-width="8"
+         filter="url(#traceGlow)"
+         id="path51"
+         sodipodi:nodetypes="cccc" />
+      <path
+         d="M212 216V280"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path52" />
+      <circle
+         cx="211.80269"
+         cy="282.70737"
+         r="11"
+         fill="#123c66"
+         id="circle52" />
+    </g>
+    <g
+       transform="translate(814.47956,71.013416)"
+       filter="url(#viaGlow)"
+       id="g54">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle53"
+         style="fill:url(#radialGradient73)"
+         cx="0"
+         cy="0" />
+      <circle
+         r="7.3000002"
+         fill="#07111c"
+         id="circle54"
+         cx="0"
+         cy="0" />
+    </g>
+    <!-- Left middle routed trace -->
+    <path
+       d="m 0,295 h 142 l 68,73 h 135 l 65,68 6.04258,1.26995"
+       fill="none"
+       stroke="url(#traceLit)"
+       stroke-width="7.5"
+       opacity="0.92"
+       filter="url(#traceGlow)"
+       id="path54"
+       sodipodi:nodetypes="cccccc" />
+    <circle
+       cx="210"
+       cy="368"
+       r="11.5"
+       fill="#154371"
+       id="circle55" />
+    <!-- Cropped lower-left OR gate -->
+    <g
+       opacity=".67"
+       id="g59">
+      <path
+         d="M -0.59865841,470.28591 H 138.40134 m -138.99999841,47 H 138.40134"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path56"
+         style="stroke:url(#linearGradient74)" />
+      <path
+         d="M117 418C184 418 242 439 279 498C241 553 184 570 117 570C145 526 152 469 117 418Z"
+         fill="url(#gateFill)"
+         stroke="#18446C"
+         stroke-width="7"
+         id="path57" />
+      <path
+         d="M279 499H304L345 544"
+         fill="none"
+         stroke="url(#traceLit)"
+         stroke-width="7"
+         id="path58" />
+      <circle
+         cx="345"
+         cy="544"
+         r="11"
+         fill="#123B63"
+         id="circle58" />
+      <path
+         d="M 200,559.22415 V 595 l 46,46 h 392 l 48,-49 h 201"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path59"
+         sodipodi:nodetypes="cccccc" />
+    </g>
+    <!-- Upper center stepped route -->
+    <path
+       d="M 987.71889,228 H 1092.3493 L 1180,154.74204 l 127.89,0 100.6995,-72.607274 128.11,0 L 1647,-5"
+       fill="none"
+       stroke="url(#traceDim)"
+       stroke-width="7"
+       opacity="0.58"
+       id="path60"
+       sodipodi:nodetypes="ccccccc" />
+    <circle
+       cx="1433.9893"
+       cy="184.37411"
+       r="9"
+       fill="#123c65"
+       opacity="0.86"
+       id="circle60" />
+    <!-- Right inverter -->
+    <!-- Lower-right AND gate -->
+    <g
+       opacity=".67"
+       id="g67">
+      <path
+         d="M1568 475H1821M1698 523H1821"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path64" />
+      <circle
+         cx="1568"
+         cy="475"
+         r="11"
+         fill="#123B63"
+         id="circle65" />
+      <path
+         d="M1821 420H1903C1951 420 1983 451 1983 493C1983 535 1951 566 1903 566H1821Z"
+         fill="url(#gateFill)"
+         stroke="#18446C"
+         stroke-width="7"
+         id="path65" />
+      <path
+         d="M1983 493H2048"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path66" />
+      <path
+         d="m 1871.3502,183.00031 h 65"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path66-3"
+         style="stroke:url(#linearGradient73)" />
+      <path
+         d="M1878 566V622"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path67" />
+      <circle
+         cx="1878"
+         cy="628"
+         r="11"
+         fill="#123B63"
+         id="circle67" />
+    </g>
+    <!-- Lower highlighted route -->
+    <path
+       d="M686 592H1074L1136 531H1359"
+       fill="none"
+       stroke="url(#traceLit)"
+       stroke-width="8"
+       opacity=".97"
+       filter="url(#traceGlow)"
+       id="path68" />
+    <circle
+       cx="685.25214"
+       cy="590.80267"
+       r="11.5"
+       fill="#0c68c8"
+       id="circle68" />
+    <g
+       transform="translate(1359 531)"
+       filter="url(#viaGlow)"
+       id="g70">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle69" />
+      <circle
+         r="7.3"
+         fill="#07111C"
+         id="circle70" />
+    </g>
+    <g
+       transform="translate(410.92516,438.05055)"
+       filter="url(#viaGlow)"
+       id="g70-2"
+       style="filter:url(#viaGlow-5)">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle69-6"
+         cx="0"
+         cy="0"
+         style="fill:url(#viaGradient-0)" />
+      <circle
+         r="7.3000002"
+         fill="#07111c"
+         id="circle70-1"
+         cx="0"
+         cy="0" />
+    </g>
+    <g
+       transform="translate(1946 184)"
+       filter="url(#viaGlow)"
+       id="g64">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle63" />
+      <circle
+         r="7.3"
+         fill="#07111C"
+         id="circle64" />
+    </g>
+    <g
+       transform="translate(1702.4588,524.14799)"
+       filter="url(#viaGlow)"
+       id="g64-3"
+       style="filter:url(#viaGlow-8)">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle63-6"
+         cx="0"
+         cy="0"
+         style="fill:url(#viaGradient-9)" />
+      <circle
+         r="7.3000002"
+         fill="#07111c"
+         id="circle64-1"
+         cx="0"
+         cy="0" />
+    </g>
+    <g
+       transform="translate(994.80314,227.46788)"
+       filter="url(#viaGlow)"
+       id="g64-3-1"
+       style="filter:url(#viaGlow-8-2)">
+      <circle
+         r="19"
+         fill="url(#viaGradient)"
+         id="circle63-6-0"
+         cx="0"
+         cy="0"
+         style="fill:url(#viaGradient-9-8)" />
+      <circle
+         r="7.3000002"
+         fill="#07111c"
+         id="circle64-1-6"
+         cx="0"
+         cy="0" />
+    </g>
+    <g
+       opacity=".74"
+       id="g63">
+      <path
+         d="M1436 184H1676"
+         fill="none"
+         stroke="url(#traceDim)"
+         stroke-width="7"
+         id="path61" />
+      <path
+         d="M1676 107V257L1826 184Z"
+         fill="url(#gateFill)"
+         stroke="#18446C"
+         stroke-width="7"
+         id="path62" />
+      <circle
+         cx="1849"
+         cy="184"
+         r="22"
+         fill="#071522"
+         stroke="#18446C"
+         stroke-width="7"
+         id="circle62" />
+    </g>
+  </g>
+  <!-- The exact silhouettes from the approved banner, represented as native vector paths. -->
+  <g
+     transform="translate(380 108)"
+     filter="url(#markShadow)"
+     id="g72">
+    <path
+       d="M49.286 487.549C39.038 484.347 29.872 476.226 25.160 466.175C22.864 461.275 22.500 459.199 22.500 450.979C22.500 442.236 22.769 440.912 25.787 434.782C29.417 427.407 35.550 421.290 43.217 417.396C45.811 416.078 48.340 415.000 48.837 415.000C49.333 415.000 49.970 417.039 50.251 419.530C51.055 426.669 54.872 433.026 60.409 436.449C64.637 439.063 66.326 439.466 74.592 439.827C86.329 440.340 115.668 438.467 135.851 435.916C168.276 431.817 192.066 425.494 212.896 415.436C243.029 400.886 259.378 383.866 267.135 358.975C270.546 348.029 270.324 331.968 266.590 319.562C259.316 295.393 238.367 267.554 212.144 247.208C191.631 231.293 184.759 225.534 176.650 217.467L167.800 208.662L171.040 215.081C176.108 225.125 183.056 234.814 192.541 245.065C212.585 266.728 219.244 275.754 226.057 290.501C234.223 308.177 236.581 325.553 232.514 338.078C219.679 377.607 175.686 398.470 98.501 401.634C80.728 402.362 77.395 401.778 74.549 397.434C72.121 393.728 72.596 389.248 75.750 386.112C78.492 383.385 78.562 383.374 100.500 382.183C151.982 379.389 184.208 369.948 201.569 352.574C208.629 345.508 212.621 337.984 214.110 328.938L215.170 322.500L206.633 314.500C198.538 306.915 189.548 300.491 156.000 278.321C125.985 258.487 104.282 238.289 89.570 216.500C82.476 205.993 74.389 188.739 71.291 177.500C68.810 168.502 68.541 165.948 68.598 152.000C68.654 138.159 68.947 135.560 71.336 127.716C78.655 103.684 90.902 86.475 112.252 70.224C121.987 62.814 138.755 53.143 150.623 48.092C159.431 44.345 182.473 36.925 195.592 33.614C225.190 26.142 282.343 20.217 315.721 21.161C328.702 21.528 329.890 21.734 336.241 24.718C361.163 36.431 366.237 67.245 346.343 86.060C341.242 90.885 334.243 94.932 330.921 94.978C329.707 94.995 329.315 93.859 329.229 90.075C329.045 82.008 324.814 75.535 317.000 71.367C313.891 69.709 311.433 69.527 295.000 69.743C201.036 70.974 135.099 96.562 116.136 139.154C110.826 151.080 109.525 157.409 109.588 171.000C109.639 181.871 110.009 184.608 112.428 192.000C121.563 219.912 141.501 244.720 176.500 271.721C185.850 278.934 197.213 288.642 201.750 293.295C206.287 297.949 210.000 301.241 210.000 300.612C210.000 299.045 202.863 286.959 197.575 279.572C195.185 276.232 188.625 268.550 182.999 262.500C177.373 256.450 169.725 247.450 166.004 242.500C138.993 206.569 137.387 170.708 161.637 145.002C172.598 133.383 186.024 125.519 206.229 118.885C227.496 111.901 257.035 107.673 285.326 107.562L301.153 107.500L304.185 110.887C306.737 113.738 307.126 114.838 306.640 117.834C306.322 119.791 304.921 122.533 303.527 123.928C301.051 126.404 300.550 126.480 282.051 127.175C258.660 128.055 245.862 129.411 231.000 132.584C194.125 140.456 173.012 154.162 166.093 174.718C164.942 178.139 164.017 182.864 164.039 185.218C164.076 189.340 164.414 189.798 173.128 197.500C183.042 206.262 199.678 218.270 212.976 226.261C224.740 233.331 241.342 245.443 254.903 256.849C284.598 281.825 303.834 311.314 310.122 341.500C311.825 349.673 311.557 368.877 309.616 377.743C305.632 395.941 295.703 413.427 281.057 428.036C244.758 464.244 182.883 483.956 92.923 487.972C64.009 489.263 54.474 489.171 49.286 487.549Z"
+       fill="url(#tripleSGradient)"
+       fill-rule="evenodd"
+       id="path71" />
+    <path
+       d="M49.286 487.549C39.038 484.347 29.872 476.226 25.160 466.175C22.864 461.275 22.500 459.199 22.500 450.979C22.500 442.236 22.769 440.912 25.787 434.782C29.417 427.407 35.550 421.290 43.217 417.396C45.811 416.078 48.340 415.000 48.837 415.000C49.333 415.000 49.970 417.039 50.251 419.530C51.055 426.669 54.872 433.026 60.409 436.449C64.637 439.063 66.326 439.466 74.592 439.827C86.329 440.340 115.668 438.467 135.851 435.916C168.276 431.817 192.066 425.494 212.896 415.436C243.029 400.886 259.378 383.866 267.135 358.975C270.546 348.029 270.324 331.968 266.590 319.562C259.316 295.393 238.367 267.554 212.144 247.208C191.631 231.293 184.759 225.534 176.650 217.467L167.800 208.662L171.040 215.081C176.108 225.125 183.056 234.814 192.541 245.065C212.585 266.728 219.244 275.754 226.057 290.501C234.223 308.177 236.581 325.553 232.514 338.078C219.679 377.607 175.686 398.470 98.501 401.634C80.728 402.362 77.395 401.778 74.549 397.434C72.121 393.728 72.596 389.248 75.750 386.112C78.492 383.385 78.562 383.374 100.500 382.183C151.982 379.389 184.208 369.948 201.569 352.574C208.629 345.508 212.621 337.984 214.110 328.938L215.170 322.500L206.633 314.500C198.538 306.915 189.548 300.491 156.000 278.321C125.985 258.487 104.282 238.289 89.570 216.500C82.476 205.993 74.389 188.739 71.291 177.500C68.810 168.502 68.541 165.948 68.598 152.000C68.654 138.159 68.947 135.560 71.336 127.716C78.655 103.684 90.902 86.475 112.252 70.224C121.987 62.814 138.755 53.143 150.623 48.092C159.431 44.345 182.473 36.925 195.592 33.614C225.190 26.142 282.343 20.217 315.721 21.161C328.702 21.528 329.890 21.734 336.241 24.718C361.163 36.431 366.237 67.245 346.343 86.060C341.242 90.885 334.243 94.932 330.921 94.978C329.707 94.995 329.315 93.859 329.229 90.075C329.045 82.008 324.814 75.535 317.000 71.367C313.891 69.709 311.433 69.527 295.000 69.743C201.036 70.974 135.099 96.562 116.136 139.154C110.826 151.080 109.525 157.409 109.588 171.000C109.639 181.871 110.009 184.608 112.428 192.000C121.563 219.912 141.501 244.720 176.500 271.721C185.850 278.934 197.213 288.642 201.750 293.295C206.287 297.949 210.000 301.241 210.000 300.612C210.000 299.045 202.863 286.959 197.575 279.572C195.185 276.232 188.625 268.550 182.999 262.500C177.373 256.450 169.725 247.450 166.004 242.500C138.993 206.569 137.387 170.708 161.637 145.002C172.598 133.383 186.024 125.519 206.229 118.885C227.496 111.901 257.035 107.673 285.326 107.562L301.153 107.500L304.185 110.887C306.737 113.738 307.126 114.838 306.640 117.834C306.322 119.791 304.921 122.533 303.527 123.928C301.051 126.404 300.550 126.480 282.051 127.175C258.660 128.055 245.862 129.411 231.000 132.584C194.125 140.456 173.012 154.162 166.093 174.718C164.942 178.139 164.017 182.864 164.039 185.218C164.076 189.340 164.414 189.798 173.128 197.500C183.042 206.262 199.678 218.270 212.976 226.261C224.740 233.331 241.342 245.443 254.903 256.849C284.598 281.825 303.834 311.314 310.122 341.500C311.825 349.673 311.557 368.877 309.616 377.743C305.632 395.941 295.703 413.427 281.057 428.036C244.758 464.244 182.883 483.956 92.923 487.972C64.009 489.263 54.474 489.171 49.286 487.549Z"
+       fill="url(#tripleSSheen)"
+       fill-rule="evenodd"
+       id="path72" />
+  </g>
+  <g
+     transform="translate(725 232)"
+     filter="url(#wordGlow)"
+     id="g73">
+    <path
+       d="M58.951 174.939C42.594 172.531 26.740 162.222 17.922 148.259C12.176 139.162 9.898 132.089 9.302 121.500C7.374 87.233 34.927 59.955 71.410 60.015C89.762 60.045 103.934 65.717 116.086 77.897C133.826 95.677 138.136 121.066 127.279 143.829C123.182 152.420 110.341 164.799 100.733 169.420C88.584 175.263 74.125 177.173 58.951 174.939ZM89.620 145.253C100.691 139.554 107.000 129.502 107.000 117.563C107.000 105.880 100.140 95.645 88.800 90.409C82.990 87.726 81.598 87.500 70.897 87.500C59.609 87.500 59.107 87.595 52.434 91.000C44.108 95.248 38.972 101.476 36.486 110.334C33.348 121.517 36.443 131.548 45.617 139.933C53.704 147.324 59.052 149.069 72.500 148.703C82.571 148.429 84.017 148.138 89.620 145.253ZM152.240 174.009C150.242 172.147 150.000 170.954 150.000 162.961C150.000 149.126 147.670 150.000 184.532 150.000C216.971 150.000 220.567 149.546 222.920 145.150C224.877 141.493 224.218 136.554 221.423 133.924C218.888 131.540 218.469 131.492 196.173 131.000C174.286 130.517 173.305 130.409 167.880 127.865C159.975 124.158 154.553 118.870 150.760 111.163C147.849 105.250 147.501 103.631 147.511 96.021C147.520 88.558 147.912 86.673 150.666 80.841C154.412 72.906 160.118 67.072 167.840 63.279L173.500 60.500L206.882 60.199C240.209 59.899 240.267 59.902 242.632 62.124C244.751 64.115 245.000 65.214 245.000 72.593C245.000 87.481 246.186 87.000 209.500 87.000C179.590 87.000 176.195 87.442 174.621 91.545C173.688 93.978 173.873 97.894 175.023 100.043C177.153 104.024 179.744 104.483 203.000 105.006C224.315 105.485 225.763 105.640 230.500 107.961C233.250 109.309 238.001 112.906 241.057 115.956C251.265 126.141 253.706 140.991 247.460 154.909C244.051 162.507 236.147 169.975 228.045 173.254C222.736 175.403 221.054 175.511 188.490 175.797C155.182 176.089 154.433 176.052 152.240 174.009ZM271.201 174.309C269.268 172.694 269.020 171.435 268.894 162.577C268.773 154.045 269.008 152.467 270.568 151.327C271.981 150.293 279.093 150.000 302.723 150.000C336.860 150.000 338.749 149.691 341.641 143.627C343.057 140.658 343.112 139.684 342.014 137.033C341.305 135.323 339.775 133.378 338.613 132.712C337.214 131.909 328.898 131.324 314.000 130.980C293.425 130.505 291.079 130.268 286.580 128.211C278.596 124.562 273.455 119.670 269.800 112.245C266.766 106.082 266.500 104.774 266.500 96.000C266.500 87.230 266.767 85.917 269.792 79.771C273.507 72.225 278.564 67.350 286.963 63.222L292.500 60.500L326.051 60.201C365.931 59.847 362.927 58.849 363.299 72.574C363.512 80.425 363.292 81.711 361.358 83.962L359.176 86.500L328.000 87.000L296.823 87.500L294.412 90.306C293.085 91.849 292.000 94.009 292.000 95.105C292.000 97.935 294.605 102.612 296.713 103.568C297.696 104.014 308.850 104.640 321.500 104.960C343.917 105.526 344.629 105.608 349.576 108.199C352.369 109.661 357.199 113.607 360.310 116.968C367.444 124.673 369.429 130.614 368.809 142.409C368.070 156.483 361.147 166.299 347.430 172.723L341.500 175.500L307.433 175.809C275.769 176.096 273.214 175.990 271.201 174.309ZM389.071 174.071C387.272 172.272 387.000 170.773 387.000 162.655C387.000 154.960 387.315 153.025 388.783 151.697C390.327 150.299 394.729 150.045 421.711 149.792C451.561 149.512 452.975 149.413 455.679 147.398C459.514 144.540 460.658 141.003 459.023 137.055C458.309 135.333 456.775 133.378 455.613 132.712C454.217 131.911 446.034 131.329 431.500 130.997C406.319 130.421 403.995 129.817 395.162 121.555C387.888 114.751 384.632 106.882 384.587 96.000C384.558 88.712 384.964 86.602 387.436 81.200C390.839 73.761 397.808 66.966 406.000 63.097L411.500 60.500L444.200 60.200C483.329 59.840 481.000 59.096 481.000 71.953C481.000 80.924 479.879 84.278 476.343 85.890C474.736 86.622 464.030 87.000 444.907 87.000L415.909 87.000L413.455 89.455C410.005 92.904 410.062 98.769 413.578 102.076C416.108 104.456 416.562 104.509 438.328 105.000C460.099 105.491 460.603 105.550 466.190 108.294C473.595 111.931 481.179 120.205 484.026 127.753C486.808 135.128 486.451 147.040 483.232 154.251C480.101 161.266 472.083 169.226 464.722 172.626L458.500 175.500L424.821 175.821C391.875 176.134 391.096 176.096 389.071 174.071ZM546.763 174.994C525.376 171.273 506.994 155.520 500.777 135.584C497.618 125.454 497.614 109.118 500.769 100.000C505.439 86.503 512.127 77.735 523.612 70.053C534.970 62.457 542.342 60.497 559.500 60.513C574.464 60.526 582.102 62.060 594.483 67.535L600.000 69.975L600.000 77.353C600.000 86.083 598.145 89.277 592.006 91.116C588.636 92.126 586.690 91.916 577.361 89.534C563.446 85.982 549.518 86.179 541.500 90.041C530.449 95.363 523.991 105.977 524.010 118.788C524.027 130.916 532.128 142.494 543.898 147.213C549.217 149.346 550.651 149.446 572.248 149.182L594.996 148.905L597.498 151.407C599.750 153.659 600.000 154.708 600.000 161.899C600.000 168.901 599.702 170.235 597.588 172.694L595.177 175.500L573.338 175.659C561.327 175.746 549.369 175.447 546.763 174.994ZM618.250 174.505L616.000 172.887L616.000 92.134C616.000 28.632 616.270 11.013 617.264 9.654C618.348 8.171 620.018 7.966 628.987 8.212C639.008 8.488 639.498 8.605 640.708 11.000C641.628 12.821 641.975 20.625 641.985 39.750C641.993 54.188 642.171 66.000 642.379 66.000C642.588 66.000 645.400 64.768 648.629 63.262C653.895 60.807 655.840 60.489 667.500 60.176C682.906 59.763 690.958 61.292 700.908 66.521C712.346 72.532 721.539 83.071 726.185 95.500C728.325 101.224 728.444 103.128 728.773 136.827C729.028 162.962 728.810 172.524 727.936 173.577C727.048 174.648 724.071 175.000 715.913 175.000C706.217 175.000 704.961 174.796 704.035 173.066C703.387 171.854 703.000 159.780 703.000 140.747C703.000 106.957 702.424 102.831 696.820 96.448C695.118 94.509 691.650 91.703 689.113 90.212C684.545 87.527 684.292 87.497 663.250 87.179L642.000 86.858L642.000 128.818C642.000 179.131 643.024 175.329 629.339 175.812C622.421 176.056 620.011 175.772 618.250 174.505ZM783.112 173.419C765.532 168.691 750.818 154.063 744.973 135.500C741.644 124.928 741.809 110.138 745.373 99.672C748.727 89.822 753.079 83.046 760.671 75.856C782.756 54.938 819.303 54.886 841.168 75.742C853.161 87.181 857.946 98.439 857.979 115.295C857.999 125.438 857.852 126.239 855.545 128.545L853.091 131.000L812.045 131.000C789.470 131.000 771.000 131.382 771.000 131.850C771.000 133.047 776.259 140.069 779.127 142.701C780.446 143.912 783.769 145.931 786.512 147.188C791.248 149.358 792.980 149.499 820.833 149.987C855.366 150.591 853.000 149.657 853.000 162.691C853.000 175.768 855.111 175.013 818.750 174.934C795.650 174.884 787.226 174.526 783.112 173.419ZM830.567 102.130C828.254 97.657 819.835 90.680 814.415 88.745C811.194 87.595 806.571 86.990 801.000 86.990C795.429 86.990 790.806 87.595 787.585 88.745C782.199 90.668 774.528 97.014 771.693 101.891L769.887 105.000L800.969 105.000L832.051 105.000L830.567 102.130ZM873.200 173.800C872.310 172.910 872.000 163.109 872.000 135.889C872.000 102.668 872.180 98.600 873.895 93.091C880.474 71.952 903.119 57.066 923.056 60.773C931.022 62.255 938.479 65.796 943.946 70.693L948.392 74.676L954.403 69.832C964.914 61.363 977.120 58.378 988.902 61.396C1006.495 65.903 1018.969 78.267 1023.508 95.693C1024.694 100.244 1025.000 108.637 1025.000 136.555C1025.000 169.323 1024.877 171.802 1023.171 173.345C1020.521 175.743 1002.869 175.752 1000.880 173.355C999.799 172.053 999.438 164.298 999.146 136.105C998.818 104.384 998.583 100.118 996.995 97.000C994.768 92.627 992.445 90.502 987.746 88.538C977.449 84.236 964.991 90.171 962.044 100.781C961.427 103.002 961.009 118.213 961.006 138.550C961.001 163.694 960.686 172.914 959.800 173.800C958.160 175.440 938.840 175.440 937.200 173.800C936.316 172.916 936.000 163.989 936.000 139.849C936.000 120.004 935.571 105.097 934.911 102.020C932.063 88.743 917.388 82.845 905.982 90.393C898.232 95.522 898.047 96.582 898.022 136.027C898.003 165.635 897.778 170.872 896.443 172.777C895.007 174.828 894.095 175.000 884.643 175.000C878.010 175.000 873.977 174.577 873.200 173.800Z"
+       fill="url(#wordGradient)"
+       fill-rule="evenodd"
+       id="path73" />
+  </g>
+</svg>

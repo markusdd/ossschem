@@ -1,0 +1,5278 @@
+{
+  "files": {
+    "a": {
+      "language": "1800-2023",
+      "path": "<built-in>"
+    },
+    "b": {
+      "language": "1800-2023",
+      "path": "<command-line>"
+    },
+    "c": {
+      "language": "1800-2023",
+      "path": "<verilated_std_waiver>"
+    },
+    "d": {
+      "language": "1800-2023",
+      "path": "<verilated_std>"
+    },
+    "e": {
+      "language": "1800-2023",
+      "path": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv"
+    },
+    "f": {
+      "language": "1800-2023",
+      "path": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv"
+    }
+  },
+  "meta": {
+    "dumpedAt": "2026-09-18T00:00:00.000Z",
+    "producer": "verilator-json-only",
+    "verilatorVersion": "5.046"
+  },
+  "modules": {
+    "m0": {
+      "boxes": [
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n0",
+              "span": {
+                "endCol": 22,
+                "endLine": 78,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 15,
+                "startLine": 78
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "expr": "bin_wpointer_r[3:0]",
+                "id": "c0",
+                "kind": "slice",
+                "params": {
+                  "lsb": 0,
+                  "msb": 3
+                },
+                "pins": {
+                  "A": {
+                    "net": "n20"
+                  },
+                  "Y": {
+                    "net": "t0"
+                  }
+                },
+                "span": {
+                  "endCol": 33,
+                  "endLine": 80,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 32,
+                  "startLine": 80
+                }
+              },
+              {
+                "expr": "~full_r",
+                "id": "c1",
+                "kind": "not",
+                "pins": {
+                  "A": {
+                    "net": "n15"
+                  },
+                  "Y": {
+                    "net": "t1"
+                  }
+                },
+                "span": {
+                  "endCol": 38,
+                  "endLine": 79,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 36,
+                  "startLine": 79
+                }
+              },
+              {
+                "expr": "wen_i & ~full_r",
+                "id": "c2",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n2"
+                  },
+                  "B": {
+                    "net": "t1"
+                  },
+                  "Y": {
+                    "net": "t2"
+                  }
+                },
+                "span": {
+                  "endCol": 27,
+                  "endLine": 79,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 25,
+                  "startLine": 79
+                }
+              },
+              {
+                "id": "c3",
+                "kind": "memwr",
+                "pins": {
+                  "ADDR": {
+                    "bits": {
+                      "lsb": 0,
+                      "msb": 3
+                    },
+                    "net": "t0"
+                  },
+                  "CLK": {
+                    "net": "n0"
+                  },
+                  "D": {
+                    "net": "n3"
+                  },
+                  "Q": {
+                    "net": "n12"
+                  },
+                  "WE": {
+                    "net": "t2"
+                  }
+                },
+                "span": {
+                  "endCol": 54,
+                  "endLine": 80,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 52,
+                  "startLine": 80
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t0",
+                "kind": "wire",
+                "loads": [],
+                "name": "t0",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t1",
+                "kind": "wire",
+                "loads": [],
+                "name": "t1",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t2",
+                "kind": "wire",
+                "loads": [],
+                "name": "t2",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b0",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_fifo_mem_w",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_w_i",
+              "net": "n0"
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 3
+              },
+              "dir": "in",
+              "name": "bin_wpointer_r",
+              "net": "n20"
+            },
+            {
+              "dir": "in",
+              "name": "full_r",
+              "net": "n15"
+            },
+            {
+              "dir": "in",
+              "name": "wdata_i",
+              "net": "n3"
+            },
+            {
+              "dir": "in",
+              "name": "wen_i",
+              "net": "n2"
+            },
+            {
+              "dir": "out",
+              "name": "fifo_mem_r",
+              "net": "n12"
+            }
+          ],
+          "resets": [],
+          "span": {
+            "endCol": 62,
+            "endLine": 80,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 3,
+            "startLine": 78
+          }
+        },
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n6",
+              "span": {
+                "endCol": 24,
+                "endLine": 86,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 17,
+                "startLine": 86
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "expr": "bin_rpointer_r[3:0]",
+                "id": "c4",
+                "kind": "slice",
+                "params": {
+                  "lsb": 0,
+                  "msb": 3
+                },
+                "pins": {
+                  "A": {
+                    "net": "n25"
+                  },
+                  "Y": {
+                    "net": "t3"
+                  }
+                },
+                "span": {
+                  "endCol": 47,
+                  "endLine": 88,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 46,
+                  "startLine": 88
+                }
+              },
+              {
+                "expr": "fifo_mem_r[bin_rpointer_r[3:0]]",
+                "id": "c5",
+                "kind": "memrd",
+                "pins": {
+                  "ADDR": {
+                    "bits": {
+                      "lsb": 0,
+                      "msb": 3
+                    },
+                    "net": "t3"
+                  },
+                  "MEM": {
+                    "net": "n12"
+                  },
+                  "Y": {
+                    "net": "t4"
+                  }
+                },
+                "span": {
+                  "endCol": 32,
+                  "endLine": 88,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 31,
+                  "startLine": 88
+                }
+              },
+              {
+                "id": "c6",
+                "kind": "dffe",
+                "pins": {
+                  "CLK": {
+                    "net": "n6"
+                  },
+                  "D": {
+                    "net": "t4"
+                  },
+                  "EN": {
+                    "net": "n8"
+                  },
+                  "Q": {
+                    "net": "n13"
+                  }
+                },
+                "span": {
+                  "endCol": 20,
+                  "endLine": 88,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 18,
+                  "startLine": 88
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t3",
+                "kind": "wire",
+                "loads": [],
+                "name": "t3",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t4",
+                "kind": "wire",
+                "loads": [],
+                "name": "t4",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b1",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_fifo_mem_r",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_r_i",
+              "net": "n6"
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 3
+              },
+              "dir": "in",
+              "name": "bin_rpointer_r",
+              "net": "n25"
+            },
+            {
+              "dir": "in",
+              "name": "fifo_mem_r",
+              "net": "n12"
+            },
+            {
+              "dir": "in",
+              "name": "ren_i",
+              "net": "n8"
+            },
+            {
+              "dir": "out",
+              "name": "rdata_r",
+              "net": "n13"
+            }
+          ],
+          "resets": [],
+          "span": {
+            "endCol": 63,
+            "endLine": 88,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 5,
+            "startLine": 86
+          }
+        },
+        {
+          "contents": {
+            "cells": [
+              {
+                "id": "c7",
+                "kind": "buf",
+                "pins": {
+                  "A": {
+                    "net": "n13"
+                  },
+                  "Y": {
+                    "net": "n9"
+                  }
+                },
+                "span": {
+                  "endCol": 21,
+                  "endLine": 92,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 20,
+                  "startLine": 92
+                }
+              }
+            ],
+            "nets": []
+          },
+          "id": "b2",
+          "kind": "assign",
+          "name": "assign rdata_o",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "rdata_r",
+              "net": "n13"
+            },
+            {
+              "dir": "out",
+              "name": "rdata_o",
+              "net": "n9"
+            }
+          ],
+          "span": {
+            "endCol": 29,
+            "endLine": 92,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 12,
+            "startLine": 92
+          }
+        },
+        {
+          "clocks": [],
+          "contents": {
+            "cells": [
+              {
+                "expr": "~empty_r",
+                "id": "c8",
+                "kind": "not",
+                "pins": {
+                  "A": {
+                    "net": "n17"
+                  },
+                  "Y": {
+                    "net": "t5"
+                  }
+                },
+                "span": {
+                  "endCol": 85,
+                  "endLine": 102,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 84,
+                  "startLine": 102
+                }
+              },
+              {
+                "expr": "ren_i & ~empty_r",
+                "id": "c9",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n8"
+                  },
+                  "B": {
+                    "net": "t5"
+                  },
+                  "Y": {
+                    "net": "t6"
+                  }
+                },
+                "span": {
+                  "endCol": 83,
+                  "endLine": 102,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 82,
+                  "startLine": 102
+                }
+              },
+              {
+                "expr": "bin_rpointer_r + (ren_i & ~empty_r)",
+                "id": "c10",
+                "kind": "add",
+                "pins": {
+                  "A": {
+                    "net": "n25"
+                  },
+                  "B": {
+                    "net": "t6"
+                  },
+                  "Y": {
+                    "net": "n23"
+                  }
+                },
+                "span": {
+                  "endCol": 45,
+                  "endLine": 102,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 44,
+                  "startLine": 102
+                }
+              },
+              {
+                "expr": "1",
+                "id": "c11",
+                "kind": "const",
+                "params": {
+                  "value": "1"
+                },
+                "pins": {
+                  "Y": {
+                    "net": "t8"
+                  }
+                },
+                "span": {
+                  "endCol": 53,
+                  "endLine": 103,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 52,
+                  "startLine": 103
+                }
+              },
+              {
+                "expr": "bin_rpointer_next_s >> 1",
+                "id": "c12",
+                "kind": "shiftr",
+                "params": {
+                  "amount": "1"
+                },
+                "pins": {
+                  "A": {
+                    "net": "n23"
+                  },
+                  "Y": {
+                    "net": "t9"
+                  }
+                },
+                "span": {
+                  "endCol": 52,
+                  "endLine": 103,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 50,
+                  "startLine": 103
+                }
+              },
+              {
+                "expr": "(bin_rpointer_next_s >> 1) ^ bin_rpointer_next_s",
+                "id": "c13",
+                "kind": "xor",
+                "pins": {
+                  "A": {
+                    "net": "t9"
+                  },
+                  "B": {
+                    "net": "n23"
+                  },
+                  "Y": {
+                    "net": "n24"
+                  }
+                },
+                "span": {
+                  "endCol": 56,
+                  "endLine": 103,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 55,
+                  "startLine": 103
+                }
+              },
+              {
+                "expr": "~full_r",
+                "id": "c14",
+                "kind": "not",
+                "pins": {
+                  "A": {
+                    "net": "n15"
+                  },
+                  "Y": {
+                    "net": "t11"
+                  }
+                },
+                "span": {
+                  "endCol": 85,
+                  "endLine": 105,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 84,
+                  "startLine": 105
+                }
+              },
+              {
+                "expr": "wen_i & ~full_r",
+                "id": "c15",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n2"
+                  },
+                  "B": {
+                    "net": "t11"
+                  },
+                  "Y": {
+                    "net": "t12"
+                  }
+                },
+                "span": {
+                  "endCol": 83,
+                  "endLine": 105,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 82,
+                  "startLine": 105
+                }
+              },
+              {
+                "expr": "bin_wpointer_r + (wen_i & ~full_r)",
+                "id": "c16",
+                "kind": "add",
+                "pins": {
+                  "A": {
+                    "net": "n20"
+                  },
+                  "B": {
+                    "net": "t12"
+                  },
+                  "Y": {
+                    "net": "n18"
+                  }
+                },
+                "span": {
+                  "endCol": 45,
+                  "endLine": 105,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 44,
+                  "startLine": 105
+                }
+              },
+              {
+                "expr": "1",
+                "id": "c17",
+                "kind": "const",
+                "params": {
+                  "value": "1"
+                },
+                "pins": {
+                  "Y": {
+                    "net": "t14"
+                  }
+                },
+                "span": {
+                  "endCol": 53,
+                  "endLine": 106,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 52,
+                  "startLine": 106
+                }
+              },
+              {
+                "expr": "bin_wpointer_next_s >> 1",
+                "id": "c18",
+                "kind": "shiftr",
+                "params": {
+                  "amount": "1"
+                },
+                "pins": {
+                  "A": {
+                    "net": "n18"
+                  },
+                  "Y": {
+                    "net": "t15"
+                  }
+                },
+                "span": {
+                  "endCol": 52,
+                  "endLine": 106,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 50,
+                  "startLine": 106
+                }
+              },
+              {
+                "expr": "(bin_wpointer_next_s >> 1) ^ bin_wpointer_next_s",
+                "id": "c19",
+                "kind": "xor",
+                "pins": {
+                  "A": {
+                    "net": "t15"
+                  },
+                  "B": {
+                    "net": "n18"
+                  },
+                  "Y": {
+                    "net": "n19"
+                  }
+                },
+                "span": {
+                  "endCol": 56,
+                  "endLine": 106,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 55,
+                  "startLine": 106
+                }
+              },
+              {
+                "expr": "gray_rpointer_next_s == gray_wpointer_sync_s",
+                "id": "c20",
+                "kind": "eq",
+                "pins": {
+                  "A": {
+                    "net": "n24"
+                  },
+                  "B": {
+                    "net": "n22"
+                  },
+                  "Y": {
+                    "net": "n16"
+                  }
+                },
+                "span": {
+                  "endCol": 41,
+                  "endLine": 108,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 39,
+                  "startLine": 108
+                }
+              },
+              {
+                "expr": "gray_rpointer_sync_s[4:3]",
+                "id": "c21",
+                "kind": "slice",
+                "params": {
+                  "lsb": 3,
+                  "msb": 4
+                },
+                "pins": {
+                  "A": {
+                    "net": "n27"
+                  },
+                  "Y": {
+                    "net": "t18"
+                  }
+                },
+                "span": {
+                  "endCol": 64,
+                  "endLine": 110,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 63,
+                  "startLine": 110
+                }
+              },
+              {
+                "expr": "~gray_rpointer_sync_s[4:3]",
+                "id": "c22",
+                "kind": "not",
+                "pins": {
+                  "A": {
+                    "bits": {
+                      "lsb": 3,
+                      "msb": 4
+                    },
+                    "net": "t18"
+                  },
+                  "Y": {
+                    "net": "t19"
+                  }
+                },
+                "span": {
+                  "endCol": 43,
+                  "endLine": 110,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 42,
+                  "startLine": 110
+                }
+              },
+              {
+                "expr": "gray_rpointer_sync_s[2:0]",
+                "id": "c23",
+                "kind": "slice",
+                "params": {
+                  "lsb": 0,
+                  "msb": 2
+                },
+                "pins": {
+                  "A": {
+                    "net": "n27"
+                  },
+                  "Y": {
+                    "net": "t20"
+                  }
+                },
+                "span": {
+                  "endCol": 64,
+                  "endLine": 111,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 63,
+                  "startLine": 111
+                }
+              },
+              {
+                "expr": "{~gray_rpointer_sync_s[4:3], gray_rpointer_sync_s[2:0]}",
+                "id": "c24",
+                "kind": "concat",
+                "pins": {
+                  "A0": {
+                    "net": "t19"
+                  },
+                  "A1": {
+                    "bits": {
+                      "lsb": 0,
+                      "msb": 2
+                    },
+                    "net": "t20"
+                  },
+                  "Y": {
+                    "net": "t21"
+                  }
+                },
+                "span": {
+                  "endCol": 93,
+                  "endLine": 110,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 92,
+                  "startLine": 110
+                }
+              },
+              {
+                "expr": "gray_wpointer_next_s == {~gray_rpointer_sync_s[4:3], gray_rpointer_sync_s[2:0]}",
+                "id": "c25",
+                "kind": "eq",
+                "pins": {
+                  "A": {
+                    "net": "n19"
+                  },
+                  "B": {
+                    "net": "t21"
+                  },
+                  "Y": {
+                    "net": "n14"
+                  }
+                },
+                "span": {
+                  "endCol": 40,
+                  "endLine": 110,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 38,
+                  "startLine": 110
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t5",
+                "kind": "wire",
+                "loads": [],
+                "name": "t5",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t6",
+                "kind": "wire",
+                "loads": [],
+                "name": "t6",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t7",
+                "kind": "wire",
+                "loads": [],
+                "name": "t7",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t8",
+                "kind": "wire",
+                "loads": [],
+                "name": "t8",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t9",
+                "kind": "wire",
+                "loads": [],
+                "name": "t9",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t10",
+                "kind": "wire",
+                "loads": [],
+                "name": "t10",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t11",
+                "kind": "wire",
+                "loads": [],
+                "name": "t11",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t12",
+                "kind": "wire",
+                "loads": [],
+                "name": "t12",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t13",
+                "kind": "wire",
+                "loads": [],
+                "name": "t13",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t14",
+                "kind": "wire",
+                "loads": [],
+                "name": "t14",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t15",
+                "kind": "wire",
+                "loads": [],
+                "name": "t15",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t16",
+                "kind": "wire",
+                "loads": [],
+                "name": "t16",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t17",
+                "kind": "wire",
+                "loads": [],
+                "name": "t17",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t18",
+                "kind": "wire",
+                "loads": [],
+                "name": "t18",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t19",
+                "kind": "wire",
+                "loads": [],
+                "name": "t19",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t20",
+                "kind": "wire",
+                "loads": [],
+                "name": "t20",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t21",
+                "kind": "wire",
+                "loads": [],
+                "name": "t21",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t22",
+                "kind": "wire",
+                "loads": [],
+                "name": "t22",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b3",
+          "keyword": "always_comb",
+          "kind": "always",
+          "name": "proc_pointer_next",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "bin_rpointer_r",
+              "net": "n25"
+            },
+            {
+              "dir": "in",
+              "name": "bin_wpointer_r",
+              "net": "n20"
+            },
+            {
+              "dir": "in",
+              "name": "empty_r",
+              "net": "n17"
+            },
+            {
+              "dir": "in",
+              "name": "full_r",
+              "net": "n15"
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 4
+              },
+              "dir": "in",
+              "name": "gray_rpointer_sync_s",
+              "net": "n27"
+            },
+            {
+              "dir": "in",
+              "name": "gray_wpointer_sync_s",
+              "net": "n22"
+            },
+            {
+              "dir": "in",
+              "name": "ren_i",
+              "net": "n8"
+            },
+            {
+              "dir": "in",
+              "name": "wen_i",
+              "net": "n2"
+            },
+            {
+              "dir": "out",
+              "name": "bin_rpointer_next_s",
+              "net": "n23"
+            },
+            {
+              "dir": "out",
+              "name": "bin_wpointer_next_s",
+              "net": "n18"
+            },
+            {
+              "dir": "out",
+              "name": "empty_s",
+              "net": "n16"
+            },
+            {
+              "dir": "out",
+              "name": "full_s",
+              "net": "n14"
+            },
+            {
+              "dir": "out",
+              "name": "gray_rpointer_next_s",
+              "net": "n24"
+            },
+            {
+              "dir": "out",
+              "name": "gray_wpointer_next_s",
+              "net": "n19"
+            }
+          ],
+          "resets": [],
+          "span": {
+            "endCol": 80,
+            "endLine": 111,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 3,
+            "startLine": 100
+          }
+        },
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n0",
+              "span": {
+                "endCol": 22,
+                "endLine": 115,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 15,
+                "startLine": 115
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "expr": "~full_r",
+                "id": "c26",
+                "kind": "not",
+                "pins": {
+                  "A": {
+                    "net": "n15"
+                  },
+                  "Y": {
+                    "net": "t23"
+                  }
+                },
+                "span": {
+                  "endCol": 47,
+                  "endLine": 119,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 45,
+                  "startLine": 119
+                }
+              },
+              {
+                "expr": "wen_i & ~full_r",
+                "id": "c27",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n2"
+                  },
+                  "B": {
+                    "net": "t23"
+                  },
+                  "Y": {
+                    "net": "t24"
+                  }
+                },
+                "span": {
+                  "endCol": 36,
+                  "endLine": 119,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 34,
+                  "startLine": 119
+                }
+              },
+              {
+                "id": "c28",
+                "kind": "adffe",
+                "params": {
+                  "RST_VAL": "0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n1"
+                  },
+                  "CLK": {
+                    "net": "n0"
+                  },
+                  "D": {
+                    "net": "n18"
+                  },
+                  "EN": {
+                    "net": "t24"
+                  },
+                  "Q": {
+                    "net": "n20"
+                  }
+                },
+                "span": {
+                  "endCol": 24,
+                  "endLine": 120,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 22,
+                  "startLine": 120
+                }
+              },
+              {
+                "id": "c29",
+                "kind": "adffe",
+                "params": {
+                  "RST_VAL": "0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n1"
+                  },
+                  "CLK": {
+                    "net": "n0"
+                  },
+                  "D": {
+                    "net": "n19"
+                  },
+                  "EN": {
+                    "net": "t24"
+                  },
+                  "Q": {
+                    "net": "n21"
+                  }
+                },
+                "span": {
+                  "endCol": 25,
+                  "endLine": 121,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 23,
+                  "startLine": 121
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t23",
+                "kind": "wire",
+                "loads": [],
+                "name": "t23",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t24",
+                "kind": "wire",
+                "loads": [],
+                "name": "t24",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b4",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_w_pointer",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_w_i",
+              "net": "n0"
+            },
+            {
+              "dir": "in",
+              "name": "rst_w_an_i",
+              "net": "n1"
+            },
+            {
+              "dir": "in",
+              "name": "bin_wpointer_next_s",
+              "net": "n18"
+            },
+            {
+              "dir": "in",
+              "name": "full_r",
+              "net": "n15"
+            },
+            {
+              "dir": "in",
+              "name": "gray_wpointer_next_s",
+              "net": "n19"
+            },
+            {
+              "dir": "in",
+              "name": "wen_i",
+              "net": "n2"
+            },
+            {
+              "dir": "out",
+              "name": "bin_wpointer_r",
+              "net": "n20"
+            },
+            {
+              "dir": "out",
+              "name": "gray_wpointer_r",
+              "net": "n21"
+            }
+          ],
+          "resets": [
+            {
+              "edge": "neg",
+              "net": "n1",
+              "span": {
+                "endCol": 41,
+                "endLine": 115,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 34,
+                "startLine": 115
+              }
+            }
+          ],
+          "span": {
+            "endCol": 46,
+            "endLine": 121,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 3,
+            "startLine": 115
+          }
+        },
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n6",
+              "span": {
+                "endCol": 22,
+                "endLine": 126,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 15,
+                "startLine": 126
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "expr": "~empty_r",
+                "id": "c30",
+                "kind": "not",
+                "pins": {
+                  "A": {
+                    "net": "n17"
+                  },
+                  "Y": {
+                    "net": "t25"
+                  }
+                },
+                "span": {
+                  "endCol": 48,
+                  "endLine": 130,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 46,
+                  "startLine": 130
+                }
+              },
+              {
+                "expr": "ren_i & ~empty_r",
+                "id": "c31",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n8"
+                  },
+                  "B": {
+                    "net": "t25"
+                  },
+                  "Y": {
+                    "net": "t26"
+                  }
+                },
+                "span": {
+                  "endCol": 36,
+                  "endLine": 130,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 34,
+                  "startLine": 130
+                }
+              },
+              {
+                "id": "c32",
+                "kind": "adffe",
+                "params": {
+                  "RST_VAL": "0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n7"
+                  },
+                  "CLK": {
+                    "net": "n6"
+                  },
+                  "D": {
+                    "net": "n23"
+                  },
+                  "EN": {
+                    "net": "t26"
+                  },
+                  "Q": {
+                    "net": "n25"
+                  }
+                },
+                "span": {
+                  "endCol": 24,
+                  "endLine": 131,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 22,
+                  "startLine": 131
+                }
+              },
+              {
+                "id": "c33",
+                "kind": "adffe",
+                "params": {
+                  "RST_VAL": "0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n7"
+                  },
+                  "CLK": {
+                    "net": "n6"
+                  },
+                  "D": {
+                    "net": "n24"
+                  },
+                  "EN": {
+                    "net": "t26"
+                  },
+                  "Q": {
+                    "net": "n26"
+                  }
+                },
+                "span": {
+                  "endCol": 25,
+                  "endLine": 132,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 23,
+                  "startLine": 132
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t25",
+                "kind": "wire",
+                "loads": [],
+                "name": "t25",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              },
+              {
+                "drivers": [],
+                "id": "t26",
+                "kind": "wire",
+                "loads": [],
+                "name": "t26",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b5",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_r_pointer",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_r_i",
+              "net": "n6"
+            },
+            {
+              "dir": "in",
+              "name": "rst_r_an_i",
+              "net": "n7"
+            },
+            {
+              "dir": "in",
+              "name": "bin_rpointer_next_s",
+              "net": "n23"
+            },
+            {
+              "dir": "in",
+              "name": "empty_r",
+              "net": "n17"
+            },
+            {
+              "dir": "in",
+              "name": "gray_rpointer_next_s",
+              "net": "n24"
+            },
+            {
+              "dir": "in",
+              "name": "ren_i",
+              "net": "n8"
+            },
+            {
+              "dir": "out",
+              "name": "bin_rpointer_r",
+              "net": "n25"
+            },
+            {
+              "dir": "out",
+              "name": "gray_rpointer_r",
+              "net": "n26"
+            }
+          ],
+          "resets": [
+            {
+              "edge": "neg",
+              "net": "n7",
+              "span": {
+                "endCol": 41,
+                "endLine": 126,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 34,
+                "startLine": 126
+              }
+            }
+          ],
+          "span": {
+            "endCol": 46,
+            "endLine": 132,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 3,
+            "startLine": 126
+          }
+        },
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n6",
+              "span": {
+                "endCol": 22,
+                "endLine": 137,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 15,
+                "startLine": 137
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "id": "c34",
+                "kind": "adff",
+                "params": {
+                  "RST_VAL": "1'b1"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n7"
+                  },
+                  "CLK": {
+                    "net": "n6"
+                  },
+                  "D": {
+                    "net": "n16"
+                  },
+                  "Q": {
+                    "net": "n17"
+                  }
+                },
+                "span": {
+                  "endCol": 17,
+                  "endLine": 142,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 15,
+                  "startLine": 142
+                }
+              },
+              {
+                "expr": "ren_i & empty_r",
+                "id": "c35",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n8"
+                  },
+                  "B": {
+                    "net": "n17"
+                  },
+                  "Y": {
+                    "net": "t27"
+                  }
+                },
+                "span": {
+                  "endCol": 24,
+                  "endLine": 143,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 23,
+                  "startLine": 143
+                }
+              },
+              {
+                "id": "c36",
+                "kind": "adff",
+                "params": {
+                  "RST_VAL": "1'b0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n7"
+                  },
+                  "CLK": {
+                    "net": "n6"
+                  },
+                  "D": {
+                    "net": "t27"
+                  },
+                  "Q": {
+                    "net": "n11"
+                  }
+                },
+                "span": {
+                  "endCol": 16,
+                  "endLine": 143,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 14,
+                  "startLine": 143
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t27",
+                "kind": "wire",
+                "loads": [],
+                "name": "t27",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b6",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_empty",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_r_i",
+              "net": "n6"
+            },
+            {
+              "dir": "in",
+              "name": "rst_r_an_i",
+              "net": "n7"
+            },
+            {
+              "dir": "in",
+              "name": "empty_s",
+              "net": "n16"
+            },
+            {
+              "dir": "in",
+              "name": "ren_i",
+              "net": "n8"
+            },
+            {
+              "dir": "out",
+              "name": "empty_r",
+              "net": "n17"
+            },
+            {
+              "dir": "out",
+              "name": "rerr_o",
+              "net": "n11"
+            }
+          ],
+          "resets": [
+            {
+              "edge": "neg",
+              "net": "n7",
+              "span": {
+                "endCol": 41,
+                "endLine": 137,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 34,
+                "startLine": 137
+              }
+            }
+          ],
+          "span": {
+            "endCol": 32,
+            "endLine": 143,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 3,
+            "startLine": 137
+          }
+        },
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n0",
+              "span": {
+                "endCol": 22,
+                "endLine": 150,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 15,
+                "startLine": 150
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "id": "c37",
+                "kind": "adff",
+                "params": {
+                  "RST_VAL": "1'b0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n1"
+                  },
+                  "CLK": {
+                    "net": "n0"
+                  },
+                  "D": {
+                    "net": "n14"
+                  },
+                  "Q": {
+                    "net": "n15"
+                  }
+                },
+                "span": {
+                  "endCol": 16,
+                  "endLine": 155,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 14,
+                  "startLine": 155
+                }
+              },
+              {
+                "expr": "wen_i & full_r",
+                "id": "c38",
+                "kind": "and",
+                "pins": {
+                  "A": {
+                    "net": "n2"
+                  },
+                  "B": {
+                    "net": "n15"
+                  },
+                  "Y": {
+                    "net": "t28"
+                  }
+                },
+                "span": {
+                  "endCol": 24,
+                  "endLine": 156,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 23,
+                  "startLine": 156
+                }
+              },
+              {
+                "id": "c39",
+                "kind": "adff",
+                "params": {
+                  "RST_VAL": "1'b0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n1"
+                  },
+                  "CLK": {
+                    "net": "n0"
+                  },
+                  "D": {
+                    "net": "t28"
+                  },
+                  "Q": {
+                    "net": "n5"
+                  }
+                },
+                "span": {
+                  "endCol": 16,
+                  "endLine": 156,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 14,
+                  "startLine": 156
+                }
+              }
+            ],
+            "nets": [
+              {
+                "drivers": [],
+                "id": "t28",
+                "kind": "wire",
+                "loads": [],
+                "name": "t28",
+                "span": {
+                  "endCol": 0,
+                  "endLine": 0,
+                  "file": "",
+                  "fileId": "?",
+                  "startCol": 0,
+                  "startLine": 0
+                },
+                "width": {
+                  "lsb": 0,
+                  "msb": 0,
+                  "packed": true
+                }
+              }
+            ]
+          },
+          "id": "b7",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_full",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_w_i",
+              "net": "n0"
+            },
+            {
+              "dir": "in",
+              "name": "rst_w_an_i",
+              "net": "n1"
+            },
+            {
+              "dir": "in",
+              "name": "full_s",
+              "net": "n14"
+            },
+            {
+              "dir": "in",
+              "name": "wen_i",
+              "net": "n2"
+            },
+            {
+              "dir": "out",
+              "name": "full_r",
+              "net": "n15"
+            },
+            {
+              "dir": "out",
+              "name": "werr_o",
+              "net": "n5"
+            }
+          ],
+          "resets": [
+            {
+              "edge": "neg",
+              "net": "n1",
+              "span": {
+                "endCol": 41,
+                "endLine": 150,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 34,
+                "startLine": 150
+              }
+            }
+          ],
+          "span": {
+            "endCol": 31,
+            "endLine": 156,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 3,
+            "startLine": 150
+          }
+        },
+        {
+          "contents": {
+            "cells": [
+              {
+                "id": "c40",
+                "kind": "buf",
+                "pins": {
+                  "A": {
+                    "net": "n17"
+                  },
+                  "Y": {
+                    "net": "n10"
+                  }
+                },
+                "span": {
+                  "endCol": 19,
+                  "endLine": 147,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 18,
+                  "startLine": 147
+                }
+              }
+            ],
+            "nets": []
+          },
+          "id": "b8",
+          "kind": "assign",
+          "name": "assign empty_o",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "empty_r",
+              "net": "n17"
+            },
+            {
+              "dir": "out",
+              "name": "empty_o",
+              "net": "n10"
+            }
+          ],
+          "span": {
+            "endCol": 19,
+            "endLine": 147,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 18,
+            "startLine": 147
+          }
+        },
+        {
+          "contents": {
+            "cells": [
+              {
+                "id": "c41",
+                "kind": "buf",
+                "pins": {
+                  "A": {
+                    "net": "n15"
+                  },
+                  "Y": {
+                    "net": "n4"
+                  }
+                },
+                "span": {
+                  "endCol": 18,
+                  "endLine": 160,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                  "fileId": "f",
+                  "startCol": 17,
+                  "startLine": 160
+                }
+              }
+            ],
+            "nets": []
+          },
+          "id": "b9",
+          "kind": "assign",
+          "name": "assign full_o",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "full_r",
+              "net": "n15"
+            },
+            {
+              "dir": "out",
+              "name": "full_o",
+              "net": "n4"
+            }
+          ],
+          "span": {
+            "endCol": 18,
+            "endLine": 160,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 17,
+            "startLine": 160
+          }
+        }
+      ],
+      "id": "m0",
+      "instances": [
+        {
+          "generate": "gen_pointer_sync",
+          "id": "a0",
+          "kind": "instanceArray",
+          "members": [
+            "i0",
+            "i2",
+            "i4",
+            "i6",
+            "i8"
+          ],
+          "module": "m1",
+          "name": "u_svb_sync_gray_wpointer",
+          "range": {
+            "lsb": 0,
+            "msb": 4
+          },
+          "span": {
+            "endCol": 33,
+            "endLine": 169,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 169
+          }
+        },
+        {
+          "arrayIndex": 0,
+          "id": "i0",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_wpointer",
+          "pins": [
+            {
+              "net": "n6",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 170,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 170
+              }
+            },
+            {
+              "net": "n7",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 171,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 171
+              }
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "net": "n21",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 172,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 172
+              }
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "net": "n22",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 173,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 173
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[0]",
+            "u_svb_sync_gray_wpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 169,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 169
+          }
+        },
+        {
+          "arrayIndex": 1,
+          "id": "i2",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_wpointer",
+          "pins": [
+            {
+              "net": "n6",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 170,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 170
+              }
+            },
+            {
+              "net": "n7",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 171,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 171
+              }
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "net": "n21",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 172,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 172
+              }
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "net": "n22",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 173,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 173
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[1]",
+            "u_svb_sync_gray_wpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 169,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 169
+          }
+        },
+        {
+          "arrayIndex": 2,
+          "id": "i4",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_wpointer",
+          "pins": [
+            {
+              "net": "n6",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 170,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 170
+              }
+            },
+            {
+              "net": "n7",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 171,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 171
+              }
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "net": "n21",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 172,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 172
+              }
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "net": "n22",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 173,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 173
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[2]",
+            "u_svb_sync_gray_wpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 169,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 169
+          }
+        },
+        {
+          "arrayIndex": 3,
+          "id": "i6",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_wpointer",
+          "pins": [
+            {
+              "net": "n6",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 170,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 170
+              }
+            },
+            {
+              "net": "n7",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 171,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 171
+              }
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "net": "n21",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 172,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 172
+              }
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "net": "n22",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 173,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 173
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[3]",
+            "u_svb_sync_gray_wpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 169,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 169
+          }
+        },
+        {
+          "arrayIndex": 4,
+          "id": "i8",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_wpointer",
+          "pins": [
+            {
+              "net": "n6",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 170,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 170
+              }
+            },
+            {
+              "net": "n7",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 171,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 171
+              }
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "net": "n21",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 172,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 172
+              }
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "net": "n22",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 173,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 173
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[4]",
+            "u_svb_sync_gray_wpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 169,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 169
+          }
+        },
+        {
+          "generate": "gen_pointer_sync",
+          "id": "a1",
+          "kind": "instanceArray",
+          "members": [
+            "i1",
+            "i3",
+            "i5",
+            "i7",
+            "i9"
+          ],
+          "module": "m1",
+          "name": "u_svb_sync_gray_rpointer",
+          "range": {
+            "lsb": 0,
+            "msb": 4
+          },
+          "span": {
+            "endCol": 33,
+            "endLine": 178,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 178
+          }
+        },
+        {
+          "arrayIndex": 0,
+          "id": "i1",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_rpointer",
+          "pins": [
+            {
+              "net": "n0",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 179,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 179
+              }
+            },
+            {
+              "net": "n1",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 180,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 180
+              }
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "net": "n26",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 181,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 181
+              }
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "net": "n27",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 182,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 182
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[0]",
+            "u_svb_sync_gray_rpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 178,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 178
+          }
+        },
+        {
+          "arrayIndex": 1,
+          "id": "i3",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_rpointer",
+          "pins": [
+            {
+              "net": "n0",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 179,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 179
+              }
+            },
+            {
+              "net": "n1",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 180,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 180
+              }
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "net": "n26",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 181,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 181
+              }
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "net": "n27",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 182,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 182
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[1]",
+            "u_svb_sync_gray_rpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 178,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 178
+          }
+        },
+        {
+          "arrayIndex": 2,
+          "id": "i5",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_rpointer",
+          "pins": [
+            {
+              "net": "n0",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 179,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 179
+              }
+            },
+            {
+              "net": "n1",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 180,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 180
+              }
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "net": "n26",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 181,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 181
+              }
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "net": "n27",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 182,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 182
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[2]",
+            "u_svb_sync_gray_rpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 178,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 178
+          }
+        },
+        {
+          "arrayIndex": 3,
+          "id": "i7",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_rpointer",
+          "pins": [
+            {
+              "net": "n0",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 179,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 179
+              }
+            },
+            {
+              "net": "n1",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 180,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 180
+              }
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "net": "n26",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 181,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 181
+              }
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "net": "n27",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 182,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 182
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[3]",
+            "u_svb_sync_gray_rpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 178,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 178
+          }
+        },
+        {
+          "arrayIndex": 4,
+          "id": "i9",
+          "kind": "instance",
+          "module": "m1",
+          "name": "u_svb_sync_gray_rpointer",
+          "pins": [
+            {
+              "net": "n0",
+              "port": "clk_i",
+              "span": {
+                "endCol": 26,
+                "endLine": 179,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 19,
+                "startLine": 179
+              }
+            },
+            {
+              "net": "n1",
+              "port": "rst_an_i",
+              "span": {
+                "endCol": 30,
+                "endLine": 180,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 20,
+                "startLine": 180
+              }
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "net": "n26",
+              "port": "d_i",
+              "span": {
+                "endCol": 36,
+                "endLine": 181,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 35,
+                "startLine": 181
+              }
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "net": "n27",
+              "port": "d_o",
+              "span": {
+                "endCol": 41,
+                "endLine": 182,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+                "fileId": "f",
+                "startCol": 40,
+                "startLine": 182
+              }
+            }
+          ],
+          "relPath": [
+            "gen_pointer_sync[4]",
+            "u_svb_sync_gray_rpointer"
+          ],
+          "span": {
+            "endCol": 33,
+            "endLine": 178,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 178
+          }
+        }
+      ],
+      "name": "svb_afifo",
+      "nets": [
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "clk_w_i",
+              "port": "p0"
+            }
+          ],
+          "id": "n0",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b0",
+              "kind": "box",
+              "pin": "clk_w_i"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "clk_w_i"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "clk_w_i"
+            },
+            {
+              "box": "i1",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i3",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i5",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i7",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i9",
+              "kind": "box",
+              "pin": "clk_i"
+            }
+          ],
+          "name": "clk_w_i",
+          "span": {
+            "endCol": 22,
+            "endLine": 28,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 28
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "rst_w_an_i",
+              "port": "p1"
+            }
+          ],
+          "id": "n1",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "rst_w_an_i"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "rst_w_an_i"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "rst_w_an_i"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "rst_w_an_i"
+            },
+            {
+              "box": "i1",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i3",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i5",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i7",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i9",
+              "kind": "box",
+              "pin": "rst_an_i"
+            }
+          ],
+          "name": "rst_w_an_i",
+          "span": {
+            "endCol": 25,
+            "endLine": 29,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 29
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "wen_i",
+              "port": "p2"
+            }
+          ],
+          "id": "n2",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b0",
+              "kind": "box",
+              "pin": "wen_i"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "wen_i"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "wen_i"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "wen_i"
+            }
+          ],
+          "name": "wen_i",
+          "span": {
+            "endCol": 20,
+            "endLine": 30,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 30
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "wdata_i",
+              "port": "p3"
+            }
+          ],
+          "id": "n3",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b0",
+              "kind": "box",
+              "pin": "wdata_i"
+            }
+          ],
+          "name": "wdata_i",
+          "span": {
+            "endCol": 39,
+            "endLine": 31,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 32,
+            "startLine": 31
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b9",
+              "kind": "box",
+              "pin": "full_o"
+            }
+          ],
+          "id": "n4",
+          "kind": "port",
+          "loads": [
+            {
+              "kind": "port",
+              "pin": "full_o",
+              "port": "p4"
+            }
+          ],
+          "name": "full_o",
+          "span": {
+            "endCol": 22,
+            "endLine": 32,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 32
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "werr_o"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "werr_o"
+            }
+          ],
+          "id": "n5",
+          "kind": "port",
+          "loads": [
+            {
+              "kind": "port",
+              "pin": "werr_o",
+              "port": "p5"
+            }
+          ],
+          "name": "werr_o",
+          "span": {
+            "endCol": 22,
+            "endLine": 33,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 33
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "clk_r_i",
+              "port": "p6"
+            }
+          ],
+          "id": "n6",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b1",
+              "kind": "box",
+              "pin": "clk_r_i"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "clk_r_i"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "clk_r_i"
+            },
+            {
+              "box": "i0",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i2",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i4",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i6",
+              "kind": "box",
+              "pin": "clk_i"
+            },
+            {
+              "box": "i8",
+              "kind": "box",
+              "pin": "clk_i"
+            }
+          ],
+          "name": "clk_r_i",
+          "span": {
+            "endCol": 22,
+            "endLine": 35,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 35
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "rst_r_an_i",
+              "port": "p7"
+            }
+          ],
+          "id": "n7",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "rst_r_an_i"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "rst_r_an_i"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "rst_r_an_i"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "rst_r_an_i"
+            },
+            {
+              "box": "i0",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i2",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i4",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i6",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "i8",
+              "kind": "box",
+              "pin": "rst_an_i"
+            }
+          ],
+          "name": "rst_r_an_i",
+          "span": {
+            "endCol": 25,
+            "endLine": 36,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 36
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "ren_i",
+              "port": "p8"
+            }
+          ],
+          "id": "n8",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b1",
+              "kind": "box",
+              "pin": "ren_i"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "ren_i"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "ren_i"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "ren_i"
+            }
+          ],
+          "name": "ren_i",
+          "span": {
+            "endCol": 20,
+            "endLine": 37,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 37
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b2",
+              "kind": "box",
+              "pin": "rdata_o"
+            }
+          ],
+          "id": "n9",
+          "kind": "port",
+          "loads": [
+            {
+              "kind": "port",
+              "pin": "rdata_o",
+              "port": "p9"
+            }
+          ],
+          "name": "rdata_o",
+          "span": {
+            "endCol": 40,
+            "endLine": 38,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 33,
+            "startLine": 38
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b8",
+              "kind": "box",
+              "pin": "empty_o"
+            }
+          ],
+          "id": "n10",
+          "kind": "port",
+          "loads": [
+            {
+              "kind": "port",
+              "pin": "empty_o",
+              "port": "p10"
+            }
+          ],
+          "name": "empty_o",
+          "span": {
+            "endCol": 23,
+            "endLine": 39,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 39
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "rerr_o"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "rerr_o"
+            }
+          ],
+          "id": "n11",
+          "kind": "port",
+          "loads": [
+            {
+              "kind": "port",
+              "pin": "rerr_o",
+              "port": "p11"
+            }
+          ],
+          "name": "rerr_o",
+          "span": {
+            "endCol": 22,
+            "endLine": 40,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 40
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b0",
+              "kind": "box",
+              "pin": "fifo_mem_r"
+            }
+          ],
+          "id": "n12",
+          "kind": "memory",
+          "loads": [
+            {
+              "box": "b1",
+              "kind": "box",
+              "pin": "fifo_mem_r"
+            }
+          ],
+          "memory": {
+            "depth": 16,
+            "packed": {
+              "lsb": 0,
+              "msb": 31,
+              "packed": true
+            }
+          },
+          "name": "fifo_mem_r",
+          "span": {
+            "endCol": 36,
+            "endLine": 55,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 55
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b1",
+              "kind": "box",
+              "pin": "rdata_r"
+            }
+          ],
+          "id": "n13",
+          "kind": "reg",
+          "loads": [
+            {
+              "box": "b2",
+              "kind": "box",
+              "pin": "rdata_r"
+            }
+          ],
+          "name": "rdata_r",
+          "span": {
+            "endCol": 33,
+            "endLine": 56,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 56
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "full_s"
+            }
+          ],
+          "id": "n14",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "full_s"
+            }
+          ],
+          "name": "full_s",
+          "span": {
+            "endCol": 15,
+            "endLine": 58,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 58
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "full_r"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "full_r"
+            }
+          ],
+          "id": "n15",
+          "kind": "reg",
+          "loads": [
+            {
+              "box": "b0",
+              "kind": "box",
+              "pin": "full_r"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "full_r"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "full_r"
+            },
+            {
+              "box": "b7",
+              "kind": "box",
+              "pin": "full_r"
+            },
+            {
+              "box": "b9",
+              "kind": "box",
+              "pin": "full_r"
+            }
+          ],
+          "name": "full_r",
+          "span": {
+            "endCol": 15,
+            "endLine": 59,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 59
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "empty_s"
+            }
+          ],
+          "id": "n16",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "empty_s"
+            }
+          ],
+          "name": "empty_s",
+          "span": {
+            "endCol": 16,
+            "endLine": 60,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 60
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "empty_r"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "empty_r"
+            }
+          ],
+          "id": "n17",
+          "kind": "reg",
+          "loads": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "empty_r"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "empty_r"
+            },
+            {
+              "box": "b6",
+              "kind": "box",
+              "pin": "empty_r"
+            },
+            {
+              "box": "b8",
+              "kind": "box",
+              "pin": "empty_r"
+            }
+          ],
+          "name": "empty_r",
+          "span": {
+            "endCol": 16,
+            "endLine": 61,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 9,
+            "startLine": 61
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_wpointer_next_s"
+            }
+          ],
+          "id": "n18",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_wpointer_next_s"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_wpointer_next_s"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "bin_wpointer_next_s"
+            }
+          ],
+          "name": "bin_wpointer_next_s",
+          "span": {
+            "endCol": 45,
+            "endLine": 63,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 63
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_wpointer_next_s"
+            }
+          ],
+          "id": "n19",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_wpointer_next_s"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "gray_wpointer_next_s"
+            }
+          ],
+          "name": "gray_wpointer_next_s",
+          "span": {
+            "endCol": 46,
+            "endLine": 64,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 64
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "bin_wpointer_r"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "bin_wpointer_r"
+            }
+          ],
+          "id": "n20",
+          "kind": "reg",
+          "loads": [
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 3
+              },
+              "box": "b0",
+              "kind": "box",
+              "pin": "bin_wpointer_r"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_wpointer_r"
+            }
+          ],
+          "name": "bin_wpointer_r",
+          "span": {
+            "endCol": 40,
+            "endLine": 65,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 65
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "gray_wpointer_r"
+            },
+            {
+              "box": "b4",
+              "kind": "box",
+              "pin": "gray_wpointer_r"
+            }
+          ],
+          "id": "n21",
+          "kind": "reg",
+          "loads": [
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "box": "i0",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "box": "i2",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "box": "i4",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "box": "i6",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "box": "i8",
+              "kind": "box",
+              "pin": "d_i"
+            }
+          ],
+          "name": "gray_wpointer_r",
+          "span": {
+            "endCol": 41,
+            "endLine": 66,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 66
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "box": "i0",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "box": "i2",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "box": "i4",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "box": "i6",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "box": "i8",
+              "kind": "box",
+              "pin": "d_o"
+            }
+          ],
+          "id": "n22",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_wpointer_sync_s"
+            }
+          ],
+          "name": "gray_wpointer_sync_s",
+          "span": {
+            "endCol": 46,
+            "endLine": 67,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 67
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_rpointer_next_s"
+            }
+          ],
+          "id": "n23",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_rpointer_next_s"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_rpointer_next_s"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "bin_rpointer_next_s"
+            }
+          ],
+          "name": "bin_rpointer_next_s",
+          "span": {
+            "endCol": 45,
+            "endLine": 69,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 69
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_rpointer_next_s"
+            }
+          ],
+          "id": "n24",
+          "kind": "wire",
+          "loads": [
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_rpointer_next_s"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "gray_rpointer_next_s"
+            }
+          ],
+          "name": "gray_rpointer_next_s",
+          "span": {
+            "endCol": 46,
+            "endLine": 70,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 70
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "bin_rpointer_r"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "bin_rpointer_r"
+            }
+          ],
+          "id": "n25",
+          "kind": "reg",
+          "loads": [
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 3
+              },
+              "box": "b1",
+              "kind": "box",
+              "pin": "bin_rpointer_r"
+            },
+            {
+              "box": "b3",
+              "kind": "box",
+              "pin": "bin_rpointer_r"
+            }
+          ],
+          "name": "bin_rpointer_r",
+          "span": {
+            "endCol": 40,
+            "endLine": 71,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 71
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "gray_rpointer_r"
+            },
+            {
+              "box": "b5",
+              "kind": "box",
+              "pin": "gray_rpointer_r"
+            }
+          ],
+          "id": "n26",
+          "kind": "reg",
+          "loads": [
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "box": "i1",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "box": "i3",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "box": "i5",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "box": "i7",
+              "kind": "box",
+              "pin": "d_i"
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "box": "i9",
+              "kind": "box",
+              "pin": "d_i"
+            }
+          ],
+          "name": "gray_rpointer_r",
+          "span": {
+            "endCol": 41,
+            "endLine": 72,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 72
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 0
+              },
+              "box": "i1",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 1,
+                "msb": 1
+              },
+              "box": "i3",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 2,
+                "msb": 2
+              },
+              "box": "i5",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 3
+              },
+              "box": "i7",
+              "kind": "box",
+              "pin": "d_o"
+            },
+            {
+              "bits": {
+                "lsb": 4,
+                "msb": 4
+              },
+              "box": "i9",
+              "kind": "box",
+              "pin": "d_o"
+            }
+          ],
+          "id": "n27",
+          "kind": "wire",
+          "loads": [
+            {
+              "bits": {
+                "lsb": 3,
+                "msb": 4
+              },
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_rpointer_sync_s"
+            },
+            {
+              "bits": {
+                "lsb": 0,
+                "msb": 2
+              },
+              "box": "b3",
+              "kind": "box",
+              "pin": "gray_rpointer_sync_s"
+            }
+          ],
+          "name": "gray_rpointer_sync_s",
+          "span": {
+            "endCol": 46,
+            "endLine": 73,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 26,
+            "startLine": 73
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 4,
+            "packed": true
+          }
+        }
+      ],
+      "origName": "svb_afifo",
+      "params": [
+        {
+          "name": "DATA_WIDTH",
+          "span": {
+            "endCol": 23,
+            "endLine": 23,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 13,
+            "startLine": 23
+          },
+          "value": "32",
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "name": "DEPTH",
+          "span": {
+            "endCol": 18,
+            "endLine": 24,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 13,
+            "startLine": 24
+          },
+          "value": "16",
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "name": "RDATA_REG",
+          "span": {
+            "endCol": 22,
+            "endLine": 25,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 13,
+            "startLine": 25
+          },
+          "value": "1",
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        },
+        {
+          "name": "ADDR_WIDTH_P",
+          "span": {
+            "endCol": 26,
+            "endLine": 53,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 14,
+            "startLine": 53
+          },
+          "value": "4",
+          "width": {
+            "lsb": 0,
+            "msb": 31,
+            "packed": true
+          }
+        }
+      ],
+      "ports": [
+        {
+          "dir": "input",
+          "id": "p0",
+          "name": "clk_w_i",
+          "net": "n0",
+          "span": {
+            "endCol": 22,
+            "endLine": 28,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 28
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p1",
+          "name": "rst_w_an_i",
+          "net": "n1",
+          "span": {
+            "endCol": 25,
+            "endLine": 29,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 29
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p2",
+          "name": "wen_i",
+          "net": "n2",
+          "span": {
+            "endCol": 20,
+            "endLine": 30,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 30
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p3",
+          "name": "wdata_i",
+          "net": "n3",
+          "span": {
+            "endCol": 39,
+            "endLine": 31,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 32,
+            "startLine": 31
+          }
+        },
+        {
+          "dir": "output",
+          "id": "p4",
+          "name": "full_o",
+          "net": "n4",
+          "span": {
+            "endCol": 22,
+            "endLine": 32,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 32
+          }
+        },
+        {
+          "dir": "output",
+          "id": "p5",
+          "name": "werr_o",
+          "net": "n5",
+          "span": {
+            "endCol": 22,
+            "endLine": 33,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 33
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p6",
+          "name": "clk_r_i",
+          "net": "n6",
+          "span": {
+            "endCol": 22,
+            "endLine": 35,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 35
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p7",
+          "name": "rst_r_an_i",
+          "net": "n7",
+          "span": {
+            "endCol": 25,
+            "endLine": 36,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 36
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p8",
+          "name": "ren_i",
+          "net": "n8",
+          "span": {
+            "endCol": 20,
+            "endLine": 37,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 15,
+            "startLine": 37
+          }
+        },
+        {
+          "dir": "output",
+          "id": "p9",
+          "name": "rdata_o",
+          "net": "n9",
+          "span": {
+            "endCol": 40,
+            "endLine": 38,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 33,
+            "startLine": 38
+          }
+        },
+        {
+          "dir": "output",
+          "id": "p10",
+          "name": "empty_o",
+          "net": "n10",
+          "span": {
+            "endCol": 23,
+            "endLine": 39,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 39
+          }
+        },
+        {
+          "dir": "output",
+          "id": "p11",
+          "name": "rerr_o",
+          "net": "n11",
+          "span": {
+            "endCol": 22,
+            "endLine": 40,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+            "fileId": "f",
+            "startCol": 16,
+            "startLine": 40
+          }
+        }
+      ],
+      "span": {
+        "endCol": 17,
+        "endLine": 22,
+        "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_afifo.sv",
+        "fileId": "f",
+        "startCol": 8,
+        "startLine": 22
+      }
+    },
+    "m1": {
+      "boxes": [
+        {
+          "clocks": [
+            {
+              "edge": "pos",
+              "net": "n28",
+              "span": {
+                "endCol": 22,
+                "endLine": 41,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+                "fileId": "e",
+                "startCol": 15,
+                "startLine": 41
+              }
+            }
+          ],
+          "contents": {
+            "cells": [
+              {
+                "id": "c42",
+                "kind": "adff",
+                "params": {
+                  "RST_VAL": "1'b0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n29"
+                  },
+                  "CLK": {
+                    "net": "n28"
+                  },
+                  "D": {
+                    "net": "n30"
+                  },
+                  "Q": {
+                    "net": "n32"
+                  }
+                },
+                "span": {
+                  "endCol": 14,
+                  "endLine": 46,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+                  "fileId": "e",
+                  "startCol": 12,
+                  "startLine": 46
+                }
+              },
+              {
+                "id": "c43",
+                "kind": "adff",
+                "params": {
+                  "RST_VAL": "1'b0"
+                },
+                "pins": {
+                  "ARST": {
+                    "net": "n29"
+                  },
+                  "CLK": {
+                    "net": "n28"
+                  },
+                  "D": {
+                    "net": "n32"
+                  },
+                  "Q": {
+                    "net": "n33"
+                  }
+                },
+                "span": {
+                  "endCol": 14,
+                  "endLine": 47,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+                  "fileId": "e",
+                  "startCol": 12,
+                  "startLine": 47
+                }
+              }
+            ],
+            "nets": []
+          },
+          "id": "b10",
+          "keyword": "always_ff",
+          "kind": "always",
+          "name": "proc_sync",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "clk_i",
+              "net": "n28"
+            },
+            {
+              "dir": "in",
+              "name": "rst_an_i",
+              "net": "n29"
+            },
+            {
+              "dir": "in",
+              "name": "d_i",
+              "net": "n30"
+            },
+            {
+              "dir": "out",
+              "name": "d0_r",
+              "net": "n32"
+            },
+            {
+              "dir": "out",
+              "name": "d1_r",
+              "net": "n33"
+            }
+          ],
+          "resets": [
+            {
+              "edge": "neg",
+              "net": "n29",
+              "span": {
+                "endCol": 39,
+                "endLine": 41,
+                "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+                "fileId": "e",
+                "startCol": 32,
+                "startLine": 41
+              }
+            }
+          ],
+          "span": {
+            "endCol": 19,
+            "endLine": 47,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 3,
+            "startLine": 41
+          }
+        },
+        {
+          "contents": {
+            "cells": [
+              {
+                "id": "c44",
+                "kind": "buf",
+                "pins": {
+                  "A": {
+                    "net": "n33"
+                  },
+                  "Y": {
+                    "net": "n31"
+                  }
+                },
+                "span": {
+                  "endCol": 15,
+                  "endLine": 51,
+                  "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+                  "fileId": "e",
+                  "startCol": 14,
+                  "startLine": 51
+                }
+              }
+            ],
+            "nets": []
+          },
+          "id": "b11",
+          "kind": "assign",
+          "name": "assign d_o",
+          "ports": [
+            {
+              "dir": "in",
+              "name": "d1_r",
+              "net": "n33"
+            },
+            {
+              "dir": "out",
+              "name": "d_o",
+              "net": "n31"
+            }
+          ],
+          "span": {
+            "endCol": 15,
+            "endLine": 51,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 14,
+            "startLine": 51
+          }
+        }
+      ],
+      "id": "m1",
+      "instances": [],
+      "name": "svb_sync",
+      "nets": [
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "clk_i",
+              "port": "p12"
+            }
+          ],
+          "id": "n28",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "clk_i"
+            }
+          ],
+          "name": "clk_i",
+          "span": {
+            "endCol": 20,
+            "endLine": 25,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 15,
+            "startLine": 25
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "rst_an_i",
+              "port": "p13"
+            }
+          ],
+          "id": "n29",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "rst_an_i"
+            },
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "rst_an_i"
+            }
+          ],
+          "name": "rst_an_i",
+          "span": {
+            "endCol": 23,
+            "endLine": 26,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 15,
+            "startLine": 26
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "kind": "port",
+              "pin": "d_i",
+              "port": "p14"
+            }
+          ],
+          "id": "n30",
+          "kind": "port",
+          "loads": [
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "d_i"
+            }
+          ],
+          "name": "d_i",
+          "span": {
+            "endCol": 18,
+            "endLine": 27,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 15,
+            "startLine": 27
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b11",
+              "kind": "box",
+              "pin": "d_o"
+            }
+          ],
+          "id": "n31",
+          "kind": "port",
+          "loads": [
+            {
+              "kind": "port",
+              "pin": "d_o",
+              "port": "p15"
+            }
+          ],
+          "name": "d_o",
+          "span": {
+            "endCol": 19,
+            "endLine": 28,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 16,
+            "startLine": 28
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "d0_r"
+            },
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "d0_r"
+            }
+          ],
+          "id": "n32",
+          "kind": "reg",
+          "loads": [
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "d0_r"
+            }
+          ],
+          "name": "d0_r",
+          "span": {
+            "endCol": 13,
+            "endLine": 37,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 9,
+            "startLine": 37
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        },
+        {
+          "drivers": [
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "d1_r"
+            },
+            {
+              "box": "b10",
+              "kind": "box",
+              "pin": "d1_r"
+            }
+          ],
+          "id": "n33",
+          "kind": "reg",
+          "loads": [
+            {
+              "box": "b11",
+              "kind": "box",
+              "pin": "d1_r"
+            }
+          ],
+          "name": "d1_r",
+          "span": {
+            "endCol": 13,
+            "endLine": 38,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 9,
+            "startLine": 38
+          },
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        }
+      ],
+      "origName": "svb_sync",
+      "params": [
+        {
+          "name": "RST_VAL",
+          "span": {
+            "endCol": 20,
+            "endLine": 23,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 13,
+            "startLine": 23
+          },
+          "value": "0",
+          "width": {
+            "lsb": 0,
+            "msb": 0,
+            "packed": true
+          }
+        }
+      ],
+      "ports": [
+        {
+          "dir": "input",
+          "id": "p12",
+          "name": "clk_i",
+          "net": "n28",
+          "span": {
+            "endCol": 20,
+            "endLine": 25,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 15,
+            "startLine": 25
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p13",
+          "name": "rst_an_i",
+          "net": "n29",
+          "span": {
+            "endCol": 23,
+            "endLine": 26,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 15,
+            "startLine": 26
+          }
+        },
+        {
+          "dir": "input",
+          "id": "p14",
+          "name": "d_i",
+          "net": "n30",
+          "span": {
+            "endCol": 18,
+            "endLine": 27,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 15,
+            "startLine": 27
+          }
+        },
+        {
+          "dir": "output",
+          "id": "p15",
+          "name": "d_o",
+          "net": "n31",
+          "span": {
+            "endCol": 19,
+            "endLine": 28,
+            "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+            "fileId": "e",
+            "startCol": 16,
+            "startLine": 28
+          }
+        }
+      ],
+      "span": {
+        "endCol": 16,
+        "endLine": 22,
+        "file": "/home/mkrause/projects/ossschem/fixtures/svb_afifo/src/svb_sync.sv",
+        "fileId": "e",
+        "startCol": 8,
+        "startLine": 22
+      }
+    }
+  },
+  "schemaVersion": 1,
+  "top": "m0"
+}

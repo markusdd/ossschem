@@ -1,0 +1,26 @@
+{
+  "verilator": "5.046",
+  "top": "svb_afifo",
+  "params": {
+    "DATA_WIDTH": 32,
+    "DEPTH": 16,
+    "RDATA_REG": 1
+  },
+  "upstream": {
+    "svb_afifo": "../sv_base_lib/svb_fifo_lib/svb_afifo.sv",
+    "svb_sync": "../sv_base_lib/svb_clk_lib/svb_sync.sv"
+  },
+  "argv": [
+    "verilator",
+    "--json-only",
+    "--no-json-edit-nums",
+    "--top-module",
+    "svb_afifo",
+    "--json-only-output",
+    "fixtures/svb_afifo/verilator/svb_afifo.tree.json",
+    "--json-only-meta-output",
+    "fixtures/svb_afifo/verilator/svb_afifo.meta.json",
+    "fixtures/svb_afifo/src/svb_sync.sv",
+    "fixtures/svb_afifo/src/svb_afifo.sv"
+  ]
+}
