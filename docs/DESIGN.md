@@ -22,7 +22,7 @@ The standalone Vite application loads `schematic-ir.json` and the fixture source
 - source declarations, expression text, drivers, and loads for selected ports, pins, and wires;
 - bus widths, thicker multi-bit wires, and width markers;
 - directional port glyphs and color-coded component families;
-- selectable dark and light themes, with the dark theme as the default;
+- selectable Current, Tokyo, Nord/Arctic, Solarized, saturated EDA, EDA Classic, Signal Contrast, Catppuccin, Neon Arcade, Fluorescent, 80s X, and Monokai themes, with Current Dark as the default;
 - branded About and Help screens, with the Help screen available from the toolbar or `H`;
 - a probe-provider seam for future waveform cross-probing.
 
@@ -186,7 +186,7 @@ Component families use CSS variables:
 | Instances/arrays | purple |
 | Primitive symbols | amber |
 
-The toolbar theme selector uses the current dark palette by default and offers a light counterpart with the same family colors and interaction contrast. The selected theme is persisted in browser local storage. The CSS variables are scoped through `data-theme`, leaving room for additional named themes without changing the renderer.
+The toolbar theme selector uses Current Dark by default, alongside Current Light, Tokyo Night/Day, Nord/Arctic Light, Solarized Dark/Light, saturated EDA Dark/Light palettes, EDA Classic Dark/Light palettes, Signal Contrast Dark/Light palettes, Catppuccin Mocha/Latte palettes, Neon Arcade Dark/Light palettes, Fluorescent Dark/Light palettes, 80s X Dark/Light palettes, and Monokai Dark/Bright palettes. The Classic palettes intentionally use a black or neutral canvas, cyan nets, colored annotations, and varied symbol colors rather than preserving the usual port/process/instance/primitive hue convention. Signal Contrast uses near-black or near-white surfaces with bright cyan, lime, magenta, and amber family colors for fast visual separation. Catppuccin uses its characteristic Mocha and Latte surfaces with blue, green, mauve, and yellow semantic accents. Neon Arcade uses deep violet or blush surfaces with hot-pink ports, yellow processes, mint instances, and violet primitives for a playful deliberate departure from the conventional family mapping. Fluorescent uses black or pale surfaces with high-saturation blacklight colors; it avoids SVG filters so the visual treatment remains responsive on large schematics. 80s X uses dusty pink, mustard, warm gray, and slate surfaces with square beveled controls and a monospace desktop feel inspired by old X/FVWM workstations. Monokai Dark uses a neutral Monokai Pro charcoal with pink ports, lime processes, cyan wires, purple instances, and yellow primitives; Monokai Bright is a genuinely light cream variant grouped with the light themes. Every palette adapts backgrounds, text, borders, wire contrast, and highlights. The selected theme is persisted in browser local storage. The CSS variables are scoped through `data-theme`, leaving room for additional named themes without changing the renderer.
 
 Selected/cone-highlighted nodes retain their family color in the fill, border, header, and primitive symbol stroke. The border uses a non-scaling SVG stroke so the highlight remains visible when zoomed out.
 

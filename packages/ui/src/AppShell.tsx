@@ -22,12 +22,39 @@ import { SchematicPane, type ViewportRequest } from "./SchematicPane.js";
 const FANOUT_STORAGE_KEY = "ossschem.fanout-limit";
 const THEME_STORAGE_KEY = "ossschem.theme";
 const WORLD_MAP_STORAGE_KEY = "ossschem.world-map-visible";
-type Theme = "dark" | "light";
+const THEMES = [
+  { id: "dark", label: "Current Dark", family: "Dark" },
+  { id: "tokyo-night", label: "Tokyo Night", family: "Dark" },
+  { id: "nord", label: "Nord", family: "Dark" },
+  { id: "solarized-dark", label: "Solarized Dark", family: "Dark" },
+  { id: "eda-dark", label: "EDA Dark", family: "Dark" },
+  { id: "eda-classic-dark", label: "EDA Classic Dark", family: "Dark" },
+  { id: "signal-contrast-dark", label: "Signal Contrast Dark", family: "Dark" },
+  { id: "catppuccin-mocha", label: "Catppuccin Mocha", family: "Dark" },
+  { id: "neon-arcade-dark", label: "Neon Arcade Dark", family: "Dark" },
+  { id: "fluorescent", label: "Fluorescent", family: "Dark" },
+  { id: "x80-dark", label: "80s X Dark", family: "Dark" },
+  { id: "monokai-dark", label: "Monokai Dark", family: "Dark" },
+  { id: "light", label: "Current Light", family: "Light" },
+  { id: "tokyo-day", label: "Tokyo Day", family: "Light" },
+  { id: "arctic-light", label: "Arctic Light", family: "Light" },
+  { id: "solarized-light", label: "Solarized Light", family: "Light" },
+  { id: "eda-light", label: "EDA Light", family: "Light" },
+  { id: "eda-classic-light", label: "EDA Classic Light", family: "Light" },
+  { id: "signal-contrast-light", label: "Signal Contrast Light", family: "Light" },
+  { id: "catppuccin-latte", label: "Catppuccin Latte", family: "Light" },
+  { id: "neon-arcade-light", label: "Neon Arcade Light", family: "Light" },
+  { id: "fluorescent-light", label: "Fluorescent Light", family: "Light" },
+  { id: "x80-light", label: "80s X Light", family: "Light" },
+  { id: "monokai-bright", label: "Monokai Bright", family: "Light" },
+] as const;
+type Theme = typeof THEMES[number]["id"];
 type Overlay = "about" | "help";
 
 function loadTheme(): Theme {
   try {
-    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return THEMES.some(theme => theme.id === stored) ? stored as Theme : "dark";
   } catch {
     return "dark";
   }
@@ -350,8 +377,13 @@ export function AppShell(props: {
         <label className="ossschem-theme">
           Theme
           <select value={theme} aria-label="Theme" onChange={ev => setTheme(ev.currentTarget.value as Theme)}>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
+            {(["Dark", "Light"] as const).map(family => (
+              <optgroup key={family} label={family}>
+                {THEMES.filter(theme => theme.family === family).map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </optgroup>
+            ))}
           </select>
         </label>
         <label className="ossschem-find">
@@ -476,7 +508,7 @@ export function AppShell(props: {
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>
                     <li>Select a wire or port to inspect its source, drivers, loads, and bus width in the bottom pane.</li>
                     <li>Use the <strong>Hide fanout</strong> control to keep large, noisy nets out of the initial view.</li>
-                    <li>Choose <strong>Dark</strong> or <strong>Light</strong> from the theme selector; the preference is remembered.</li>
+                    <li>Choose a current, Tokyo, Nord, Arctic, Solarized, EDA, EDA Classic, Signal Contrast, Catppuccin, Neon Arcade, Fluorescent, 80s X, or Monokai palette from the theme selector; the preference is remembered.</li>
                   </ul>
                 </section>
               </div>
