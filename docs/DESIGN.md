@@ -6,7 +6,7 @@ This document describes the implementation that exists in this repository. It is
 
 ## Current product surface
 
-The standalone Vite application loads `schematic-ir.json` and the fixture sources. It provides:
+The standalone Vite application loads `schematic-ir.json` and the fixture sources. The CLI can also package the built viewer with arbitrary IR and source text in a self-contained output directory, so a generated `index.html` can be opened directly from a Makefile workflow. It provides:
 
 - a full-height hierarchy sidebar;
 - a schematic viewport with pan, wheel zoom, fit-to-view, and drag-to-rectangle zoom;
@@ -36,7 +36,7 @@ The repository is a TypeScript workspace with these layers:
 | --- | --- |
 | `packages/ir` | Serializable design model, source spans, widths, expression pretty-printing, stable serialization, and path-qualified view IDs. |
 | `packages/ingest-verilator` | Parses Verilator tree/meta JSON, resolves addresses and dtypes, attaches source spans, discovers modules/ports/nets/boxes/instances, and lowers expressions into primitives. |
-| `packages/cli` | Converts a tree/meta pair into Schematic IR. The fixture command regenerates `fixtures/svb_afifo/golden/schematic-ir.json`. |
+| `packages/cli` | Converts tree/meta JSON into Schematic IR, runs Verilator for the `build` command, and packages a standalone browser viewer. The fixture command regenerates `fixtures/svb_afifo/golden/schematic-ir.json`. |
 | `packages/graph` | Builds the level-zero view graph, scoped connectivity, hierarchy model, tracing state, expansion state, isolation, fanout collapse, selection data, and handles. |
 | `packages/layout` | Converts the view graph into an ELK layered orthogonal graph and maps ELK positions/routes back to view nodes and pins. |
 | `packages/render` | Imperative SVG scene renderer, symbols, wire/bus drawing, hit-testing, camera controls, focus framing, rectangle zoom, and port outlines. |
@@ -255,6 +255,8 @@ npm run build
 npm run dev
 npm run fixture:dump
 npm run ossschem -- dump --fixture svb_afifo
+node_modules/.bin/ossschem build --top my_top --out-dir build/ossschem rtl/*.sv
+node_modules/.bin/ossschem open build/ossschem
 ```
 
 ## Boundaries and future work

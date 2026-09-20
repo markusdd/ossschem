@@ -3,4 +3,5 @@ dist/
 *.tsbuildinfo
 .DS_Store
 apps/web/dist/
+packages/cli/viewer/
 .vite/

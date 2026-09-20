@@ -23,6 +23,22 @@ Open [http://localhost:5173](http://localhost:5173) in a browser. The bundled vi
 
 In the schematic, click to select and use **Fit** to restore the full view. Double-click a process or instance, or press `E`, to expand its structure; press `L` to expand its logic. Select a pin or wire and press `F` or `B` to trace forward or backward. Use **Isolate** or `I` to focus on one component, and `Backspace` to return to the parent view. The **Help** button or `H` shows all shortcuts.
 
+## Use from a Makefile
+
+After installing the repository or the published CLI package, `ossschem` can build a browser-ready schematic in one command. It runs Verilator's JSON-only dump, converts it to Schematic IR, copies the viewer assets, embeds the design and source text, and optionally opens the result with `$BROWSER` (or the platform's default browser):
+
+```make
+TOP := my_top
+RTL := $(wildcard rtl/*.sv)
+SCHEMATIC_DIR := build/ossschem
+
+.PHONY: schematic
+schematic:
+	npx --no-install ossschem build --top $(TOP) --out-dir $(SCHEMATIC_DIR) --open $(RTL)
+```
+
+The generated directory contains `index.html`, `schematic-ir.json`, `sources.json`, and the viewer assets. Use `ossschem open build/ossschem` later to reopen an existing result. Add `--sources path/to/rtl` when source files are not present in the Verilator input list. The generated `index.html` embeds its data, so it can be opened directly without a development server.
+
 v1 golden design is `svb_afifo` from the adjacent `sv_base_lib` tree. Architecture and acceptance scenes: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Development

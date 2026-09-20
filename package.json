@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "license": "MIT",
+  "bin": {
+    "ossschem": "packages/cli/dist/index.js"
+  },
   "engines": {
     "node": ">=20"
   },
@@ -11,13 +14,15 @@
     "apps/*"
   ],
   "scripts": {
+    "prepare": "npm run typecheck",
     "dev": "npm run dev -w @ossschem/web",
-    "build": "npm run build -w @ossschem/web",
+    "build": "npm run build:viewer",
+    "build:viewer": "npm run build -w @ossschem/web && node scripts/package-viewer.mjs",
     "typecheck": "tsc -b",
     "fixture:dump": "node scripts/dump-verilator.mjs",
-    "fixture:ir": "tsx packages/cli/src/main.ts dump --fixture svb_afifo",
+    "fixture:ir": "node packages/cli/dist/index.js dump --fixture svb_afifo",
     "fixture:check": "node scripts/check-fixture-ports.mjs",
-    "ossschem": "tsx packages/cli/src/main.ts",
+    "ossschem": "node packages/cli/dist/index.js",
     "test": "npm run typecheck && npm run fixture:check && npm run fixture:ir && vitest run"
   },
   "devDependencies": {
