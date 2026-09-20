@@ -22,6 +22,7 @@ import { SchematicPane, type ViewportRequest } from "./SchematicPane.js";
 
 const FANOUT_STORAGE_KEY = "ossschem.fanout-limit";
 const THEME_STORAGE_KEY = "ossschem.theme";
+const WORLD_MAP_STORAGE_KEY = "ossschem.world-map-visible";
 type Theme = "dark" | "light";
 type Overlay = "about" | "help";
 
@@ -55,6 +56,10 @@ export function AppShell(props: {
   const [fanoutLimit, setFanoutLimit] = useState(loadFanoutLimit);
   const [fanoutInput, setFanoutInput] = useState(() => String(fanoutLimit));
   const [theme, setTheme] = useState<Theme>(loadTheme);
+  const [showWorldMap, setShowWorldMap] = useState(() => {
+    try { return localStorage.getItem(WORLD_MAP_STORAGE_KEY) !== "false"; }
+    catch { return true; }
+  });
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [viewSession, setSession] = useState<ViewSession | null>(() =>
     props.design !== undefined && props.design !== null ? defaultSession(props.design) : null,
@@ -78,6 +83,11 @@ export function AppShell(props: {
     try { localStorage.setItem(THEME_STORAGE_KEY, theme); }
     catch { /* The theme still applies when preferences cannot be saved. */ }
   }, [theme]);
+
+  useEffect(() => {
+    try { localStorage.setItem(WORLD_MAP_STORAGE_KEY, String(showWorldMap)); }
+    catch { /* Visibility still works without storage. */ }
+  }, [showWorldMap]);
 
   useEffect(() => {
     if (design === null) {
@@ -293,6 +303,8 @@ export function AppShell(props: {
         <button type="button" onClick={() => ctl?.zoomToFit()} disabled={design === null}>
           Fit
         </button>
+        <button type="button" aria-pressed={showWorldMap} title="Show or hide the navigation overview"
+          onClick={() => setShowWorldMap(shown => !shown)}>World map</button>
         <button type="button" onClick={() => trace("back")} disabled={selectedKey === null}>
           Trace ◀ <kbd>B</kbd>
         </button>
@@ -385,6 +397,8 @@ export function AppShell(props: {
             session={session}
             selectedKey={selectedKey}
             viewportRequest={viewportRequest}
+            showWorldMap={showWorldMap}
+            theme={theme}
             onSelect={setSelectedKey}
             onDblClick={expandOrExplode}
             onTracePin={tracePin}
@@ -442,6 +456,7 @@ export function AppShell(props: {
                 <section>
                   <h2>Useful operations</h2>
                   <ul className="ossschem-help-list">
+                    <li>Toggle <strong>World map</strong> in the toolbar. Click the map to recenter or drag its view box to pan without changing zoom. Drag its upper-left corner to resize it, up to 30% of the schematic viewport area.</li>
                     <li>Use <strong>Expand structure</strong> to reveal processes, assignments, and sub-instances.</li>
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>
                     <li>Select a wire or port to inspect its source, drivers, loads, and bus width in the bottom pane.</li>

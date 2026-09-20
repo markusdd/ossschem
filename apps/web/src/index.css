@@ -209,6 +209,44 @@ input:disabled {
   user-select: none;
 }
 
+.ossschem-schematic-host { position: relative; overflow: hidden; }
+.ossschem-toolbar button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, var(--bg-raised)); }
+.ossschem-minimap {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--canvas);
+  color: var(--fg);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--bg-sunken) 55%, transparent);
+  outline: 1px solid var(--border);
+  user-select: none;
+}
+.ossschem-minimap-header {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border);
+}
+.ossschem-minimap-resize { width: 24px; height: 24px; border: 0; padding: 0; cursor: nwse-resize; touch-action: none; }
+.ossschem-minimap-surface { position: relative; height: calc(100% - 24px); overflow: hidden; cursor: grab; touch-action: none; }
+.ossschem-minimap-surface.is-dragging { cursor: grabbing; }
+.ossschem-minimap-surface:focus-visible, .ossschem-minimap-resize:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ossschem-minimap-surface canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.ossschem-minimap-viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  pointer-events: none;
+}
+
 .ossschem-canvas-bg {
   fill: var(--canvas);
 }

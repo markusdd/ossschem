@@ -35,6 +35,8 @@ Multi-bit connections use thicker wires and slash/count markers (for example, `3
 
 The toolbar theme selector defaults to the dark theme and also offers a light theme. The choice is remembered locally so the viewer keeps the selected appearance across reloads.
 
+The **World map** toolbar toggle shows or hides a navigation overview at the schematic's bottom right. It follows the currently explored schematic, including off-screen components; isolated views show only their isolated contents. Drag the view box to pan without changing zoom, or click elsewhere on the map to recenter. Drag the map's upper-left corner to resize it, up to 30% of the schematic viewport area. Its size and visibility are remembered locally. With the map focused, arrow keys pan; with its resize handle focused, arrow keys adjust size and Enter resets it (double-clicking the handle also resets it).
+
 The ossschem logo opens an About screen with the project banner. The **Help** button or `H` opens the shortcut and operations guide; pressing `H` again or `Escape` closes it.
 
 ## License

@@ -4,6 +4,7 @@ export const packageName = "@ossschem/render" as const;
 
 export { attachCanvas, type Camera, type CanvasController, type CanvasScene, type Wire } from "./canvas.js";
 export { drawSymbol, symbolSize } from "./symbols.js";
+export { attachMinimap } from "./minimap.js";
 
 const NS = "http://www.w3.org/2000/svg";
 

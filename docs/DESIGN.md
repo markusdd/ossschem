@@ -10,6 +10,7 @@ The standalone Vite application loads `schematic-ir.json` and the fixture source
 
 - a full-height hierarchy sidebar;
 - a schematic viewport with pan, wheel zoom, fit-to-view, and drag-to-rectangle zoom;
+- a resizable world map with a viewport rectangle, click-to-center, drag-to-pan, and a toolbar visibility toggle;
 - a source pane below the schematic whose height can be resized independently;
 - a hierarchy sidebar whose width can be resized independently;
 - process, assignment, instance, instance-array, primitive, and port selection;
@@ -168,6 +169,10 @@ Each layout request has a timeout. If it fails, the caller can keep the naive/cu
 ## Rendering and symbols
 
 The renderer draws a single SVG world with a camera transform. Wires have transparent hit paths plus visible paths. Multi-bit wires use a thicker stroke and a slash/count marker. Labels are positioned with obstacle and wire clearances. Selecting a wire selects its net and highlights related pins and wires.
+
+The world map is a separate canvas overview of the current laid-out scene. It caches simplified component rectangles and wire routes, with a DOM rectangle marking the current viewport. Scene subscriptions rebuild its absolute node positions and bounds only when the scene changes; theme or map-size changes repaint the cached geometry. Camera updates move only the viewport rectangle, coalesced through `requestAnimationFrame`. Map navigation updates the existing camera translation without selecting, expanding, or invoking layout. The map's bounds include routed wires and remain fixed during navigation.
+
+The map sits at the bottom right of the schematic. Its upper-left resize handle preserves the panel aspect ratio; the entire panel is capped at 30% of the schematic viewport area and constrained to fit the available width and height. A resize observer reapplies those limits when the viewport changes. Width and toolbar visibility preferences are stored locally. Hiding the map detaches its subscriptions, observer, and pending animation frame; showing it recreates the overview from the current scene.
 
 Component families use CSS variables:
 

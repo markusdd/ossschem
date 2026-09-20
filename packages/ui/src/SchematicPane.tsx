@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactElement } from "react";
 import { buildVisibleConnectivity, hopAtBoundary, type PinFace, type TraceDirection, type Level0Node, type ViewSession } from "@ossschem/graph";
 import type { Design } from "@ossschem/ir";
 import { fromElkGraph, layoutLevel0 } from "@ossschem/layout";
-import { attachCanvas, mountSchematicSvg, traceFocusKeys, type CanvasController } from "@ossschem/render";
+import { attachCanvas, attachMinimap, mountSchematicSvg, traceFocusKeys, type CanvasController } from "@ossschem/render";
 
 export interface ViewportRequest { key: string; direction?: TraceDirection; keys?: string[]; fit?: boolean }
 
@@ -11,6 +11,8 @@ export function SchematicPane(props: {
   session: ViewSession | null;
   selectedKey: string | null;
   viewportRequest?: ViewportRequest | null;
+  showWorldMap?: boolean;
+  theme?: string;
   onSelect: (key: string | null) => void;
   onDblClick: (key: string) => void;
   onTracePin: (key: string, direction: TraceDirection, face?: PinFace) => void;
@@ -18,6 +20,7 @@ export function SchematicPane(props: {
 }): ReactElement {
   const hostRef = useRef<HTMLDivElement>(null);
   const ctlRef = useRef<CanvasController | null>(null);
+  const minimapRef = useRef<ReturnType<typeof attachMinimap> | null>(null);
   const genRef = useRef(0);
   const previousRef = useRef<{ design: Design; session: ViewSession; keys: Set<string> } | null>(null);
 
@@ -31,6 +34,15 @@ export function SchematicPane(props: {
     ctlRef.current = ctl;
     props.onReady?.(ctl);
   }, [props.onReady]);
+
+  useEffect(() => {
+    if (!props.showWorldMap || !hostRef.current || !ctlRef.current) return;
+    const minimap = attachMinimap(hostRef.current, ctlRef.current);
+    minimapRef.current = minimap;
+    return () => { minimap.destroy(); minimapRef.current = null; };
+  }, [props.showWorldMap, props.onReady]);
+
+  useEffect(() => { minimapRef.current?.refreshTheme(); }, [props.theme]);
 
   useEffect(() => {
     const ctl = ctlRef.current;

@@ -41,6 +41,9 @@ export interface CanvasController {
   zoomToFit(keys?: readonly string[]): void;
   focusElements(keys: readonly string[]): void;
   camera(): Camera;
+  scene(): CanvasScene;
+  panTo(x: number, y: number): void;
+  subscribe(listener: (change: "scene" | "camera") => void): () => void;
 }
 
 function svgEl<K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string, string> = {}): SVGElementTagNameMap[K] {
@@ -102,6 +105,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
   }
 
   let camera: Camera = { x: 0, y: 0, k: 1 };
+  const listeners = new Set<(change: "scene" | "camera") => void>();
   let nodes: Level0Node[] = [];
   let wires: Wire[] = [];
   let collapsed: CollapsedNetView[] = [];
@@ -130,6 +134,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
 
   const applyCam = (): void => {
     world.setAttribute("transform", `translate(${camera.x} ${camera.y}) scale(${camera.k})`);
+    listeners.forEach(listener => listener("camera"));
   };
 
   const drawPin = (g: SVGGElement, n: Level0Node, p: Pin, netSel: string | null): void => {
@@ -393,12 +398,14 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       wires = [];
       collapsed = [];
       draw();
+      listeners.forEach(listener => listener("scene"));
     },
     setScene(scene) {
       nodes = scene.nodes;
       wires = scene.wires;
       collapsed = scene.collapsed;
       draw();
+      listeners.forEach(listener => listener("scene"));
     },
     setSelection(key) {
       selected = key;
@@ -450,6 +457,15 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       applyCam();
     },
     camera: () => camera,
+    scene: () => ({ nodes, wires, collapsed }),
+    panTo(x, y) {
+      camera = { ...camera, x, y };
+      applyCam();
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    },
   };
 
   svg.addEventListener("wheel", (ev) => {
