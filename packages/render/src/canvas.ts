@@ -1,4 +1,4 @@
-import { mapSymbolPoint, pinLabel, pinTraceDirection, type PinFace, type TraceDirection, type CollapsedNetView, type Level0Node, type Pin } from "@ossschem/graph";
+import { isPortLike, mapSymbolPoint, pinLabel, pinTraceDirection, type PinFace, type TraceDirection, type CollapsedNetView, type Level0Node, type Pin } from "@ossschem/graph";
 import { busMarkerBounds, busLabelPosition, busLabelTextPosition, wireClearances, type LabelRect } from "./bus-label.js";
 import { elementBounds, focusCamera } from "./focus.js";
 import { drawSymbol } from "./symbols.js";
@@ -177,14 +177,15 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     const quiet = n.kind === "primitive";
     if (!quiet) {
       const label = svgEl("text", {
-        class: `ossschem-pin-label${n.kind === "port" ? " ossschem-port-label" : ""}`,
+        class: `ossschem-pin-label${isPortLike(n.kind) ? " ossschem-port-label" : ""}`,
         "data-id": p.id,
         "data-trace": pinTraceDirection(p.side, "outside"),
         "data-face": "outside",
         style: "pointer-events: auto; cursor: pointer; paint-order: stroke; stroke: var(--node-fill, var(--bg-raised)); stroke-width: 4px; stroke-linejoin: round",
-        x: n.kind === "port" ? String(n.w / 2 - (n.badge === "inout" ? 0 : 5)) : p.side === "W" ? "20" : String(n.w - 20),
+        // an open end has no arrow to clear, so its name sits dead centre
+        x: isPortLike(n.kind) ? String(n.w / 2 - (n.kind === "open" || n.badge === "inout" ? 0 : 5)) : p.side === "W" ? "20" : String(n.w - 20),
         y: String(n.children ? py - 7 : py + 4),
-        "text-anchor": n.kind === "port" ? "middle" : p.side === "W" ? "start" : "end",
+        "text-anchor": isPortLike(n.kind) ? "middle" : p.side === "W" ? "start" : "end",
       });
       label.textContent = pinLabel(p);
       g.appendChild(label);
@@ -245,7 +246,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       g.appendChild(svgEl("rect", { class: "ossschem-primitive-selection", width: String(n.w), height: String(n.h), rx: "5", "data-id": n.key }));
       g.appendChild(drawSymbol(n.symbol, n.w, n.symbolHeight ?? n.h));
     }
-    if (!isGate && n.kind !== "port") {
+    if (!isGate && !isPortLike(n.kind)) {
       const title = svgEl("text", { class: "ossschem-node-title", x: "10", y: "20" });
       title.textContent = n.title;
       g.appendChild(title);

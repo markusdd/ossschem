@@ -1025,7 +1025,7 @@ input:disabled {
 .ossschem-tree-select[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 .ossschem-tree-row > button { font-size: 11px; }
 
-.ossschem-kind-port { --node-color: var(--port-color); }
+.ossschem-kind-port, .ossschem-kind-open { --node-color: var(--port-color); }
 .ossschem-kind-always, .ossschem-kind-assign { --node-color: var(--process-color); }
 .ossschem-kind-instance, .ossschem-kind-instanceArray { --node-color: var(--instance-color); }
 .ossschem-kind-primitive { --node-color: var(--logic-color); }

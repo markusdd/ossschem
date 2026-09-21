@@ -1,4 +1,4 @@
-import { orthogonalPoints, pinLabel, placeGatePins, type Level0Edge, type Level0Node } from "@ossschem/graph";
+import { isPortLike, orthogonalPoints, pinLabel, placeGatePins, type Level0Edge, type Level0Node } from "@ossschem/graph";
 
 export const ELK_OPTIONS: Record<string, string> = {
   "elk.algorithm": "layered",
@@ -69,7 +69,7 @@ function nodeToElk(n: Level0Node): ElkNode {
     layoutOptions: {
       "elk.portConstraints": "FIXED_POS",
       ...(fixed ? { "elk.nodeSize.constraints": "FIXED" } : {}),
-      ...(n.kind === "port" ? {
+      ...(isPortLike(n.kind) ? {
         "elk.layered.layering.layerConstraint": n.badge === "in" ? "FIRST_SEPARATE" : "LAST_SEPARATE",
       } : {}),
     },
@@ -124,7 +124,7 @@ export interface LaidOut {
 const HEADER = 36;
 
 function packPins(n: Level0Node): Level0Node {
-  if (n.kind === "port") return { ...n, pins: n.pins.map(p => ({ ...p, x: p.side === "W" ? 0 : n.w, y: n.h / 2 })) };
+  if (isPortLike(n.kind)) return { ...n, pins: n.pins.map(p => ({ ...p, x: p.side === "W" ? 0 : n.w, y: n.h / 2 })) };
   if (n.kind === "primitive") {
     return {
       ...n,
@@ -175,7 +175,7 @@ function applyElk(n: Level0Node, elk: ElkNode, ox: number, oy: number): Level0No
       interiorEdges: n.interiorEdges,
     };
   }
-  if (n.kind === "port") return { ...n, x, y, w, h,
+  if (isPortLike(n.kind)) return { ...n, x, y, w, h,
     pins: n.pins.map(p => ({ ...p, x: p.side === "W" ? 0 : w, y: h / 2 })) };
   const elkPort = new Map((elk.ports ?? []).map((p) => [p.id, p]));
   const pins = n.pins.map((p) => {
@@ -267,10 +267,10 @@ export function fromElkGraph(raw: ElkNode, nodes: Level0Node[], edges: Level0Edg
   });
   // ELK can offset unconnected ports within the outer layers. Align connection points,
   // independent of label width or whether a wire is currently visible.
-  const inputs = laidNodes.filter(n => n.kind === "port" && n.badge === "in");
+  const inputs = laidNodes.filter(n => isPortLike(n.kind) && n.badge === "in");
   const inputTip = Math.max(...inputs.map(n => n.x + n.w));
   for (const node of inputs) node.x = inputTip - node.w;
-  const outputs = laidNodes.filter(n => n.kind === "port" && (n.badge === "out" || n.badge === "inout"));
+  const outputs = laidNodes.filter(n => isPortLike(n.kind) && (n.badge === "out" || n.badge === "inout"));
   const outputConnection = Math.min(...outputs.map(n => n.x));
   for (const node of outputs) node.x = outputConnection;
   const interiors = (list: Level0Node[]): Level0Edge[] => list.flatMap(n => [...(n.interiorEdges ?? []), ...interiors(n.children ?? [])]);

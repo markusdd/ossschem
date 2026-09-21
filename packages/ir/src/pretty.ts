@@ -6,6 +6,7 @@ const BIN: Record<string, string> = {
   xor: "^",
   eq: "==",
   add: "+",
+  sub: "-",
   shiftr: ">>",
   shiftl: "<<",
 };

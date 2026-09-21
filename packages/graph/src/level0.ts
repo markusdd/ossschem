@@ -3,7 +3,14 @@ import { viewIdKey } from "@ossschem/ir";
 import { combinedWidth, connectionWidth, referenceWidth } from "./width.js";
 import { defaultSession, type ViewSession } from "./session.js";
 
-export type Level0Kind = "port" | "always" | "assign" | "instanceArray" | "instance" | "primitive";
+export type Level0Kind = "port" | "open" | "always" | "assign" | "instanceArray" | "instance" | "primitive";
+
+/* An open end is laid out and labelled like a port -- it is where a signal
+ * enters or leaves the drawing -- but it is not a declared port, so it is
+ * drawn as a plain box rather than a directional one. */
+export function isPortLike(kind: Level0Kind): boolean {
+  return kind === "port" || kind === "open";
+}
 
 export interface Pin {
   id: string;
@@ -148,7 +155,7 @@ function pinsForInstance(
       side: childPort?.dir === "output" ? "E" : "W",
       netId: p.net,
       width: referenceWidth(p, parent.nets),
-      netName: netName(parent, p.net),
+      netName: netName(parent, p.net) + (p.element === undefined ? "" : `[${p.element}]`),
       collapsed: collapsed.has(p.net),
     };
   });
@@ -448,6 +455,41 @@ export function buildLevel0(design: Design, mod?: Module, session?: ViewSession)
     nodes.push(finishNode({ key, id, kind: "instance", title: inst.name,
       badge: design.modules[inst.module]?.name ?? "instance",
       pins: pinsForInstance(key, inst, module, design.modules[inst.module], collapsed) }));
+  }
+
+  /* Nets connected on one side only: something outside the module drives or
+   * reads them -- a testbench signal driven by the simulator, for instance.
+   * Without a box to land on, the pins that use them are left labelled but
+   * unconnected, so give them one. A net with nothing on either side has no
+   * connection to show and is left out. */
+  const portNets = new Set(module.ports.map((p) => p.net));
+  for (const net of module.nets) {
+    if (portNets.has(net.id)) continue;
+    if ((net.drivers.length === 0) === (net.loads.length === 0)) continue;
+    const entering = net.drivers.length === 0;
+    const id = { path, irId: net.id };
+    const key = viewIdKey(id);
+    nodes.push(
+      finishNode({
+        key,
+        id,
+        kind: "open",
+        title: net.name,
+        // placement only: a port-like node draws its name, not its badge
+        badge: entering ? "in" : "out",
+        pins: [
+          {
+            id: pinId(key, net.name),
+            name: net.name,
+            side: entering ? "E" : "W",
+            netId: net.id,
+            netName: net.name,
+            width: referenceWidth({ net: net.id }, module.nets),
+            collapsed: collapsed.has(net.id),
+          },
+        ],
+      }),
+    );
   }
 
   for (const port of outputs) {

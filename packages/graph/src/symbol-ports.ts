@@ -36,6 +36,7 @@ const PORTS: Record<string, Record<string, { vx: number; vy: number }>> = {
   xor: { A: { vx: 12, vy: 22 }, B: { vx: 12, vy: 42 }, Y: { vx: 64, vy: 32 } },
   mux: { A: { vx: 22, vy: 20 }, B: { vx: 22, vy: 44 }, S: { vx: 22, vy: 32 }, Y: { vx: 58, vy: 32 } },
   add: { A: { vx: 16, vy: 24 }, B: { vx: 16, vy: 40 }, Y: { vx: 64, vy: 32 } },
+  sub: { A: { vx: 16, vy: 24 }, B: { vx: 16, vy: 40 }, Y: { vx: 64, vy: 32 } },
   eq: { A: { vx: 16, vy: 24 }, B: { vx: 16, vy: 40 }, Y: { vx: 64, vy: 32 } },
   shiftr: { A: { vx: 16, vy: 32 }, Y: { vx: 64, vy: 32 } },
   shiftl: { A: { vx: 16, vy: 32 }, Y: { vx: 64, vy: 32 } },

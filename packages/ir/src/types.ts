@@ -119,7 +119,8 @@ export interface Instance {
   name: string;
   module: Id;
   relPath: string[];
-  pins: { port: string; net: Id; bits?: { msb: number; lsb: number }; span: SourceSpan }[];
+  /** `bits` selects within a packed vector, `element` one entry of an unpacked array. */
+  pins: { port: string; net: Id; bits?: { msb: number; lsb: number }; element?: number; span: SourceSpan }[];
   span: SourceSpan;
   arrayIndex?: number;
 }
@@ -147,6 +148,7 @@ export type PrimKind =
   | "not"
   | "eq"
   | "add"
+  | "sub"
   | "shiftr"
   | "shiftl"
   | "concat"

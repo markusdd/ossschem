@@ -79,6 +79,10 @@ function prettyAst(node: VerilatorNode | undefined, nested: boolean, shiftAmt = 
     const parts = [...asNodes(node.lhsp), ...asNodes(node.rhsp)].map((p) => prettyAst(p, false));
     return `{${parts.join(", ")}}`;
   }
+  if (node.type === "COND") {
+    const text = `${prettyAst(child(node, "condp"), true)} ? ${prettyAst(child(node, "thenp"), true)} : ${prettyAst(child(node, "elsep"), true)}`;
+    return nested ? wrapNested(text) : text;
+  }
   const bin: Record<string, string> = {
     AND: "&",
     LOGAND: "&",
@@ -87,6 +91,7 @@ function prettyAst(node: VerilatorNode | undefined, nested: boolean, shiftAmt = 
     XOR: "^",
     EQ: "==",
     ADD: "+",
+    SUB: "-",
     SHIFTR: ">>",
     SHIFTL: "<<",
   };
@@ -177,6 +182,25 @@ export function lowerExpr(ctx: Ctx, node: VerilatorNode | undefined): WireRef | 
       });
       out = { net: y };
     }
+  } else if (node.type === "COND") {
+    /* A ternary selects between two values, which is a multiplexer. The IR
+     * reads a mux as `S ? B : A`, so the then branch lands on B. Without this
+     * the whole conditional degrades to one opaque box and everything inside
+     * it -- the incrementer on a pointer, say -- is lost with it. */
+    const select = lowerExpr(ctx, child(node, "condp"));
+    const whenTrue = lowerExpr(ctx, child(node, "thenp"));
+    const whenFalse = lowerExpr(ctx, child(node, "elsep"));
+    if (select !== undefined && whenTrue !== undefined && whenFalse !== undefined) {
+      const y = tempNet(ctx);
+      emit(ctx, {
+        id: ctx.mint.next("c"),
+        kind: "mux",
+        pins: { S: select, B: whenTrue, A: whenFalse, Y: { net: y } },
+        span: spanOf(ctx, node),
+        expr: prettyAst(node, false),
+      });
+      out = { net: y };
+    }
   } else if (node.type === "CONCAT") {
     const parts = [...asNodes(node.lhsp), ...asNodes(node.rhsp)];
     const pins: Primitive["pins"] = {};
@@ -204,6 +228,7 @@ export function lowerExpr(ctx: Ctx, node: VerilatorNode | undefined): WireRef | 
       XOR: "xor",
       EQ: "eq",
       ADD: "add",
+      SUB: "sub",
       SHIFTR: "shiftr",
       SHIFTL: "shiftl",
     };

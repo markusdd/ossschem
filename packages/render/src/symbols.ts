@@ -124,6 +124,9 @@ function glyph(kind: string): SVGGElement {
     case "add":
       g.append(path("M16,16 H64 V48 H16 Z"), txt(40, 38, "+"));
       break;
+    case "sub":
+      g.append(path("M16,16 H64 V48 H16 Z"), txt(40, 38, "-"));
+      break;
     case "shiftr":
       g.append(path("M16,16 H64 V48 H16 Z"), txt(40, 38, ">>"));
       break;

@@ -10,6 +10,7 @@ export {
   parseViewKey,
   pinId,
   pinLabel,
+  isPortLike,
   type Level0Kind,
   type Level0Node,
   type Pin,

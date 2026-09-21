@@ -32,7 +32,7 @@ function bindExpr(
   dump: VerilatorDump,
   expr: VerilatorNode | undefined,
   netsByName: Map<string, Net>,
-): { net: IdRef; bits?: { msb: number; lsb: number }; span: SourceSpan } | undefined {
+): { net: IdRef; bits?: { msb: number; lsb: number }; element?: number; span: SourceSpan } | undefined {
   if (expr === undefined) {
     return undefined;
   }
@@ -57,6 +57,23 @@ function bindExpr(
     }
     return { net: inner.net, bits: { msb, lsb }, span };
   }
+  /* One entry of an unpacked array, as a generate loop connects a bank of
+   * instances: `u_dut[i].wen_i (wen_s[i])`. Without this the pin binds to
+   * nothing and is dropped, so the port shows a label with no connection and
+   * the signal behind it never appears in the drawing. */
+  if (expr.type === "ARRAYSEL") {
+    const from = asNodes(expr.fromp)[0];
+    const indexNode = asNodes(expr.bitp)[0];
+    const inner = bindExpr(dump, from, netsByName);
+    if (inner === undefined) {
+      return undefined;
+    }
+    const element =
+      indexNode?.type === "CONST" && typeof indexNode.name === "string"
+        ? Number(parseVerilogInt(indexNode.name))
+        : undefined;
+    return { net: inner.net, element: Number.isFinite(element) ? element : undefined, span };
+  }
   return undefined;
 }
 
@@ -69,7 +86,7 @@ function bindPins(dump: VerilatorDump, cell: VerilatorNode, netsByName: Map<stri
     if (bound === undefined) {
       continue;
     }
-    pins.push({ port, net: bound.net, bits: bound.bits, span: bound.span });
+    pins.push({ port, net: bound.net, bits: bound.bits, element: bound.element, span: bound.span });
   }
   return pins;
 }

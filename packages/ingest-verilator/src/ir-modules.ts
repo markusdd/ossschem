@@ -15,6 +15,13 @@ export interface IngestOptions {
   topName?: string;
 }
 
+/* A port is declared by its direction, not by varType. Verilator reports
+ * `output logic y` as varType PORT but `input wire logic x` as varType WIRE,
+ * so keying on varType keeps the outputs and silently drops every input. */
+function isPortDirection(raw: unknown): boolean {
+  return raw === "INPUT" || raw === "OUTPUT" || raw === "INOUT";
+}
+
 function portDir(raw: unknown): Port["dir"] {
   if (raw === "OUTPUT") {
     return "output";
@@ -75,7 +82,7 @@ function ingestModule(dump: VerilatorDump, ast: VerilatorNode, mint: IdMint): Mo
       continue;
     }
 
-    if (varType === "PORT") {
+    if (isPortDirection(stmt.direction)) {
       const netId = mint.next("n");
       const portId = mint.next("p");
       nets.push({
@@ -97,7 +104,8 @@ function ingestModule(dump: VerilatorDump, ast: VerilatorNode, mint: IdMint): Mo
       continue;
     }
 
-    if (varType === "VAR") {
+    // an internal signal, however it was declared
+    if (varType === "VAR" || varType === "WIRE" || varType === "PORT") {
       const dtype = dump.dtype(typeof stmt.dtypep === "string" ? stmt.dtypep : undefined);
       const netId = mint.next("n");
       let kind: Net["kind"] = "wire";
