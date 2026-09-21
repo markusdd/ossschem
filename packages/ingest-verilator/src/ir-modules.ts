@@ -113,7 +113,11 @@ function ingestModule(dump: VerilatorDump, ast: VerilatorNode, mint: IdMint): Mo
       if (dtype?.kind === "unpackArray") {
         kind = "memory";
         const depth = dtype.unpacked !== undefined ? Math.abs(dtype.unpacked.msb - dtype.unpacked.lsb) + 1 : 0;
-        memory = { depth, packed: dtype.width };
+        // only the indices: the range names the elements, it is not a value
+        const range = dtype.unpacked === undefined
+          ? undefined
+          : { msb: dtype.unpacked.msb, lsb: dtype.unpacked.lsb };
+        memory = { depth, packed: dtype.width, range };
       } else if (seq.has(name)) {
         kind = "reg";
       }

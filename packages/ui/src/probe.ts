@@ -7,7 +7,8 @@ export interface HierRef {
 
 export interface ProbeProvider {
   resolve(path: string | string[]): HierRef | null;
-  onNetPicked?(ref: HierRef): void;
+  /** One gesture can mean several signals: an array is all of its elements. */
+  onNetPicked?(refs: HierRef[]): void;
   subscribe(
     cb: (time: { value: number; unit: string }, values: Map<string, string>) => void,
   ): () => void;

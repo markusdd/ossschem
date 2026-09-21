@@ -1,5 +1,5 @@
 import { prettyNet, type Design, type SourceSpan } from "@ossschem/ir";
-import { parseViewKey, type Level0Node } from "./level0.js";
+import { isPortLike, parseViewKey, type Level0Node } from "./level0.js";
 import { moduleAtKey, type ViewSession } from "./session.js";
 import { buildLevel0Connectivity } from "./connect.js";
 import { copySession, flattenNodes, sceneEdges } from "./visible.js";
@@ -25,7 +25,8 @@ function signalContext(design: Design, session: ViewSession, key: string) {
   const nodes = flattenNodes(graph.nodes);
   const allEdges = sceneEdges(graph);
   const wire = allEdges.find(e => e.key === key);
-  const port = nodes.find(n => n.key === key && n.kind === "port");
+  // an open end is a signal entering or leaving the drawing, same as a port
+  const port = nodes.find(n => n.key === key && isPortLike(n.kind));
   const pin = port?.pins[0] ?? nodes.flatMap(n => n.pins).find(p => p.id === key);
   const netId = wire?.netId ?? pin?.netId;
   if (!netId) return null;
@@ -66,6 +67,54 @@ function signalInfo(design: Design, session: ViewSession, key: string): Selectio
     fileBasename: span?.file.split("/").pop(), sourceKind: declaration ? "declaration" : "expression",
     expr: !declaration && box ? prettyNet(irId, box.contents) : undefined,
     signal: { netId, drivers: endpoints(sources, targets), loads: endpoints(targets, sources) } };
+}
+
+/** An array of this many elements or more is not expanded onto the viewer. */
+const MAX_PROBE_ELEMENTS = 64;
+
+/* The hierarchical names a waveform viewer knows a selected signal by.
+ *
+ * The scope path is the one the session walks, which comes from the same
+ * elaboration as the dump, so the names line up. An unpacked array is the
+ * shape that differs: a dump gives it a scope of its own holding the
+ * elements, named by index alone because the scope already carries the array
+ * name, so `wen_s[0]` is addressed as `wen_s.[0]`. Selecting one
+ * branch names that element; selecting the array itself names all of them,
+ * since the scope on its own is not a variable any viewer can plot.
+ *
+ * Empty for anything with no counterpart in a dump -- a temporary inside an
+ * expanded box, or a selection that is not a signal at all.
+ */
+export function probeTargets(design: Design, session: ViewSession, key: string | null): string[][] {
+  if (key === null) {
+    return [];
+  }
+  const context = signalContext(design, session, key);
+  if (context === null) {
+    return [];
+  }
+  const split = context.netId.lastIndexOf("#net:");
+  const irId = context.netId.slice(split + 5);
+  const owner = moduleAtKey(design, session, `${context.netId.slice(0, split)}#${irId}`);
+  const declared = design.modules[owner.moduleId]?.nets.find((n) => n.id === irId);
+  if (declared === undefined) {
+    return [];
+  }
+  if (declared.kind !== "memory") {
+    return [[...owner.path, declared.name]];
+  }
+  const element = /\[\d+\]$/.exec(context.name ?? "");
+  if (element !== null) {
+    return [[...owner.path, declared.name, element[0]]];
+  }
+  const range = declared.memory?.range;
+  const low = range === undefined ? 0 : Math.min(range.msb, range.lsb);
+  const high = range === undefined ? (declared.memory?.depth ?? 1) - 1 : Math.max(range.msb, range.lsb);
+  const indices: number[] = [];
+  for (let i = low; i <= high && indices.length < MAX_PROBE_ELEMENTS; i++) {
+    indices.push(i);
+  }
+  return indices.map((i) => [...owner.path, declared.name, `[${i}]`]);
 }
 
 /** Reveal just the route to one listed endpoint, preserving isolation and partial expansion. */

@@ -8,6 +8,7 @@ import {
   expandHierarchy, moduleRootKey, revealSignalConnection, type ExpansionMode, type SignalEndpoint,
   copySession, collapseWire, expandComponent, flattenNodes, isolateComponent, advanceTrace, sceneEdges,
   type PinFace, type TraceDirection,
+  probeTargets,
   selectionInfo,
   snippet,
   type ViewSession,
@@ -284,6 +285,21 @@ export function AppShell(props: {
       activeTrace?.frontier.map(key => key.split("::")[0]));
   }, [ctl, selectedKey, viewportRequest, activeTrace]);
 
+  /* Cross probing is an explicit act: browsing the schematic should not fill
+   * the waveform viewer with everything the pointer touched. A signal with no
+   * counterpart in a dump offers nothing rather than guessing a name. */
+  const canProbe = probe.onNetPicked !== undefined;
+  const probePaths = useMemo(
+    () => (canProbe && design !== null && session !== null ? probeTargets(design, session, selectedKey) : []),
+    [canProbe, design, session, selectedKey],
+  );
+  const sendToWaveform = useCallback(() => {
+    if (probePaths.length === 0) {
+      return;
+    }
+    probe.onNetPicked?.(probePaths.map((path) => ({ path, net: path[path.length - 1] })));
+  }, [probe, probePaths]);
+
   useEffect(() => {
     const onKey = (ev: KeyboardEvent): void => {
       if (ev.target instanceof HTMLElement && (ev.target.closest("input, textarea, select, [contenteditable=true]") ||
@@ -308,6 +324,8 @@ export function AppShell(props: {
         expandSubtree("logic");
       } else if ((ev.key === "i" || ev.key === "I") && selectedNode) {
         isolate(selectedNode.key);
+      } else if (ev.key === "w" || ev.key === "W") {
+        sendToWaveform();
       } else if (ev.key === "c" || ev.key === "C") {
         collapse();
       } else if (ev.key === "Enter" && selectedKey !== null) {
@@ -321,9 +339,8 @@ export function AppShell(props: {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [collapse, ctl, drillIn, drillOut, expandOrExplode, expandSubtree, overlay, selectedKey, selectedNode, isolate, trace]);
+  }, [collapse, ctl, drillIn, drillOut, expandOrExplode, expandSubtree, overlay, selectedKey, selectedNode, isolate, sendToWaveform, trace]);
 
-  void probe;
 
   return (
     <div className="ossschem-shell" data-theme={theme}>
@@ -352,6 +369,14 @@ export function AppShell(props: {
         <button type="button" onClick={() => expandSubtree("structure")} disabled={!canExpandStructure}>Expand structure <kbd>E</kbd></button>
         <button type="button" onClick={() => expandSubtree("logic")} disabled={!canExpand}>Expand logic <kbd>L</kbd></button>
         <button type="button" onClick={() => selectedNode && isolate(selectedNode.key)} disabled={!selectedNode}>Isolate <kbd>I</kbd></button>
+        {canProbe && (
+          <button type="button" onClick={sendToWaveform} disabled={probePaths.length === 0}
+            title={probePaths.length === 0
+              ? "Select a signal to add it to the waveform viewer"
+              : probePaths.map((p) => p.join(".")).join("\n")}>
+            Waveform <kbd>W</kbd>
+          </button>
+        )}
         <button type="button" onClick={showAll} disabled={!session?.visible}>Show all</button>
         <button type="button" onClick={collapse} disabled={!canCollapse}>Collapse <kbd>C</kbd></button>
         <button type="button" onClick={drillOut} disabled={history.length === 0}>
@@ -496,6 +521,7 @@ export function AppShell(props: {
                     <div><dt><kbd>L</kbd></dt><dd>Expand logic beneath the selected component</dd></div>
                     <div><dt><kbd>I</kbd></dt><dd>Isolate the selected component</dd></div>
                     <div><dt><kbd>C</kbd></dt><dd>Collapse the selected component or wire</dd></div>
+                    {canProbe && <div><dt><kbd>W</kbd></dt><dd>Add the selected signal to the waveform viewer</dd></div>}
                     <div><dt><kbd>Esc</kbd></dt><dd>Close dialogs or clear the current selection</dd></div>
                   </dl>
                 </section>
@@ -507,6 +533,7 @@ export function AppShell(props: {
                     <li>Use <strong>Expand structure</strong> to reveal processes, assignments, and sub-instances.</li>
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>
                     <li>Select a wire or port to inspect its source, drivers, loads, and bus width in the bottom pane.</li>
+                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice.</li>}
                     <li>Use the <strong>Hide fanout</strong> control to keep large, noisy nets out of the initial view.</li>
                     <li>Choose a current, Tokyo, Nord, Arctic, Solarized, EDA, EDA Classic, Signal Contrast, Catppuccin, Neon Arcade, Fluorescent, 80s X, or Monokai palette from the theme selector; the preference is remembered.</li>
                   </ul>

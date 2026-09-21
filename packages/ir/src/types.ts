@@ -65,7 +65,8 @@ export interface Net {
   name: string;
   width: Width;
   kind: "port" | "reg" | "wire" | "memory";
-  memory?: { depth: number; packed: Width };
+  /** `range` is the declared unpacked range, which names the elements. */
+  memory?: { depth: number; packed: Width; range?: { msb: number; lsb: number } };
   span: SourceSpan;
   drivers: Endpoint[];
   loads: Endpoint[];

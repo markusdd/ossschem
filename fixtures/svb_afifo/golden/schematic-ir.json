@@ -26,7 +26,7 @@
     }
   },
   "meta": {
-    "dumpedAt": "2026-09-18T00:00:00.000Z",
+    "dumpedAt": "2026-09-21T13:13:55.328Z",
     "producer": "verilator-json-only",
     "verilatorVersion": "5.046"
   },
@@ -3754,6 +3754,10 @@
               "lsb": 0,
               "msb": 31,
               "packed": true
+            },
+            "range": {
+              "lsb": 0,
+              "msb": 15
             }
           },
           "name": "fifo_mem_r",
@@ -4887,11 +4891,6 @@
               "dir": "in",
               "name": "d_i",
               "net": "n30"
-            },
-            {
-              "dir": "out",
-              "name": "d0_r",
-              "net": "n32"
             },
             {
               "dir": "out",

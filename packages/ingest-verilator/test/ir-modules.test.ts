@@ -74,6 +74,8 @@ describe("ingestToIr(svb_afifo) Scene A subset", () => {
     expect(byName.fifo_mem_r.memory).toEqual({
       depth: 16,
       packed: { msb: 31, lsb: 0, packed: true },
+      // the declared index range, which names the elements in a dump
+      range: { msb: 15, lsb: 0 },
     });
     expect(byName.i).toBeUndefined();
     expect(top.nets.some((n) => n.name === "i")).toBe(false);

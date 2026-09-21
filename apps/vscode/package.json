@@ -9,22 +9,55 @@
   "engines": {
     "vscode": "^1.90.0"
   },
-  "categories": ["Visualization"],
-  "activationEvents": ["onCommand:ossschem.open"],
-  "main": "./src/extension.js",
+  "categories": [
+    "Visualization"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "ossschem.open",
-        "title": "ossschem: Open schematic"
+        "title": "Open schematic",
+        "category": "ossschem"
+      },
+      {
+        "command": "ossschem.linkWaveform",
+        "title": "Link selection to waveform viewer (toggle)",
+        "category": "ossschem"
+      },
+      {
+        "command": "ossschem.showLog",
+        "title": "Show log",
+        "category": "ossschem"
+      },
+      {
+        "command": "ossschem.diagnoseProbe",
+        "title": "Diagnose waveform probing",
+        "category": "ossschem"
       }
     ],
-    "languages": [
-      {
-        "id": "ossschem-ir",
-        "extensions": [".ir.json"],
-        "aliases": ["ossschem IR"]
-      }
-    ]
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "ossschem.open",
+          "when": "resourceFilename =~ /(^schematic-ir\\.json$|\\.ir\\.json$)/",
+          "group": "navigation@20"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "ossschem.open",
+          "when": "resourceFilename =~ /(^schematic-ir\\.json$|\\.ir\\.json$)/",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0"
+  },
+  "scripts": {
+    "build": "tsc -b"
   }
 }

@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AppShell } from "@ossschem/ui";
+import { AppShell, type ProbeProvider } from "@ossschem/ui";
 import type { Design } from "@ossschem/ir";
 import logoUrl from "../../../assets/ossschem_logo_gradient.svg";
 import bannerUrl from "../../../assets/ossschem_banner.svg";
@@ -10,8 +10,25 @@ declare global {
   interface Window {
     __OSSSCHEM_DESIGN__?: Design;
     __OSSSCHEM_SOURCES__?: Record<string, string>;
+    /** Present only when the page runs inside a VS Code webview. */
+    acquireVsCodeApi?: () => { postMessage(message: unknown): void };
   }
 }
+
+/* In a webview, hand the selected signal to the extension, which is what can
+ * reach the waveform viewer. Standalone there is no host and no probe. */
+const host = window.acquireVsCodeApi?.();
+host?.postMessage({ type: "ossschem/ready" });
+const probe: ProbeProvider | undefined =
+  host === undefined
+    ? undefined
+    : {
+        resolve: () => null,
+        subscribe: () => () => {},
+        onNetPicked: (refs) => {
+          host.postMessage({ type: "ossschem/netPicked", instancePaths: refs.map((r) => r.path) });
+        },
+      };
 
 const sourceGlob = import.meta.glob("../../../fixtures/svb_afifo/src/*.sv", {
   query: "?raw",
@@ -37,7 +54,7 @@ const reactRoot = createRoot(root);
 function render(design: Design | null, sourceMap: Record<string, string> = sources): void {
   reactRoot.render(
     <StrictMode>
-      <AppShell design={design} sources={sourceMap} branding={{ logoUrl, bannerUrl }} />
+      <AppShell design={design} sources={sourceMap} branding={{ logoUrl, bannerUrl }} probe={probe} />
     </StrictMode>,
   );
 }
