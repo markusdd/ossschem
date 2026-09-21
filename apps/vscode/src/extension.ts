@@ -10,7 +10,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import * as vscode from "vscode";
 
-import { pathCandidates, pickDocument, type OpenDocuments } from "./vaporview.js";
+import { arrayShape, parseIndexSpec, pathCandidates, pickDocument, SMALL_ARRAY,
+  type OpenDocuments } from "./vaporview.js";
 import { viewerHtml } from "./webview-html.js";
 
 /** What `ossschem build` writes, and what `ossschem dump --out` is called. */
@@ -146,10 +147,57 @@ async function resolveInDump(uri: string, path: string[]): Promise<string | unde
   return undefined;
 }
 
-async function sendToWaveform(instancePaths: string[][]): Promise<void> {
-  lastPicked = instancePaths;
-  const paths = instancePaths.map((p) => p.join("."));
-  trace(`schematic picked ${paths.length === 1 ? paths[0] : `${paths.length} signals: ${paths.join(", ")}`}`);
+/* Which elements of an unpacked array to add.
+ *
+ * A bundle of a few signals -- one per instance -- is almost always wanted
+ * whole, while a memory almost never is, so the default follows the size and
+ * Enter accepts it. Typing an index, a range or a list overrides it.
+ */
+async function chooseElements(paths: string[][]): Promise<string[][] | undefined> {
+  const array = arrayShape(paths);
+  if (array === undefined) {
+    return paths;
+  }
+  const name = array.scope[array.scope.length - 1];
+  const all = { label: `All ${array.indices.length} elements`, indices: array.indices };
+  const first = { label: `First element · ${name}.[${array.indices[0]}]`, indices: [array.indices[0]] };
+  const items = array.indices.length <= SMALL_ARRAY ? [all, first] : [first, all];
+
+  const chosen = await new Promise<number[] | undefined>((resolve) => {
+    const pick = vscode.window.createQuickPick<vscode.QuickPickItem & { indices: number[] }>();
+    pick.title = `Add ${name} to the waveform viewer`;
+    pick.placeholder = "Enter to accept, or type an index, a range (0-7) or a list (0,2,5)";
+    pick.items = items;
+    pick.activeItems = [items[0]];
+    let answered = false;
+    pick.onDidAccept(() => {
+      // typed text wins over the highlighted item, so a spec can be entered
+      // without first clearing the filter
+      const typed = parseIndexSpec(pick.value, array.indices);
+      answered = true;
+      resolve(typed ?? pick.selectedItems[0]?.indices ?? pick.activeItems[0]?.indices);
+      pick.hide();
+    });
+    pick.onDidHide(() => {
+      if (!answered) {
+        resolve(undefined);
+      }
+      pick.dispose();
+    });
+    pick.show();
+  });
+
+  if (chosen === undefined) {
+    trace("  cancelled");
+    return undefined;
+  }
+  return chosen.map((i) => [...array.scope, `[${i}]`]);
+}
+
+async function sendToWaveform(offered: string[][]): Promise<void> {
+  lastPicked = offered;
+  const offeredText = offered.map((p) => p.join("."));
+  trace(`schematic picked ${offered.length === 1 ? offeredText[0] : `${offered.length} signals: ${offeredText.join(", ")}`}`);
   if (!linkSelection) {
     trace("  skipped: link is turned off");
     return;
@@ -169,8 +217,6 @@ async function sendToWaveform(instancePaths: string[][]): Promise<void> {
     trace("  activating vaporview");
     await viewer.activate();
   }
-  /* One call per signal. An array is addressed element by element rather than
-   * by its scope, which is not something a viewer can plot. */
   const uri = await activeWaveform();
   if (uri === undefined) {
     trace("  no waveform document is open");
@@ -178,9 +224,21 @@ async function sendToWaveform(instancePaths: string[][]): Promise<void> {
     return;
   }
   trace(`  target document ${uri}`);
+
+  // asked only once there is somewhere for the answer to go
+  const chosen = await chooseElements(offered);
+  if (chosen === undefined) {
+    return;
+  }
+  if (chosen.length !== offered.length) {
+    trace(`  adding ${chosen.length} of ${offered.length} elements`);
+  }
+
+  /* One call per signal. An array is addressed element by element rather than
+   * by its scope, which is not something a viewer can plot. */
   let added = 0;
   const unresolved: string[] = [];
-  for (const path of instancePaths) {
+  for (const path of chosen) {
     const resolved = await resolveInDump(uri, path);
     if (resolved === undefined) {
       unresolved.push(path.join("."));
@@ -196,7 +254,7 @@ async function sendToWaveform(instancePaths: string[][]): Promise<void> {
       unresolved.push(`${resolved}: ${String(err)}`);
     }
   }
-  trace(`  added ${added} of ${instancePaths.length} signal(s)`);
+  trace(`  added ${added} of ${chosen.length} signal(s)`);
   if (unresolved.length === 0) {
     return;
   }

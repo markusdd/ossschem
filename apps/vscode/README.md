@@ -28,3 +28,21 @@ it writes `schematic-ir.json` and `sources.json`, and the extension reads both.
 - a Content-Security-Policy that denies everything by default and allows the
   scripts by nonce;
 - the design and sources, escaped for embedding in a script tag.
+
+## Cross probing
+
+Select a signal in the schematic and press `W`, or use the **Waveform** button,
+to add it to vaporview. The extension resolves the name against the open dump
+before adding: `addVariable` accepts a name it cannot find without complaining,
+so an unverified spelling looks exactly like success.
+
+Names come from the same elaboration as the dump, so they line up. Unpacked
+arrays are the exception worth knowing: a dump gives the array a scope of its
+own and names each element by index alone, so `wen_s[0]` is
+`tb.wen_s.[0]`. Selecting an array asks which elements to add -- whole for a
+small bundle, the first element for anything larger, or an index, range
+(`0-7`) or list (`0,2,5`) typed into the picker.
+
+`ossschem: Show log` traces every step. `ossschem: Diagnose waveform probing`
+reports what vaporview knows about the last signal picked, which is the first
+thing to check when something does not appear.
