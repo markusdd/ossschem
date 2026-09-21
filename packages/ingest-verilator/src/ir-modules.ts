@@ -1,7 +1,7 @@
 import type { Design, Module, Net, Param, Port, Width } from "@ossschem/ir";
 import { parseVerilogInt, constName } from "./const.js";
 import { IdMint } from "./ids.js";
-import { ingestBoxes } from "./ir-boxes.js";
+import { ingestBoxes, pruneInternalBoxPorts } from "./ir-boxes.js";
 import { ingestInstances } from "./ir-instances.js";
 import { attachPortAndInstanceEndpoints } from "./ir-usedef.js";
 import type { VerilatorDump } from "./parse.js";
@@ -185,6 +185,7 @@ export function ingestToIr(dump: VerilatorDump, options: IngestOptions): Design 
     ingestInstances(dump, ast, modules[irId], moduleIdByAddr, mint);
     ingestBoxes(dump, ast, modules[irId], mint);
     attachPortAndInstanceEndpoints(modules[irId], modules);
+    pruneInternalBoxPorts(modules[irId]);
   }
 
   const files: Design["files"] = {};

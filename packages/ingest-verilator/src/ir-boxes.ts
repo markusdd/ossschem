@@ -114,6 +114,36 @@ function boxPorts(
   return [...clockPorts, ...resetPorts, ...dataIns, ...dataOuts];
 }
 
+/* A signal a process writes and reads itself, that nothing outside it uses,
+ * belongs inside the process: the two stages of a synchroniser chain connect
+ * directly rather than leaving the box and coming straight back. Only the
+ * written side needed this -- a net that is read and written inside one box
+ * was already kept off the input side, but still appeared as an output.
+ *
+ * Runs once the nets know all their endpoints, which is after the instances
+ * and the module's own ports have been attached.
+ */
+export function pruneInternalBoxPorts(ir: Module): void {
+  const portNets = new Set(ir.ports.map((p) => p.net));
+  const netsById = new Map(ir.nets.map((n) => [n.id, n]));
+  for (const box of ir.boxes) {
+    box.ports = box.ports.filter((port) => {
+      if (port.dir !== "out" || portNets.has(port.net)) {
+        return true;
+      }
+      const net = netsById.get(port.net);
+      if (net === undefined) {
+        return true;
+      }
+      const elsewhere = (ep: { kind: string; box?: string }): boolean =>
+        ep.kind !== "box" || ep.box !== box.id;
+      // kept when anything else touches the net, and when nothing reads it at
+      // all: an unread signal still has to reach the edge of the drawing
+      return net.loads.length === 0 || net.drivers.some(elsewhere) || net.loads.some(elsewhere);
+    });
+  }
+}
+
 export function ingestBoxes(dump: VerilatorDump, ast: VerilatorNode, ir: Module, mint: IdMint): void {
   const netsByName = new Map(ir.nets.map((n) => [n.name, n]));
   const boxes: Module["boxes"] = [];
