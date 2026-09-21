@@ -19,6 +19,20 @@ declare global {
  * reach the waveform viewer. Standalone there is no host and no probe. */
 const host = window.acquireVsCodeApi?.();
 host?.postMessage({ type: "ossschem/ready" });
+
+/* The host names a signal it wants shown. Listeners are held in a set so the
+ * app can subscribe and unsubscribe without the page caring how many. */
+const revealListeners = new Set<(instancePath: string[]) => void>();
+if (host !== undefined) {
+  window.addEventListener("message", (event: MessageEvent<unknown>) => {
+    const message = event.data as { type?: string; instancePath?: unknown } | null;
+    if (message?.type !== "ossschem/revealSignal" || !Array.isArray(message.instancePath)) {
+      return;
+    }
+    const path = message.instancePath.filter((part): part is string => typeof part === "string");
+    revealListeners.forEach((listener) => { listener(path); });
+  });
+}
 const probe: ProbeProvider | undefined =
   host === undefined
     ? undefined
@@ -27,6 +41,10 @@ const probe: ProbeProvider | undefined =
         subscribe: () => () => {},
         onNetPicked: (refs) => {
           host.postMessage({ type: "ossschem/netPicked", instancePaths: refs.map((r) => r.path) });
+        },
+        onRevealRequest: (cb) => {
+          revealListeners.add(cb);
+          return () => revealListeners.delete(cb);
         },
       };
 

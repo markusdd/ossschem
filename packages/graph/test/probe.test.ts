@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { Design } from "@ossschem/ir";
-import { buildLevel0Connectivity, defaultSession, probeTargets, sceneEdges, selectionInfo } from "../src/index.js";
+import { buildLevel0Connectivity, defaultSession, probeTargets, resolveProbePath, sceneEdges, selectionInfo } from "../src/index.js";
 
 const design = JSON.parse(
   readFileSync(new URL("../../../fixtures/svb_afifo/golden/schematic-ir.json", import.meta.url), "utf8"),
@@ -129,5 +129,38 @@ describe("probing a testbench", () => {
       ["tb", "data_s", "[3]"],
       ["tb", "data_s", "[4]"],
     ]);
+  });
+});
+
+describe("resolving a name from the waveform viewer", () => {
+  const bench = benchDesign();
+
+  it("finds a signal at the top", () => {
+    expect(resolveProbePath(bench, ["tb", "clk_s"])).toMatchObject({ moduleId: "m0", path: ["tb"], netName: "clk_s" });
+  });
+
+  it("walks into an instance", () => {
+    expect(resolveProbePath(bench, ["tb", "u_dut", "clk_i"])).toMatchObject({
+      moduleId: "m1", path: ["tb", "u_dut"], netName: "clk_i",
+    });
+  });
+
+  it("takes an array element back to its array", () => {
+    expect(resolveProbePath(bench, ["tb", "data_s", "[1]"])).toMatchObject({ path: ["tb"], netName: "data_s" });
+  });
+
+  it("round-trips whatever probeTargets produced", () => {
+    const session = defaultSession(bench);
+    const graph = buildLevel0Connectivity(bench, undefined, session);
+    const open = graph.nodes.find((n) => n.kind === "open" && n.title === "data_s")!;
+    for (const path of probeTargets(bench, session, open.key)) {
+      expect(resolveProbePath(bench, path)?.netName).toBe("data_s");
+    }
+  });
+
+  it("refuses a name from somewhere else", () => {
+    expect(resolveProbePath(bench, ["other_tb", "clk_s"])).toBeNull();
+    expect(resolveProbePath(bench, ["tb", "nope"])).toBeNull();
+    expect(resolveProbePath(bench, ["tb"])).toBeNull();
   });
 });

@@ -51,6 +51,9 @@ let warnedNoViewer = false;
 let log: vscode.OutputChannel | undefined;
 /** The last thing the schematic offered, for the diagnostic command. */
 let lastPicked: string[][] = [];
+/** Open schematic panels, so a selection in the waveform can reach them. */
+const panels = new Set<vscode.WebviewPanel>();
+let listeningToViewer = false;
 
 function trace(message: string): void {
   log?.appendLine(`${new Date().toISOString().slice(11, 19)} ${message}`);
@@ -264,6 +267,51 @@ async function sendToWaveform(offered: string[][]): Promise<void> {
   );
 }
 
+interface SelectSignalEvent {
+  instancePath?: unknown;
+}
+
+interface VaporviewApi {
+  onDidSelectSignal?: (cb: (event: SelectSignalEvent) => void) => vscode.Disposable;
+}
+
+/* The reverse direction: a signal selected in the waveform is shown in the
+ * schematic. Subscribed once, when the first schematic opens, because
+ * vaporview may not be running before that. */
+async function listenToViewer(context: vscode.ExtensionContext): Promise<void> {
+  if (listeningToViewer) {
+    return;
+  }
+  const viewer = vscode.extensions.getExtension<VaporviewApi>(VAPORVIEW);
+  if (viewer === undefined) {
+    return;
+  }
+  if (!viewer.isActive) {
+    await viewer.activate();
+  }
+  const api = viewer.exports;
+  if (typeof api?.onDidSelectSignal !== "function") {
+    trace("vaporview exports no onDidSelectSignal; waveform to schematic is off");
+    return;
+  }
+  listeningToViewer = true;
+  context.subscriptions.push(
+    api.onDidSelectSignal((event) => {
+      // the event carries every selected signal; the first is the one to show
+      const raw = Array.isArray(event.instancePath) ? event.instancePath : [event.instancePath];
+      const first = raw.find((p): p is string => typeof p === "string" && p.length > 0);
+      if (first === undefined || panels.size === 0) {
+        return;
+      }
+      trace(`waveform selected ${first}`);
+      for (const panel of panels) {
+        void panel.webview.postMessage({ type: "ossschem/revealSignal", instancePath: first.split(".") });
+      }
+    }),
+  );
+  trace("listening for selections in vaporview");
+}
+
 async function openSchematic(context: vscode.ExtensionContext, target?: vscode.Uri): Promise<void> {
   const uri = target ?? vscode.window.activeTextEditor?.document.uri;
   if (uri === undefined) {
@@ -306,6 +354,9 @@ async function openSchematic(context: vscode.ExtensionContext, target?: vscode.U
     },
   );
   trace(`opened ${name} with the viewer from ${viewerRoot}`);
+  panels.add(panel);
+  panel.onDidDispose(() => panels.delete(panel));
+  void listenToViewer(context);
   panel.webview.onDidReceiveMessage(
     (message: unknown) => {
       if ((message as { type?: string } | undefined)?.type === "ossschem/ready") {

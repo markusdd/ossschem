@@ -117,6 +117,56 @@ export function probeTargets(design: Design, session: ViewSession, key: string |
   return indices.map((i) => [...owner.path, declared.name, `[${i}]`]);
 }
 
+export interface ProbeLocation {
+  moduleId: string;
+  /** Session path to the module the signal lives in. */
+  path: string[];
+  netId: string;
+  netName: string;
+}
+
+/* Where a name from a waveform viewer lives in the design: the inverse of
+ * probeTargets. Walks the instance path segment by segment, since one
+ * instance can contribute several segments (a generate block and the
+ * instance inside it), then takes what is left as the signal.
+ *
+ * Null when the name belongs to another design, or to something with no net
+ * behind it.
+ */
+export function resolveProbePath(design: Design, instancePath: string[]): ProbeLocation | null {
+  const top = design.modules[design.top];
+  if (top === undefined || instancePath[0] !== top.name) {
+    return null;
+  }
+  let moduleId = design.top;
+  let path = [top.name];
+  let rest = instancePath.slice(1);
+  for (;;) {
+    const mod = design.modules[moduleId];
+    if (mod === undefined) {
+      return null;
+    }
+    const step = mod.instances.find((i): i is typeof i & { kind: "instance" } =>
+      i.kind === "instance" && i.relPath.length > 0 && i.relPath.length < rest.length &&
+      i.relPath.every((part, k) => rest[k] === part));
+    if (step === undefined) {
+      break;
+    }
+    path = [...path, ...step.relPath];
+    rest = rest.slice(step.relPath.length);
+    moduleId = step.module;
+  }
+  // what remains is the signal: a name, or an array name and an element
+  const name = rest.length === 1 ? rest[0]
+    : rest.length === 2 && /^\[\d+\]$/.test(rest[1]) ? rest[0]
+    : undefined;
+  const net = name === undefined ? undefined : design.modules[moduleId]?.nets.find((n) => n.name === name);
+  if (net === undefined) {
+    return null;
+  }
+  return { moduleId, path, netId: net.id, netName: net.name };
+}
+
 /** Reveal just the route to one listed endpoint, preserving isolation and partial expansion. */
 export function revealSignalConnection(design: Design, session: ViewSession, key: string, endpoint: string): ViewSession {
   const next = copySession(session);

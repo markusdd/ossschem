@@ -9,6 +9,7 @@ import {
   copySession, collapseWire, expandComponent, flattenNodes, isolateComponent, advanceTrace, sceneEdges,
   type PinFace, type TraceDirection,
   probeTargets,
+  resolveProbePath,
   selectionInfo,
   snippet,
   type ViewSession,
@@ -96,6 +97,8 @@ export function AppShell(props: {
   const [history, setHistory] = useState<ViewSession[]>([]);
   const [traceDirection, setTraceDirection] = useState<"back" | "forward" | null>(null);
   const [viewportRequest, setViewportRequest] = useState<ViewportRequest | null>(null);
+  /** A net the host asked for, held until the scene it lives in is built. */
+  const [pendingReveal, setPendingReveal] = useState<string | null>(null);
   const [ctl, setCtl] = useState<CanvasController | null>(null);
   const onReady = useCallback((next: CanvasController) => {
     setCtl(next);
@@ -293,6 +296,42 @@ export function AppShell(props: {
     () => (canProbe && design !== null && session !== null ? probeTargets(design, session, selectedKey) : []),
     [canProbe, design, session, selectedKey],
   );
+  /* The other direction: the host names a signal and the schematic shows it.
+   * The scope is switched first, then the selection is made once the scene
+   * for that scope exists -- the wire to select does not exist before then. */
+  useEffect(() => {
+    if (probe.onRevealRequest === undefined || design === null) {
+      return;
+    }
+    return probe.onRevealRequest((instancePath) => {
+      const found = resolveProbePath(design, instancePath);
+      if (found === null) {
+        return;
+      }
+      setSession((prev) => (prev !== null && prev.moduleId === found.moduleId
+        && prev.path.join("/") === found.path.join("/")
+        ? { ...prev, visible: undefined }
+        : { moduleId: found.moduleId, path: found.path, exploded: new Set(), expansion: new Set() }));
+      setPendingReveal(found.netId);
+    });
+  }, [probe, design]);
+
+  useEffect(() => {
+    if (pendingReveal === null) {
+      return;
+    }
+    const suffix = `#net:${pendingReveal}`;
+    const wire = sceneEdges(hierarchyGraph).find((e) => e.netId?.endsWith(suffix));
+    const node = flattenNodes(hierarchyGraph.nodes).find((n) => n.pins.some((pin) => pin.netId?.endsWith(suffix)));
+    const key = wire?.key ?? node?.key;
+    if (key === undefined) {
+      return;
+    }
+    setSelectedKey(key);
+    setViewportRequest({ key: node?.key ?? key });
+    setPendingReveal(null);
+  }, [pendingReveal, hierarchyGraph]);
+
   const sendToWaveform = useCallback(() => {
     if (probePaths.length === 0) {
       return;
@@ -533,7 +572,7 @@ export function AppShell(props: {
                     <li>Use <strong>Expand structure</strong> to reveal processes, assignments, and sub-instances.</li>
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>
                     <li>Select a wire or port to inspect its source, drivers, loads, and bus width in the bottom pane.</li>
-                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice. An unpacked array asks which elements to add: Enter accepts the default, or type an index, a range like <strong>0-7</strong>, or a list like <strong>0,2,5</strong>.</li>}
+                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice. An unpacked array asks which elements to add: Enter accepts the default, or type an index, a range like <strong>0-7</strong>, or a list like <strong>0,2,5</strong>. Selecting a signal in the waveform viewer works the other way round, switching the schematic to the module it lives in and highlighting it.</li>}
                     <li>Use the <strong>Hide fanout</strong> control to keep large, noisy nets out of the initial view.</li>
                     <li>Choose a current, Tokyo, Nord, Arctic, Solarized, EDA, EDA Classic, Signal Contrast, Catppuccin, Neon Arcade, Fluorescent, 80s X, or Monokai palette from the theme selector; the preference is remembered.</li>
                   </ul>

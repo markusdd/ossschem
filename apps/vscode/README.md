@@ -43,6 +43,12 @@ own and names each element by index alone, so `wen_s[0]` is
 small bundle, the first element for anything larger, or an index, range
 (`0-7`) or list (`0,2,5`) typed into the picker.
 
+The reverse direction needs no gesture: selecting a signal in vaporview
+switches the schematic to the module that signal lives in and highlights it,
+with its declaration, drivers and loads in the source pane. Probing out is
+explicit (`W`) while probing in is automatic, so the two cannot chase each
+other.
+
 `ossschem: Show log` traces every step. `ossschem: Diagnose waveform probing`
 reports what vaporview knows about the last signal picked, which is the first
 thing to check when something does not appear.
