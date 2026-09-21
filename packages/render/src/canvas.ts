@@ -1,5 +1,5 @@
 import { isPortLike, mapSymbolPoint, pinLabel, pinTraceDirection, type PinFace, type TraceDirection, type CollapsedNetView, type Level0Node, type Pin } from "@ossschem/graph";
-import { busMarkerBounds, busLabelPosition, busLabelTextPosition, wireClearances, type LabelRect } from "./bus-label.js";
+import { busMarkerBounds, busLabelPosition, busLabelTextPosition, crowdedByMarker, wireClearances, type LabelRect } from "./bus-label.js";
 import { elementBounds, focusCamera } from "./focus.js";
 import { drawSymbol } from "./symbols.js";
 import { portOutline } from "./port-shape.js";
@@ -15,10 +15,17 @@ export interface Wire {
   width?: number;
 }
 
+export interface Junction {
+  x: number;
+  y: number;
+  netId?: string;
+}
+
 export interface CanvasScene {
   nodes: Level0Node[];
   wires: Wire[];
   collapsed: CollapsedNetView[];
+  junctions?: Junction[];
 }
 
 const NS = "http://www.w3.org/2000/svg";
@@ -108,6 +115,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
   const listeners = new Set<(change: "scene" | "camera") => void>();
   let nodes: Level0Node[] = [];
   let wires: Wire[] = [];
+  let junctions: Junction[] = [];
   let collapsed: CollapsedNetView[] = [];
   let selected: string | null = null;
   let cone = new Set<string>();
@@ -305,7 +313,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     });
     const wireObstacles = wireClearances(wires);
     const busMarkers: SVGGElement[] = [];
-    const marked = new Set<string>();
+    const marked = new Map<string, { x: number; y: number }[]>();
     for (const w of wires) {
       if (w.points.length < 2) {
         continue;
@@ -328,9 +336,11 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       );
       const marker = w.width === undefined ? undefined : busLabelPosition(w.points, w.width, occupied, wireObstacles);
       if (marker) {
-        const tag = `${w.netId}:${w.width}:${Math.round(marker.x)}:${Math.round(marker.y)}`;
-        if (marked.has(tag)) continue;
-        marked.add(tag);
+        const tag = `${w.netId}:${w.width}`;
+        const already = marked.get(tag) ?? [];
+        if (crowdedByMarker(marker, already)) continue;
+        already.push({ x: marker.x, y: marker.y });
+        marked.set(tag, already);
         occupied.push(busMarkerBounds(marker, w.width!));
         const g = svgEl("g", { class: "ossschem-bus-marker", "data-id": w.key });
         const title = svgEl("title");
@@ -350,6 +360,17 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
         busMarkers.push(g);
       }
     }
+    /* A fork gets a dot; wires that merely cross on their way past each other
+     * do not. Drawn as a zero length stroke with a round cap, so the dot keeps
+     * its size in screen pixels the way the wires keep their thickness. */
+    for (const j of junctions) {
+      const on = netSel !== null && j.netId === netSel;
+      world.appendChild(svgEl("path", {
+        class: `ossschem-junction${on ? " ossschem-junction-on" : ""}`,
+        d: `M${j.x} ${j.y} L${j.x} ${j.y}`,
+        "data-net": j.netId ?? "",
+      }));
+    }
     world.append(...busMarkers);
     for (const n of nodes) {
       drawChrome(n, 0, 0);
@@ -362,6 +383,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     world.querySelectorAll(".ossschem-selected").forEach((el) => el.classList.remove("ossschem-selected"));
     world.querySelectorAll(".ossschem-pin-on").forEach((el) => el.classList.remove("ossschem-pin-on"));
     world.querySelectorAll(".ossschem-wire").forEach((el) => el.classList.toggle("ossschem-wire-on", cone.has(el.getAttribute("data-id") ?? "")));
+    world.querySelectorAll(".ossschem-junction").forEach((el) => el.classList.remove("ossschem-junction-on"));
     if (selected !== null) {
       world.querySelectorAll(`[data-id="${CSS.escape(selected)}"]`).forEach((el) => {
         el.classList.add("ossschem-selected");
@@ -388,6 +410,13 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
           el.classList.add("ossschem-wire-on");
         }
       });
+      // a highlighted signal lights its forks too, or the dots would stay
+      // muted on an otherwise highlighted net
+      world.querySelectorAll(".ossschem-junction").forEach((el) => {
+        if (el.getAttribute("data-net") === netSel) {
+          el.classList.add("ossschem-junction-on");
+        }
+      });
     }
   };
 
@@ -398,6 +427,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     setNodes(next) {
       nodes = next;
       wires = [];
+      junctions = [];
       collapsed = [];
       draw();
       listeners.forEach(listener => listener("scene"));
@@ -405,6 +435,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     setScene(scene) {
       nodes = scene.nodes;
       wires = scene.wires;
+      junctions = scene.junctions ?? [];
       collapsed = scene.collapsed;
       draw();
       listeners.forEach(listener => listener("scene"));
@@ -460,7 +491,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       applyCam();
     },
     camera: () => camera,
-    scene: () => ({ nodes, wires, collapsed }),
+    scene: () => ({ nodes, wires, collapsed, junctions }),
     panTo(x, y) {
       camera = { ...camera, x, y };
       applyCam();

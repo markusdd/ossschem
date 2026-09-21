@@ -28,6 +28,16 @@ export function busMarkerBounds(point: BusLabelPosition, width: number): LabelRe
   return { x, y, w: Math.max(point.x + 7, label.x + label.w) - x, h: Math.max(point.y + 8, label.y + label.h) - y };
 }
 
+/* Every route of a net carries a width marker, and the routes of a fan-out all
+ * begin at the same pin, so their markers land on the shared trunk within a
+ * few tens of pixels of each other and repeat the same number. Branches that
+ * have actually separated sit much further apart than this. */
+export const BUS_MARKER_SPACING = 120;
+
+export function crowdedByMarker(point: Point, placed: Point[], spacing = BUS_MARKER_SPACING): boolean {
+  return placed.some((p) => Math.hypot(p.x - point.x, p.y - point.y) < spacing);
+}
+
 export function wireClearances(paths: { points: Point[] }[]): LabelRect[] {
   return paths.flatMap(path => path.points.slice(1).map((b, i) => {
     const a = path.points[i];

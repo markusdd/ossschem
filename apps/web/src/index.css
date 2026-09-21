@@ -817,6 +817,16 @@ input:disabled {
   fill: none;
 }
 
+.ossschem-junction {
+  stroke: var(--fg-muted);
+  stroke-width: 5.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  fill: none;
+}
+
+.ossschem-junction-on { stroke: var(--accent); stroke-width: 7; }
+
 .ossschem-wire-bus { stroke-width: 2.8; }
 .ossschem-wire-bus.ossschem-wire-on { stroke-width: 3.6; }
 

@@ -82,7 +82,7 @@ export function SchematicPane(props: {
     // Keep the existing scene and camera while an in-place expansion is laying out.
     if (!sameView) {
       const naive = fromElkGraph({ id: "root", children: [], edges: [] }, conn.nodes, conn.edges);
-      ctl.setScene({ nodes: naive.nodes, wires: naive.edges, collapsed: conn.collapsed });
+      ctl.setScene({ nodes: naive.nodes, wires: naive.edges, collapsed: conn.collapsed, junctions: naive.junctions });
       ctl.zoomToFit();
     }
     const gen = ++genRef.current;
@@ -95,6 +95,7 @@ export function SchematicPane(props: {
           nodes: laid.nodes,
           wires: laid.edges,
           collapsed: conn.collapsed,
+          junctions: laid.junctions,
         });
         previousRef.current = { design, session, keys };
         if (!sameView || props.viewportRequest?.fit) ctl.zoomToFit();

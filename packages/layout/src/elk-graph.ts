@@ -48,6 +48,8 @@ export interface ElkEdge {
     endPoint: { x: number; y: number };
     bendPoints?: { x: number; y: number }[];
   }[];
+  /** Where routes of one net meet, reported by ELK when it merges them. */
+  junctionPoints?: { x: number; y: number }[];
 }
 
 function nodeToElk(n: Level0Node): ElkNode {
@@ -119,6 +121,8 @@ export function toElkGraph(nodes: Level0Node[], edges: Level0Edge[]): ElkNode {
 export interface LaidOut {
   nodes: Level0Node[];
   edges: { key: string; sourcePin: string; targetPin: string; width?: number; netId?: string; netName?: string; points: { x: number; y: number }[] }[];
+  /** Points where a net forks, to mark apart from wires that merely cross. */
+  junctions: { x: number; y: number; netId?: string }[];
 }
 
 const HEADER = 36;
@@ -220,8 +224,12 @@ function collectElkRoutes(
   ox: number,
   oy: number,
   into: Map<string, { x: number; y: number }[]>,
+  junctions: Map<string, { x: number; y: number }[]>,
 ): void {
   for (const e of elk.edges ?? []) {
+    if (e.junctionPoints !== undefined && e.junctionPoints.length > 0) {
+      junctions.set(e.id, e.junctionPoints.map((p) => ({ x: p.x + ox, y: p.y + oy })));
+    }
     const sec = e.sections?.[0];
     if (sec === undefined) {
       continue;
@@ -233,7 +241,7 @@ function collectElkRoutes(
     ]);
   }
   for (const c of elk.children ?? []) {
-    collectElkRoutes(c, ox + (c.x ?? 0), oy + (c.y ?? 0), into);
+    collectElkRoutes(c, ox + (c.x ?? 0), oy + (c.y ?? 0), into, junctions);
   }
 }
 
@@ -276,7 +284,8 @@ export function fromElkGraph(raw: ElkNode, nodes: Level0Node[], edges: Level0Edg
   const interiors = (list: Level0Node[]): Level0Edge[] => list.flatMap(n => [...(n.interiorEdges ?? []), ...interiors(n.children ?? [])]);
   const allOrig = [...edges, ...interiors(nodes)];
   const elkRoutes = new Map<string, { x: number; y: number }[]>();
-  collectElkRoutes(raw, 0, 0, elkRoutes);
+  const elkJunctions = new Map<string, { x: number; y: number }[]>();
+  collectElkRoutes(raw, 0, 0, elkRoutes, elkJunctions);
   const routed: LaidOut["edges"] = [];
   for (const e of allOrig) {
     const elkPts = elkRoutes.get(e.key);
@@ -298,5 +307,20 @@ export function fromElkGraph(raw: ElkNode, nodes: Level0Node[], edges: Level0Edg
     }
     routed.push({ key: e.key, width: e.width, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points: orthogonalPoints(a, b) });
   }
-  return { nodes: laidNodes, edges: routed };
+  /* One fork is reported by every edge that leaves it, so the same point
+   * arrives several times; collapse them and tag each with its net, which lets
+   * a highlighted signal light its own junctions too. */
+  const seen = new Set<string>();
+  const junctions: LaidOut["junctions"] = [];
+  for (const e of allOrig) {
+    for (const p of elkJunctions.get(e.key) ?? []) {
+      const tag = `${Math.round(p.x)}:${Math.round(p.y)}:${e.netId ?? ""}`;
+      if (seen.has(tag)) {
+        continue;
+      }
+      seen.add(tag);
+      junctions.push({ x: p.x, y: p.y, netId: e.netId });
+    }
+  }
+  return { nodes: laidNodes, edges: routed, junctions };
 }
