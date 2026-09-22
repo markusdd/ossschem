@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Design } from "@ossschem/ir";
-import { buildLevel0Connectivity, defaultSession, hopAtBoundary, pinLabel, sceneEdges } from "../src/index.js";
+import { buildLevel0Connectivity, defaultSession, hopAtBoundary, netProbePath, pinLabel, sceneEdges, signalValueKey } from "../src/index.js";
 
 /* A testbench drives two DUTs from one unpacked array and collects their
  * outputs into another: a fan-out and a fan-in of the same shape. */
@@ -83,6 +83,19 @@ describe("splitting an unpacked array", () => {
   it("says on the array's own box that it is an array, not one wide signal", () => {
     const box = graph.nodes.find((n) => n.kind === "open" && n.title === "data_s")!;
     expect(pinLabel(box.pins[0])).toBe("data_s · 2×8b");
+  });
+
+  it("gives each branch a value to ask the host about, which the array has none of", () => {
+    const edges = sceneEdges(graph).filter((e) => e.netId?.endsWith("#net:n1"));
+    const trunk = edges.find((e) => e.element === undefined)!;
+    expect(netProbePath(design, session, trunk.netId!, trunk.element)).toBeNull();
+    for (const branch of edges.filter((e) => e.element !== undefined)) {
+      expect(netProbePath(design, session, branch.netId!, branch.element))
+        .toEqual(["tb", "data_s", `[${branch.element}]`]);
+      // the answers are kept apart by element, not just by net
+      expect(signalValueKey(branch.netId!, branch.element)).toBe(`${branch.netId}[${branch.element}]`);
+    }
+    expect(signalValueKey(trunk.netId!)).toBe(trunk.netId);
   });
 
   it("is a waypoint, not a component: a trace crosses it to the members", () => {

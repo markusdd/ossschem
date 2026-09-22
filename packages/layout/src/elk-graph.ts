@@ -120,7 +120,7 @@ export function toElkGraph(nodes: Level0Node[], edges: Level0Edge[]): ElkNode {
 
 export interface LaidOut {
   nodes: Level0Node[];
-  edges: { key: string; sourcePin: string; targetPin: string; width?: number; widthText?: string; netId?: string; netName?: string; points: { x: number; y: number }[] }[];
+  edges: { key: string; sourcePin: string; targetPin: string; width?: number; widthText?: string; element?: number; netId?: string; netName?: string; points: { x: number; y: number }[] }[];
   /** Points where a net forks, to mark apart from wires that merely cross. */
   junctions: { x: number; y: number; netId?: string }[];
 }
@@ -303,13 +303,13 @@ export function fromElkGraph(raw: ElkNode, nodes: Level0Node[], edges: Level0Edg
       if (b !== undefined) {
         points = slideEnd(points, b, false);
       }
-      routed.push({ key: e.key, width: e.width, widthText: e.widthText, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points });
+      routed.push({ key: e.key, width: e.width, widthText: e.widthText, element: e.element, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points });
       continue;
     }
     if (a === undefined || b === undefined) {
       continue;
     }
-    routed.push({ key: e.key, width: e.width, widthText: e.widthText, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points: orthogonalPoints(a, b) });
+    routed.push({ key: e.key, width: e.width, widthText: e.widthText, element: e.element, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points: orthogonalPoints(a, b) });
   }
   /* One fork is reported by every edge that leaves it, so the same point
    * arrives several times; collapse them and tag each with its net, which lets

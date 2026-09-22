@@ -17,7 +17,7 @@ export interface SelectionInfo {
   expr?: string;
   fileBasename?: string;
   sourceKind?: "declaration" | "expression";
-  signal?: { netId: string; drivers: SignalEndpoint[]; loads: SignalEndpoint[] };
+  signal?: { netId: string; element?: number; drivers: SignalEndpoint[]; loads: SignalEndpoint[] };
 }
 
 function signalContext(design: Design, session: ViewSession, key: string) {
@@ -75,7 +75,7 @@ function signalInfo(design: Design, session: ViewSession, key: string): Selectio
   return { title: declared?.name ?? temporary?.name ?? context.name, span,
     fileBasename: span?.file.split("/").pop(), sourceKind: declaration ? "declaration" : "expression",
     expr: !declaration && box ? prettyNet(irId, box.contents) : undefined,
-    signal: { netId, drivers: endpoints(sources, targets), loads: endpoints(targets, sources) } };
+    signal: { netId, element: context.element, drivers: endpoints(sources, targets), loads: endpoints(targets, sources) } };
 }
 
 /** An array of this many elements or more is not expanded onto the viewer. */
@@ -94,10 +94,13 @@ const MAX_PROBE_ELEMENTS = 64;
  * Empty for anything with no counterpart in a dump -- a temporary inside an
  * expanded box, or a selection that is not a signal at all.
  */
-/* The name of one net, addressed by its view id. An unpacked array has no
- * single name -- its elements are separate signals -- so it reports nothing;
- * probeTargets expands those from the selection instead. */
-export function netProbePath(design: Design, session: ViewSession, netId: string): string[] | null {
+/* The name of one net, addressed by its view id, and for an unpacked array by
+ * the element as well. The array itself has no single name -- its elements are
+ * separate signals -- so it reports nothing without one; probeTargets expands
+ * those from the selection instead. */
+export function netProbePath(
+  design: Design, session: ViewSession, netId: string, element?: number,
+): string[] | null {
   const split = netId.lastIndexOf("#net:");
   if (split < 0) {
     return null;
@@ -105,10 +108,19 @@ export function netProbePath(design: Design, session: ViewSession, netId: string
   const irId = netId.slice(split + 5);
   const owner = moduleAtKey(design, session, `${netId.slice(0, split)}#${irId}`);
   const declared = design.modules[owner.moduleId]?.nets.find((n) => n.id === irId);
-  if (declared === undefined || declared.kind === "memory") {
+  if (declared === undefined) {
     return null;
   }
+  if (declared.kind === "memory") {
+    return element === undefined ? null : [...owner.path, declared.name, `[${element}]`];
+  }
   return [...owner.path, declared.name];
+}
+
+/* What a connection is worth asking the host about: the net, or one element of
+ * an array, since the branches off a splitter each carry their own value. */
+export function signalValueKey(netId: string, element?: number): string {
+  return element === undefined ? netId : `${netId}[${element}]`;
 }
 
 export function probeTargets(design: Design, session: ViewSession, key: string | null): string[][] {

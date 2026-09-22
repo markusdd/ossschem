@@ -817,16 +817,34 @@ input:disabled {
   fill: none;
 }
 
-/* a value at the cursor: reads over the wire it belongs to */
+/* a value at the cursor: reads over the wire it belongs to, and lights up
+ * with that wire, since on a crowded sheet the two are hard to pair up */
 .ossschem-value {
   font-size: 11px;
   font-weight: 600;
-  fill: var(--accent);
+  fill: var(--fg);
   paint-order: stroke;
   stroke: var(--canvas);
   stroke-width: 4px;
   stroke-linejoin: round;
   pointer-events: none;
+}
+
+.ossschem-value-on {
+  fill: var(--accent);
+  font-weight: 700;
+}
+
+.ossschem-cursor-value {
+  margin: 0.4rem 0;
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.ossschem-cursor-value strong {
+  color: var(--accent);
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
 }
 
 .ossschem-junction {

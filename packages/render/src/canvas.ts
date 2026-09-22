@@ -1,4 +1,4 @@
-import { isPortLike, mapSymbolPoint, pinLabel, pinTraceDirection, type PinFace, type TraceDirection, type CollapsedNetView, type Level0Node, type Pin } from "@ossschem/graph";
+import { isPortLike, mapSymbolPoint, pinLabel, pinTraceDirection, signalValueKey, type PinFace, type TraceDirection, type CollapsedNetView, type Level0Node, type Pin } from "@ossschem/graph";
 import { busMarkerBounds, busLabelPosition, busLabelTextPosition, crowdedByMarker, wireClearances, type LabelRect } from "./bus-label.js";
 import { elementBounds, focusCamera } from "./focus.js";
 import { drawSymbol } from "./symbols.js";
@@ -16,6 +16,8 @@ export interface Wire {
   width?: number;
   /** Shown in place of the width, for a connection the bit count does not describe. */
   widthText?: string;
+  /** The array element this connection carries, which has a value of its own. */
+  element?: number;
 }
 
 export interface Junction {
@@ -348,20 +350,23 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
           "data-width": String(w.width ?? ""),
         }),
       );
-      /* One value per net, placed the way a bus marker is: on a clear stretch
-       * of the wire, and not repeated where a fan-out shares a trunk. */
+      /* One value per signal, placed the way a bus marker is: on a clear
+       * stretch of the wire, and not repeated where a fan-out shares a trunk.
+       * A branch off a splitter carries one array element, and its own value. */
       const netId = w.netId;
-      const value = netId === undefined ? undefined : values[netId];
-      if (value !== undefined && netId !== undefined) {
+      const valueKey = netId === undefined ? undefined : signalValueKey(netId, w.element);
+      const value = valueKey === undefined ? undefined : values[valueKey];
+      if (value !== undefined && netId !== undefined && valueKey !== undefined) {
         const at = busLabelPosition(w.points, value, occupied, wireObstacles);
-        const near = valued.get(netId) ?? [];
+        const near = valued.get(valueKey) ?? [];
         if (at !== undefined && !crowdedByMarker(at, near)) {
           near.push(at);
-          valued.set(netId, near);
+          valued.set(valueKey, near);
           occupied.push(busMarkerBounds(at, value));
           const where = busLabelTextPosition(at);
           const text = svgEl("text", {
-            class: "ossschem-value", x: String(where.x), y: String(where.y),
+            class: `ossschem-value${netSel !== null && netId === netSel ? " ossschem-value-on" : ""}`,
+            x: String(where.x), y: String(where.y),
             "text-anchor": where.anchor, "data-net": netId,
           });
           text.textContent = value;
@@ -421,6 +426,9 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     world.querySelectorAll(".ossschem-pin-on").forEach((el) => el.classList.remove("ossschem-pin-on"));
     world.querySelectorAll(".ossschem-wire").forEach((el) => el.classList.toggle("ossschem-wire-on", cone.has(el.getAttribute("data-id") ?? "")));
     world.querySelectorAll(".ossschem-junction").forEach((el) => el.classList.remove("ossschem-junction-on"));
+    // a value belongs to a signal, so it lights with it
+    world.querySelectorAll(".ossschem-value").forEach((el) =>
+      el.classList.toggle("ossschem-value-on", netSel !== null && el.getAttribute("data-net") === netSel));
     if (selected !== null) {
       world.querySelectorAll(`[data-id="${CSS.escape(selected)}"]`).forEach((el) => {
         el.classList.add("ossschem-selected");
