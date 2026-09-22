@@ -14,7 +14,7 @@ send a selected signal to the waveform, reveal a waveform signal in the
 schematic, and inspect values at the waveform cursor. Other RTL input formats
 are planned.
 
-![ossschem interactive schematic viewer](assets/screenshot.png)
+![ossschem interactive schematic viewer](assets/vscode_vaporview_ossscheem_screenshot.png)
 
 ## Quick start
 

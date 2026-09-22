@@ -15,6 +15,10 @@ installed it also works with a waveform dump: signals go from the schematic to
 the waveform, a signal in the waveform is revealed in the schematic, and every
 wire can be labelled with its value at the cursor.
 
+<p align="center">
+  <img src="images/vscode_vaporview_ossscheem_screenshot.png" alt="ossschem vs code with vaporview" width="100%">
+</p>
+
 ## 1. Build a schematic from your design
 
 The extension opens a `schematic-ir.json`, which the `ossschem` command writes
