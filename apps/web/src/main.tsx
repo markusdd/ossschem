@@ -23,14 +23,24 @@ host?.postMessage({ type: "ossschem/ready" });
 /* The host names a signal it wants shown. Listeners are held in a set so the
  * app can subscribe and unsubscribe without the page caring how many. */
 const revealListeners = new Set<(instancePath: string[]) => void>();
+const cursorListeners = new Set<() => void>();
+/** Outstanding value requests, by the id they were sent with. */
+const pendingValues = new Map<number, (values: Record<string, string | string[]>) => void>();
+let nextRequest = 0;
+
 if (host !== undefined) {
   window.addEventListener("message", (event: MessageEvent<unknown>) => {
-    const message = event.data as { type?: string; instancePath?: unknown } | null;
-    if (message?.type !== "ossschem/revealSignal" || !Array.isArray(message.instancePath)) {
-      return;
+    const message = event.data as
+      { type?: string; instancePath?: unknown; id?: number; values?: Record<string, string | string[]> } | null;
+    if (message?.type === "ossschem/revealSignal" && Array.isArray(message.instancePath)) {
+      const path = message.instancePath.filter((part): part is string => typeof part === "string");
+      revealListeners.forEach((listener) => { listener(path); });
+    } else if (message?.type === "ossschem/cursorMoved") {
+      cursorListeners.forEach((listener) => { listener(); });
+    } else if (message?.type === "ossschem/values" && typeof message.id === "number") {
+      pendingValues.get(message.id)?.(message.values ?? {});
+      pendingValues.delete(message.id);
     }
-    const path = message.instancePath.filter((part): part is string => typeof part === "string");
-    revealListeners.forEach((listener) => { listener(path); });
   });
 }
 const probe: ProbeProvider | undefined =
@@ -38,14 +48,29 @@ const probe: ProbeProvider | undefined =
     ? undefined
     : {
         resolve: () => null,
-        subscribe: () => () => {},
         onNetPicked: (refs) => {
           host.postMessage({ type: "ossschem/netPicked", instancePaths: refs.map((r) => r.path) });
         },
         onRevealRequest: (cb) => {
           revealListeners.add(cb);
-          return () => revealListeners.delete(cb);
+          return () => { revealListeners.delete(cb); };
         },
+        onCursorMoved: (cb) => {
+          cursorListeners.add(cb);
+          return () => { cursorListeners.delete(cb); };
+        },
+        values: (paths) =>
+          new Promise((resolve) => {
+            const id = ++nextRequest;
+            pendingValues.set(id, resolve);
+            host.postMessage({ type: "ossschem/valuesRequest", id, instancePaths: paths });
+            // an unanswered request must not leak, nor hold the annotation back
+            window.setTimeout(() => {
+              if (pendingValues.delete(id)) {
+                resolve({});
+              }
+            }, 4000);
+          }),
       };
 
 const sourceGlob = import.meta.glob("../../../fixtures/svb_afifo/src/*.sv", {

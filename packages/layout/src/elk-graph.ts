@@ -54,7 +54,7 @@ export interface ElkEdge {
 
 function nodeToElk(n: Level0Node): ElkNode {
   const placed = packPins(n);
-  const fixed = n.kind === "primitive";
+  const fixed = n.kind === "primitive" || n.kind === "split";
   const elk: ElkNode = {
     id: n.key,
     ports: placed.pins.map((p, i) => ({
@@ -120,7 +120,7 @@ export function toElkGraph(nodes: Level0Node[], edges: Level0Edge[]): ElkNode {
 
 export interface LaidOut {
   nodes: Level0Node[];
-  edges: { key: string; sourcePin: string; targetPin: string; width?: number; netId?: string; netName?: string; points: { x: number; y: number }[] }[];
+  edges: { key: string; sourcePin: string; targetPin: string; width?: number; widthText?: string; netId?: string; netName?: string; points: { x: number; y: number }[] }[];
   /** Points where a net forks, to mark apart from wires that merely cross. */
   junctions: { x: number; y: number; netId?: string }[];
 }
@@ -129,6 +129,8 @@ const HEADER = 36;
 
 function packPins(n: Level0Node): Level0Node {
   if (isPortLike(n.kind)) return { ...n, pins: n.pins.map(p => ({ ...p, x: p.side === "W" ? 0 : n.w, y: n.h / 2 })) };
+  // a splitter is drawn to fit its branches; its pins are placed with it
+  if (n.kind === "split") return n;
   if (n.kind === "primitive") {
     return {
       ...n,
@@ -161,8 +163,9 @@ function packPins(n: Level0Node): Level0Node {
 function applyElk(n: Level0Node, elk: ElkNode, ox: number, oy: number): Level0Node {
   const x = ox + (elk.x ?? 0);
   const y = oy + (elk.y ?? 0);
-  const w = n.kind === "primitive" ? n.w : (elk.width ?? n.w);
-  const h = n.kind === "primitive" ? n.h : (elk.height ?? n.h);
+  const fixedSize = n.kind === "primitive" || n.kind === "split";
+  const w = fixedSize ? n.w : (elk.width ?? n.w);
+  const h = fixedSize ? n.h : (elk.height ?? n.h);
   const children = n.children?.map((ch) => {
     const ce = (elk.children ?? []).find((c) => c.id === ch.key);
     return ce === undefined ? ch : applyElk(ch, ce, 0, 0);
@@ -181,6 +184,7 @@ function applyElk(n: Level0Node, elk: ElkNode, ox: number, oy: number): Level0No
   }
   if (isPortLike(n.kind)) return { ...n, x, y, w, h,
     pins: n.pins.map(p => ({ ...p, x: p.side === "W" ? 0 : w, y: h / 2 })) };
+  if (n.kind === "split") return { ...n, x, y };
   const elkPort = new Map((elk.ports ?? []).map((p) => [p.id, p]));
   const pins = n.pins.map((p) => {
     const ep = elkPort.get(p.id);
@@ -299,13 +303,13 @@ export function fromElkGraph(raw: ElkNode, nodes: Level0Node[], edges: Level0Edg
       if (b !== undefined) {
         points = slideEnd(points, b, false);
       }
-      routed.push({ key: e.key, width: e.width, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points });
+      routed.push({ key: e.key, width: e.width, widthText: e.widthText, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points });
       continue;
     }
     if (a === undefined || b === undefined) {
       continue;
     }
-    routed.push({ key: e.key, width: e.width, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points: orthogonalPoints(a, b) });
+    routed.push({ key: e.key, width: e.width, widthText: e.widthText, sourcePin: e.sourcePin, targetPin: e.targetPin, netId: e.netId, netName: e.netName, points: orthogonalPoints(a, b) });
   }
   /* One fork is reported by every edge that leaves it, so the same point
    * arrives several times; collapse them and tag each with its net, which lets

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import {
   defaultSession,
   DEFAULT_FANOUT_LIMIT,
@@ -8,8 +8,11 @@ import {
   expandHierarchy, moduleRootKey, revealSignalConnection, type ExpansionMode, type SignalEndpoint,
   copySession, collapseWire, expandComponent, flattenNodes, isolateComponent, advanceTrace, sceneEdges,
   type PinFace, type TraceDirection,
+  formatSignalValue,
+  netProbePath,
   probeTargets,
   resolveProbePath,
+  revealPath,
   selectionInfo,
   snippet,
   type ViewSession,
@@ -95,10 +98,16 @@ export function AppShell(props: {
   // Display preferences survive navigation and restoring a previous exploration.
   const session = useMemo(() => viewSession ? { ...viewSession, fanoutLimit } : null, [viewSession, fanoutLimit]);
   const [history, setHistory] = useState<ViewSession[]>([]);
+  /* The reveal callback is registered once, so it reads the session through a
+   * ref rather than a stale closure. */
+  const sessionRef = useRef<ViewSession | null>(null);
   const [traceDirection, setTraceDirection] = useState<"back" | "forward" | null>(null);
   const [viewportRequest, setViewportRequest] = useState<ViewportRequest | null>(null);
   /** A net the host asked for, held until the scene it lives in is built. */
   const [pendingReveal, setPendingReveal] = useState<string | null>(null);
+  const [showValues, setShowValues] = useState(false);
+  /** Bumped when the cursor moves, to re-ask for values. */
+  const [cursorTick, setCursorTick] = useState(0);
   const [ctl, setCtl] = useState<CanvasController | null>(null);
   const onReady = useCallback((next: CanvasController) => {
     setCtl(next);
@@ -138,6 +147,8 @@ export function AppShell(props: {
   );
   const srcText = info?.fileBasename !== undefined ? sources[info.fileBasename] : undefined;
   const snip = info?.span !== undefined && srcText !== undefined ? snippet(srcText, info.span, 2) : null;
+
+  useEffect(() => { sessionRef.current = viewSession; }, [viewSession]);
 
   const mutateSession = useCallback((fn: (s: ViewSession) => ViewSession) => {
     setSession((prev) => (prev === null ? prev : fn(copySession({ ...prev, fanoutLimit, trace: undefined }))));
@@ -304,15 +315,28 @@ export function AppShell(props: {
       return;
     }
     return probe.onRevealRequest((instancePath) => {
+      const current = sessionRef.current;
+      if (current === null) {
+        return;
+      }
+      /* Opening the instances in place keeps the view where it is, which is
+       * what makes the answer readable: the signal appears in the context the
+       * question was asked in. */
+      const plan = revealPath(design, current, instancePath);
+      if (plan !== null) {
+        setSession(plan.session);
+        setPendingReveal(plan.netId);
+        return;
+      }
+      // not under this scope: there is nothing to open, so move, and leave a
+      // way back the way drilling in does
       const found = resolveProbePath(design, instancePath);
       if (found === null) {
         return;
       }
-      setSession((prev) => (prev !== null && prev.moduleId === found.moduleId
-        && prev.path.join("/") === found.path.join("/")
-        ? { ...prev, visible: undefined }
-        : { moduleId: found.moduleId, path: found.path, exploded: new Set(), expansion: new Set() }));
-      setPendingReveal(found.netId);
+      setHistory((past) => [...past, current]);
+      setSession({ moduleId: found.moduleId, path: found.path, exploded: new Set(), expansion: new Set() });
+      setPendingReveal(`${found.path.join("/")}#net:${found.netId}`);
     });
   }, [probe, design]);
 
@@ -320,17 +344,79 @@ export function AppShell(props: {
     if (pendingReveal === null) {
       return;
     }
-    const suffix = `#net:${pendingReveal}`;
-    const wire = sceneEdges(hierarchyGraph).find((e) => e.netId?.endsWith(suffix));
-    const node = flattenNodes(hierarchyGraph.nodes).find((n) => n.pins.some((pin) => pin.netId?.endsWith(suffix)));
+    // the net id carries the occurrence, so four instances of one module do
+    // not all answer to the same signal
+    const wire = sceneEdges(hierarchyGraph).find((e) => e.netId === pendingReveal);
+    const node = flattenNodes(hierarchyGraph.nodes).find((n) => n.pins.some((pin) => pin.netId === pendingReveal));
     const key = wire?.key ?? node?.key;
     if (key === undefined) {
       return;
     }
     setSelectedKey(key);
-    setViewportRequest({ key: node?.key ?? key });
+    // frame what was selected, so the answer is on screen and not somewhere
+    // off the sheet behind a box that just opened
+    setViewportRequest({ key });
     setPendingReveal(null);
   }, [pendingReveal, hierarchyGraph]);
+
+  /* Values at the cursor, annotated onto the wires.
+   *
+   * The schematic decides what to ask about -- only the nets it is currently
+   * showing -- so the host needs to know nothing about the view. Arrays are
+   * left out: an unpacked array has no single value. */
+  const canAnnotate = probe.values !== undefined;
+  const visibleNetPaths = useMemo(() => {
+    const paths = new Map<string, { path: string[]; width?: number }>();
+    if (!canAnnotate || design === null || session === null || !showValues) {
+      return paths;
+    }
+    for (const edge of sceneEdges(hierarchyGraph)) {
+      if (edge.netId === undefined || paths.has(edge.netId)) {
+        continue;
+      }
+      const path = netProbePath(design, session, edge.netId);
+      if (path !== null) {
+        paths.set(edge.netId, { path, width: edge.width });
+      }
+    }
+    return paths;
+  }, [canAnnotate, showValues, design, session, hierarchyGraph]);
+
+  useEffect(() => {
+    if (probe.onCursorMoved === undefined) {
+      return;
+    }
+    return probe.onCursorMoved(() => { setCursorTick((t) => t + 1); });
+  }, [probe]);
+
+  useEffect(() => {
+    if (ctl === null) {
+      return;
+    }
+    if (!showValues || visibleNetPaths.size === 0 || probe.values === undefined) {
+      ctl.setValues({});
+      return;
+    }
+    let dropped = false;
+    void probe.values([...visibleNetPaths.values()].map((n) => n.path)).then((answered) => {
+      if (dropped) {
+        return;
+      }
+      const byNet: Record<string, string> = {};
+      for (const [netId, net] of visibleNetPaths) {
+        const value = answered[net.path.join(".")];
+        if (value !== undefined) {
+          const text = formatSignalValue(value, net.width);
+          if (text !== "") {
+            byNet[netId] = text;
+          }
+        }
+      }
+      ctl.setValues(byNet);
+    });
+    // a later view or cursor supersedes this answer
+    return () => { dropped = true; };
+  }, [ctl, probe, showValues, visibleNetPaths, cursorTick]);
 
   const sendToWaveform = useCallback(() => {
     if (probePaths.length === 0) {
@@ -408,6 +494,13 @@ export function AppShell(props: {
         <button type="button" onClick={() => expandSubtree("structure")} disabled={!canExpandStructure}>Expand structure <kbd>E</kbd></button>
         <button type="button" onClick={() => expandSubtree("logic")} disabled={!canExpand}>Expand logic <kbd>L</kbd></button>
         <button type="button" onClick={() => selectedNode && isolate(selectedNode.key)} disabled={!selectedNode}>Isolate <kbd>I</kbd></button>
+        {canAnnotate && (
+          <button type="button" onClick={() => setShowValues((on) => !on)}
+            className={showValues ? "ossschem-active" : undefined}
+            title="Annotate the wires with their value at the waveform cursor">
+            Values
+          </button>
+        )}
         {canProbe && (
           <button type="button" onClick={sendToWaveform} disabled={probePaths.length === 0}
             title={probePaths.length === 0
@@ -572,7 +665,9 @@ export function AppShell(props: {
                     <li>Use <strong>Expand structure</strong> to reveal processes, assignments, and sub-instances.</li>
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>
                     <li>Select a wire or port to inspect its source, drivers, loads, and bus width in the bottom pane.</li>
-                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice. An unpacked array asks which elements to add: Enter accepts the default, or type an index, a range like <strong>0-7</strong>, or a list like <strong>0,2,5</strong>. Selecting a signal in the waveform viewer works the other way round, switching the schematic to the module it lives in and highlighting it.</li>}
+                    <li>An unpacked array arrives as one wire marked <strong>4×8b</strong> and separates at a splitter, one branch per element labelled <strong>[0]</strong>, <strong>[1]</strong>, and so on. A branch is that one element; the trunk, the splitter, and the array's own box are all of them.</li>
+                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice. An unpacked array asks which elements to add: Enter accepts the default, or type an index, a range like <strong>0-7</strong>, or a list like <strong>0,2,5</strong>. The other way round, <strong>Reveal in schematic</strong> on a signal in the waveform viewer (right click, or from its netlist tree) opens the instances between here and it in place and highlights it, without leaving the current scope.</li>}
+                    {canAnnotate && <li>Toggle <strong>Values</strong> to label the wires with their value at the waveform cursor. The labels follow the cursor and cover the nets currently on screen. Values read as Verilog writes them (<strong>1'b1</strong>, <strong>8'h0f</strong>), and a signal that changes at the cursor shows the step across it (<strong>8'h0f\u2192a3</strong>). An unpacked array has no single value and is left unlabelled.</li>}
                     <li>Use the <strong>Hide fanout</strong> control to keep large, noisy nets out of the initial view.</li>
                     <li>Choose a current, Tokyo, Nord, Arctic, Solarized, EDA, EDA Classic, Signal Contrast, Catppuccin, Neon Arcade, Fluorescent, 80s X, or Monokai palette from the theme selector; the preference is remembered.</li>
                   </ul>

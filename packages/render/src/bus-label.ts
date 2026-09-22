@@ -15,13 +15,13 @@ export function busLabelTextPosition(point: BusLabelPosition): Point & { anchor:
   };
 }
 
-export function busLabelBounds(point: BusLabelPosition, width: number): LabelRect {
+export function busLabelBounds(point: BusLabelPosition, width: number | string): LabelRect {
   const text = busLabelTextPosition(point);
   const w = String(width).length * 8 + 8;
   return { x: text.x - (text.anchor === "end" ? w - 4 : 4), y: text.y - 15, w, h: 21 };
 }
 
-export function busMarkerBounds(point: BusLabelPosition, width: number): LabelRect {
+export function busMarkerBounds(point: BusLabelPosition, width: number | string): LabelRect {
   const label = busLabelBounds(point, width);
   const x = Math.min(point.x - 7, label.x);
   const y = Math.min(point.y - 8, label.y);
@@ -51,8 +51,9 @@ function overlaps(a: LabelRect, b: LabelRect): boolean {
 }
 
 /** Keep the whole marker clear of other labels, and its text clear of every routed wire. */
-export function busLabelPosition(points: Point[], width: number, occupied: LabelRect[] = [], wires: LabelRect[] = []): BusLabelPosition | undefined {
-  if (width <= 1) return undefined;
+export function busLabelPosition(points: Point[], width: number | string, occupied: LabelRect[] = [], wires: LabelRect[] = []): BusLabelPosition | undefined {
+  // the single bit rule is about bus widths; a value is always worth placing
+  if (typeof width === "number" && width <= 1) return undefined;
   const segments = points.slice(1).flatMap((b, index) => {
     const a = points[index];
     const vertical = Math.abs(a.x - b.x) < 0.5;

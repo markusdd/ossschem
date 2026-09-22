@@ -43,7 +43,9 @@ export function hopAtBoundary(
     const owner = owners.get(pin);
     if (!owner) continue;
     keys.add(owner.key);
-    if (!starts.has(pin) && owner.children === undefined) continue;
+    // a splitter is a waypoint on one net, not a component the trace ends at
+    if (owner.kind === "split") queue.push(...owner.pins.map(p => p.id));
+    else if (!starts.has(pin) && owner.children === undefined) continue;
     for (const e of edges) {
       if ((direction === "back" ? e.targetPin : e.sourcePin) !== pin) continue;
       keys.add(e.key);

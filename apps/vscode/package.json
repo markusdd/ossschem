@@ -35,6 +35,11 @@
         "command": "ossschem.diagnoseProbe",
         "title": "Diagnose waveform probing",
         "category": "ossschem"
+      },
+      {
+        "command": "ossschem.revealFromWaveform",
+        "title": "Reveal in schematic",
+        "category": "ossschem"
       }
     ],
     "menus": {
@@ -50,6 +55,20 @@
           "command": "ossschem.open",
           "when": "resourceFilename =~ /(^schematic-ir\\.json$|\\.ir\\.json$)/",
           "group": "navigation"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "ossschem.revealFromWaveform",
+          "when": "activeCustomEditorId == 'vaporview.waveformViewer' && webviewSection == 'signal'",
+          "group": "2_variables@30"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ossschem.revealFromWaveform",
+          "when": "view == 'waveformViewerNetlistView' && viewItem == 'netlistVar'",
+          "group": "1_default@30"
         }
       ]
     }

@@ -3,6 +3,7 @@ import { busMarkerBounds, busLabelPosition, busLabelTextPosition, crowdedByMarke
 import { elementBounds, focusCamera } from "./focus.js";
 import { drawSymbol } from "./symbols.js";
 import { portOutline } from "./port-shape.js";
+import { splitOutline } from "./split-shape.js";
 import { rectangleZoomCamera, type ScreenPoint } from "./navigation.js";
 
 export interface Wire {
@@ -13,6 +14,8 @@ export interface Wire {
   netName?: string;
   netId?: string;
   width?: number;
+  /** Shown in place of the width, for a connection the bit count does not describe. */
+  widthText?: string;
 }
 
 export interface Junction {
@@ -41,6 +44,8 @@ export interface CanvasController {
   setScene(scene: CanvasScene): void;
   setSelection(key: string | null): void;
   setAnnotate(values: Record<string, string>): void;
+  /** Values at the cursor, keyed by net id; empty clears them. */
+  setValues(values: Record<string, string>): void;
   setCone(keys: readonly string[], frontierKeys?: readonly string[]): void;
   onSelect: ((key: string | null) => void) | null;
   onDblClick: ((key: string) => void) | null;
@@ -116,6 +121,8 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
   let nodes: Level0Node[] = [];
   let wires: Wire[] = [];
   let junctions: Junction[] = [];
+  /** Signal values at the cursor, by net, drawn on the wires. */
+  let values: Record<string, string> = {};
   let collapsed: CollapsedNetView[] = [];
   let selected: string | null = null;
   let cone = new Set<string>();
@@ -182,7 +189,8 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
         }));
       }
     }
-    const quiet = n.kind === "primitive";
+    // a splitter labels its branches, and lets the wire name the array
+    const quiet = n.kind === "primitive" || (n.kind === "split" && p.name === "");
     if (!quiet) {
       const label = svgEl("text", {
         class: `ossschem-pin-label${isPortLike(n.kind) ? " ossschem-port-label" : ""}`,
@@ -191,11 +199,14 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
         "data-face": "outside",
         style: "pointer-events: auto; cursor: pointer; paint-order: stroke; stroke: var(--node-fill, var(--bg-raised)); stroke-width: 4px; stroke-linejoin: round",
         // an open end has no arrow to clear, so its name sits dead centre
-        x: isPortLike(n.kind) ? String(n.w / 2 - (n.kind === "open" || n.badge === "inout" ? 0 : 5)) : p.side === "W" ? "20" : String(n.w - 20),
+        x: isPortLike(n.kind) ? String(n.w / 2 - (n.kind === "open" || n.badge === "inout" ? 0 : 5))
+          : n.kind === "split" ? String(p.side === "W" ? -22 : n.w + 22)
+          : p.side === "W" ? "20" : String(n.w - 20),
         y: String(n.children ? py - 7 : py + 4),
-        "text-anchor": isPortLike(n.kind) ? "middle" : p.side === "W" ? "start" : "end",
+        "text-anchor": isPortLike(n.kind) ? "middle"
+          : (p.side === "W") === (n.kind === "split") ? "end" : "start",
       });
-      label.textContent = pinLabel(p);
+      label.textContent = n.kind === "split" ? p.name : pinLabel(p);
       g.appendChild(label);
     }
   };
@@ -208,14 +219,15 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     if (!isGate) {
       const g = svgEl("g", { class: `ossschem-kind-${n.kind}`, transform: `translate(${x} ${y})` });
       g.appendChild(
-        svgEl(n.kind === "port" ? "path" : "rect", {
+        svgEl(n.kind === "port" || n.kind === "split" ? "path" : "rect", {
           class: `ossschem-node-body${expanded ? " ossschem-compound" : ""}${selected === n.key ? " ossschem-selected" : ""}${cone.has(n.key) ? " ossschem-cone" : ""}${frontier.has(n.key) ? " ossschem-trace-frontier" : ""}`,
           width: String(n.w),
           height: String(n.h),
           rx: "5",
           ...(n.kind === "port" ? { d: portOutline(n.w, n.h, n.badge === "inout", n.pins[0]?.y) } : {}),
+          ...(n.kind === "split" ? { d: splitOutline(n.w, n.h, n.badge === "fanout") } : {}),
           "data-id": n.key,
-          "data-expand": n.kind === "primitive" ? "" : n.key,
+          "data-expand": n.kind === "primitive" || n.kind === "split" ? "" : n.key,
         }),
       );
       world.appendChild(g);
@@ -254,7 +266,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       g.appendChild(svgEl("rect", { class: "ossschem-primitive-selection", width: String(n.w), height: String(n.h), rx: "5", "data-id": n.key }));
       g.appendChild(drawSymbol(n.symbol, n.w, n.symbolHeight ?? n.h));
     }
-    if (!isGate && !isPortLike(n.kind)) {
+    if (!isGate && !isPortLike(n.kind) && n.kind !== "split") {
       const title = svgEl("text", { class: "ossschem-node-title", x: "10", y: "20" });
       title.textContent = n.title;
       g.appendChild(title);
@@ -313,6 +325,8 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     });
     const wireObstacles = wireClearances(wires);
     const busMarkers: SVGGElement[] = [];
+    const valueLabels: SVGTextElement[] = [];
+    const valued = new Map<string, { x: number; y: number }[]>();
     const marked = new Map<string, { x: number; y: number }[]>();
     for (const w of wires) {
       if (w.points.length < 2) {
@@ -334,17 +348,38 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
           "data-width": String(w.width ?? ""),
         }),
       );
-      const marker = w.width === undefined ? undefined : busLabelPosition(w.points, w.width, occupied, wireObstacles);
+      /* One value per net, placed the way a bus marker is: on a clear stretch
+       * of the wire, and not repeated where a fan-out shares a trunk. */
+      const netId = w.netId;
+      const value = netId === undefined ? undefined : values[netId];
+      if (value !== undefined && netId !== undefined) {
+        const at = busLabelPosition(w.points, value, occupied, wireObstacles);
+        const near = valued.get(netId) ?? [];
+        if (at !== undefined && !crowdedByMarker(at, near)) {
+          near.push(at);
+          valued.set(netId, near);
+          occupied.push(busMarkerBounds(at, value));
+          const where = busLabelTextPosition(at);
+          const text = svgEl("text", {
+            class: "ossschem-value", x: String(where.x), y: String(where.y),
+            "text-anchor": where.anchor, "data-net": netId,
+          });
+          text.textContent = value;
+          valueLabels.push(text);
+        }
+      }
+      const shown = w.widthText ?? w.width;
+      const marker = shown === undefined ? undefined : busLabelPosition(w.points, shown, occupied, wireObstacles);
       if (marker) {
-        const tag = `${w.netId}:${w.width}`;
+        const tag = `${w.netId}:${shown}`;
         const already = marked.get(tag) ?? [];
         if (crowdedByMarker(marker, already)) continue;
         already.push({ x: marker.x, y: marker.y });
         marked.set(tag, already);
-        occupied.push(busMarkerBounds(marker, w.width!));
+        occupied.push(busMarkerBounds(marker, shown!));
         const g = svgEl("g", { class: "ossschem-bus-marker", "data-id": w.key });
         const title = svgEl("title");
-        title.textContent = `${w.netName ?? "Signal"} · ${w.width} bits`;
+        title.textContent = `${w.netName ?? "Signal"} · ${w.widthText ?? `${w.width} bits`}`;
         g.appendChild(title);
         g.appendChild(svgEl("path", {
           d: `M${marker.x - 4} ${marker.y + 5} L${marker.x + 4} ${marker.y - 5}`,
@@ -355,7 +390,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
           x: String(textPosition.x), y: String(textPosition.y), "text-anchor": textPosition.anchor,
           class: "ossschem-bus-label",
         });
-        label.textContent = String(w.width);
+        label.textContent = String(shown);
         g.appendChild(label);
         busMarkers.push(g);
       }
@@ -375,6 +410,8 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     for (const n of nodes) {
       drawChrome(n, 0, 0);
     }
+    // last, so a value is never painted over by the box it sits in
+    world.append(...valueLabels);
     applyCam();
   };
 
@@ -428,6 +465,7 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       nodes = next;
       wires = [];
       junctions = [];
+      values = {};
       collapsed = [];
       draw();
       listeners.forEach(listener => listener("scene"));
@@ -444,8 +482,12 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       selected = key;
       paintSelection();
     },
-    setAnnotate(values) {
-      annotate = values;
+    setAnnotate(next) {
+      annotate = next;
+      draw();
+    },
+    setValues(next) {
+      values = next;
       draw();
     },
     setCone(keys, frontierKeys = []) {

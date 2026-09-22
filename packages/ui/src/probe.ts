@@ -11,12 +11,12 @@ export interface ProbeProvider {
   onNetPicked?(refs: HierRef[]): void;
   /** The host asking the schematic to show a signal it names. Returns an unsubscribe. */
   onRevealRequest?(cb: (instancePath: string[]) => void): () => void;
-  subscribe(
-    cb: (time: { value: number; unit: string }, values: Map<string, string>) => void,
-  ): () => void;
+  /** Values at the cursor for the named signals, keyed by the joined path. */
+  values?(paths: string[][]): Promise<Record<string, string | string[]>>;
+  /** The cursor moved in the waveform viewer. Returns an unsubscribe. */
+  onCursorMoved?(cb: () => void): () => void;
 }
 
 export const NullProbeProvider: ProbeProvider = {
   resolve: () => null,
-  subscribe: () => () => {},
 };

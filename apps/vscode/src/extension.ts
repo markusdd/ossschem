@@ -121,7 +121,8 @@ async function diagnose(): Promise<void> {
       const values = await vscode.commands.executeCommand<{ instancePath: string; value: unknown }[]>(
         "waveformViewer.getValuesAtTime", { uri, instancePaths: [candidate] });
       const found = Array.isArray(values) && values.length > 0;
-      trace(`  ${found ? "KNOWN  " : "unknown"} ${candidate}${found ? ` = ${JSON.stringify(values[0]?.value)}` : ""}`);
+      trace(`  ${found ? "KNOWN  " : "unknown"} ${candidate}`
+        + `${found ? ` = ${typeof values[0]?.value} ${JSON.stringify(values[0]?.value)}` : ""}`);
     } catch (err) {
       trace(`  error   ${candidate}: ${String(err)}`);
     }
@@ -267,17 +268,54 @@ async function sendToWaveform(offered: string[][]): Promise<void> {
   );
 }
 
-interface SelectSignalEvent {
-  instancePath?: unknown;
+interface ValuesRequest {
+  type: "ossschem/valuesRequest";
+  id: number;
+  instancePaths: string[][];
+}
+
+function isValuesRequest(message: unknown): message is ValuesRequest {
+  const m = message as ValuesRequest | undefined;
+  return m?.type === "ossschem/valuesRequest" && typeof m.id === "number" && Array.isArray(m.instancePaths);
+}
+
+/* Values at the cursor for whatever the schematic is showing. The viewer
+ * answers only for names it knows, so anything it leaves out simply goes
+ * unannotated. */
+async function answerValues(panel: vscode.WebviewPanel, request: ValuesRequest): Promise<void> {
+  const uri = await activeWaveform();
+  const values: Record<string, string | string[]> = {};
+  if (uri !== undefined && request.instancePaths.length > 0) {
+    const paths = request.instancePaths.map((p) => p.join("."));
+    try {
+      const answered = await vscode.commands.executeCommand<{ instancePath: string; value: string | string[] }[]>(
+        "waveformViewer.getValuesAtTime", { uri, instancePaths: paths });
+      for (const entry of answered ?? []) {
+        // handed over raw: only the schematic knows the width that says
+        // whether a pair of entries is a transition or two bits
+        values[entry.instancePath] = entry.value;
+      }
+      const sample = (answered ?? [])[0];
+      if (sample !== undefined) {
+        // the shape of this has differed from the documented one before
+        trace(`  values: ${Object.keys(values).length} of ${paths.length}, e.g. ${sample.instancePath} = `
+          + `${typeof sample.value} ${JSON.stringify(sample.value)}`);
+      }
+    } catch (err) {
+      trace(`  values at the cursor failed: ${String(err)}`);
+    }
+  }
+  void panel.webview.postMessage({ type: "ossschem/values", id: request.id, values });
 }
 
 interface VaporviewApi {
-  onDidSelectSignal?: (cb: (event: SelectSignalEvent) => void) => vscode.Disposable;
+  onDidSetMarker?: (cb: () => void) => vscode.Disposable;
 }
 
-/* The reverse direction: a signal selected in the waveform is shown in the
- * schematic. Subscribed once, when the first schematic opens, because
- * vaporview may not be running before that. */
+/* The cursor moving is worth following automatically; a selection changing is
+ * not -- scrubbing the cursor moves the selection around, and a schematic that
+ * jumps with it is worse than one that waits to be asked. Revealing is a
+ * deliberate act, through the context menus vaporview lets us contribute to. */
 async function listenToViewer(context: vscode.ExtensionContext): Promise<void> {
   if (listeningToViewer) {
     return;
@@ -290,26 +328,50 @@ async function listenToViewer(context: vscode.ExtensionContext): Promise<void> {
     await viewer.activate();
   }
   const api = viewer.exports;
-  if (typeof api?.onDidSelectSignal !== "function") {
-    trace("vaporview exports no onDidSelectSignal; waveform to schematic is off");
+  if (typeof api?.onDidSetMarker !== "function") {
+    trace("vaporview exports no onDidSetMarker; values will not follow the cursor");
     return;
   }
   listeningToViewer = true;
-  context.subscriptions.push(
-    api.onDidSelectSignal((event) => {
-      // the event carries every selected signal; the first is the one to show
-      const raw = Array.isArray(event.instancePath) ? event.instancePath : [event.instancePath];
-      const first = raw.find((p): p is string => typeof p === "string" && p.length > 0);
-      if (first === undefined || panels.size === 0) {
-        return;
-      }
-      trace(`waveform selected ${first}`);
-      for (const panel of panels) {
-        void panel.webview.postMessage({ type: "ossschem/revealSignal", instancePath: first.split(".") });
-      }
-    }),
-  );
-  trace("listening for selections in vaporview");
+  context.subscriptions.push(api.onDidSetMarker(() => {
+    for (const panel of panels) {
+      void panel.webview.postMessage({ type: "ossschem/cursorMoved" });
+    }
+  }));
+  trace("following the cursor in vaporview");
+}
+
+/* Both of vaporview's menus hand over the signal in the same two pieces: the
+ * scope it lives in and its own name. */
+interface SignalContext {
+  /** A string in the waveform context, an array in the netlist tree. */
+  scopePath?: string | string[];
+  signalName?: string;
+  name?: string;
+}
+
+function scopeSegments(scopePath: string | string[] | undefined): string[] {
+  const parts = Array.isArray(scopePath) ? scopePath : (scopePath ?? "").split(".");
+  return parts.filter((part): part is string => typeof part === "string" && part.length > 0);
+}
+
+function revealFromWaveform(target: SignalContext | undefined): void {
+  const name = target?.signalName ?? target?.name;
+  if (name === undefined || name === "") {
+    void vscode.window.showWarningMessage("ossschem: no signal to reveal.");
+    return;
+  }
+  const scope = scopeSegments(target?.scopePath);
+  const instancePath = [...scope, name];
+  trace(`reveal asked for ${instancePath.join(".")}`);
+  if (panels.size === 0) {
+    void vscode.window.showWarningMessage("ossschem: open a schematic first.");
+    return;
+  }
+  for (const panel of panels) {
+    void panel.webview.postMessage({ type: "ossschem/revealSignal", instancePath });
+    panel.reveal(undefined, true);
+  }
 }
 
 async function openSchematic(context: vscode.ExtensionContext, target?: vscode.Uri): Promise<void> {
@@ -361,6 +423,8 @@ async function openSchematic(context: vscode.ExtensionContext, target?: vscode.U
     (message: unknown) => {
       if ((message as { type?: string } | undefined)?.type === "ossschem/ready") {
         trace("webview connected");
+      } else if (isValuesRequest(message)) {
+        void answerValues(panel, message);
       } else if (isNetPicked(message)) {
         void sendToWaveform(message.instancePaths);
       } else {
@@ -386,6 +450,9 @@ export function activate(context: vscode.ExtensionContext): void {
     log,
     vscode.commands.registerCommand("ossschem.open", (target?: vscode.Uri) => {
       void openSchematic(context, target);
+    }),
+    vscode.commands.registerCommand("ossschem.revealFromWaveform", (target?: SignalContext) => {
+      revealFromWaveform(target);
     }),
     vscode.commands.registerCommand("ossschem.diagnoseProbe", () => {
       void diagnose();

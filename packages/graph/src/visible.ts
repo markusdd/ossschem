@@ -33,7 +33,8 @@ export function buildVisibleConnectivity(design: Design, session: ViewSession) {
   const keepNodes = (nodes: Level0Node[], parent?: string): Level0Node[] => nodes.flatMap(n => {
     if (parent && session.partial?.has(parent) && !session.partial.get(parent)!.has(n.key)) return [];
     const children = n.children && keepNodes(n.children, n.key);
-    if (session.visible && !session.visible.has(n.key) && !children?.length) return [];
+    // a splitter belongs to its net, so it stays wherever that net is drawn
+    if (session.visible && !session.visible.has(n.key) && !children?.length && n.kind !== "split") return [];
     return [{ ...n, pins: n.pins.map(p => ({ ...p })), children }];
   });
   const nodes = keepNodes(full.nodes);
@@ -54,7 +55,10 @@ export function buildVisibleConnectivity(design: Design, session: ViewSession) {
       };
     }
   }
-  return { nodes, edges: full.edges.filter(keepEdge), collapsed: full.collapsed.filter(c => c.stubKeys.some(k => visible.has(k))) };
+  const kept = full.edges.filter(keepEdge);
+  const attached = new Set(kept.flatMap(e => [e.sourceKey, e.targetKey]));
+  return { nodes: nodes.filter(n => n.kind !== "split" || attached.has(n.key)),
+    edges: kept, collapsed: full.collapsed.filter(c => c.stubKeys.some(k => visible.has(k))) };
 }
 
 export function isolateComponent(design: Design, session: ViewSession, key: string): ViewSession {

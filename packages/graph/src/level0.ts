@@ -3,7 +3,7 @@ import { viewIdKey } from "@ossschem/ir";
 import { combinedWidth, connectionWidth, referenceWidth } from "./width.js";
 import { defaultSession, type ViewSession } from "./session.js";
 
-export type Level0Kind = "port" | "open" | "always" | "assign" | "instanceArray" | "instance" | "primitive";
+export type Level0Kind = "port" | "open" | "always" | "assign" | "instanceArray" | "instance" | "primitive" | "split";
 
 /* An open end is laid out and labelled like a port -- it is where a signal
  * enters or leaves the drawing -- but it is not a declared port, so it is
@@ -19,6 +19,10 @@ export interface Pin {
   netId: string;
   netName: string;
   width?: number;
+  /** Shown in place of the bit count, for a signal that is not one wide value. */
+  widthText?: string;
+  /** Index into an unpacked array, when this pin connects to one element of it. */
+  element?: number;
   collapsed?: boolean;
   handles?: { inside: boolean; outside: boolean };
   x?: number;
@@ -49,6 +53,10 @@ export interface Level0Edge {
   key: string;
   stubbed?: boolean;
   width?: number;
+  /** Shown in place of the width, for a connection the bit count does not describe. */
+  widthText?: string;
+  /** The array element this connection carries, for a branch off a splitter. */
+  element?: number;
   netName: string;
   netId: string;
   sourceKey: string;
@@ -75,7 +83,18 @@ export function parseViewKey(key: string): { nodeKey: string; irId: string | und
 }
 
 export function pinLabel(pin: Pin): string {
-  return `${pin.name}${pin.width !== undefined && pin.width > 1 ? ` · ${pin.width}b` : ""}`;
+  const width = pin.widthText ?? (pin.width !== undefined && pin.width > 1 ? `${pin.width}b` : undefined);
+  return `${pin.name}${width === undefined ? "" : ` · ${width}`}`;
+}
+
+/* An unpacked array is several signals under one name, so its size is a count
+ * of elements and their width, not a single bit count. */
+export function arrayShape(net: Net | undefined): string | undefined {
+  if (net?.kind !== "memory" || net.memory === undefined) {
+    return undefined;
+  }
+  const packed = net.memory.packed;
+  return `${net.memory.depth}\u00d7${Math.abs(packed.msb - packed.lsb) + 1}b`;
 }
 
 export function sizeFromPins(pins: Pin[], minW = 168): { w: number; h: number } {
@@ -156,6 +175,7 @@ function pinsForInstance(
       netId: p.net,
       width: referenceWidth(p, parent.nets),
       netName: netName(parent, p.net) + (p.element === undefined ? "" : `[${p.element}]`),
+      element: p.element,
       collapsed: collapsed.has(p.net),
     };
   });
@@ -175,7 +195,8 @@ function pinsForArray(
   return pinsForInstance(key, member, parent, childMod, collapsed).map(pin => {
     const refs = parent.instances.flatMap(inst => inst.kind === "instance" && arr.members.includes(inst.id)
       ? inst.pins.filter(p => p.port === pin.name && p.net === pin.netId) : []);
-    return { ...pin, width: combinedWidth(refs, parent.nets) };
+    // the folded array stands for every member, so its pins name no one element
+    return { ...pin, element: undefined, width: combinedWidth(refs, parent.nets) };
   });
 }
 
@@ -383,6 +404,7 @@ export function buildLevel0(design: Design, mod?: Module, session?: ViewSession)
             netId: port.net,
             netName: port.name,
             width: referenceWidth({ net: port.net }, module.nets),
+            widthText: arrayShape(module.nets.find((n) => n.id === port.net)),
             collapsed: collapsed.has(port.net),
           },
         ],
@@ -485,6 +507,7 @@ export function buildLevel0(design: Design, mod?: Module, session?: ViewSession)
             netId: net.id,
             netName: net.name,
             width: referenceWidth({ net: net.id }, module.nets),
+            widthText: arrayShape(net),
             collapsed: collapsed.has(net.id),
           },
         ],
@@ -510,6 +533,7 @@ export function buildLevel0(design: Design, mod?: Module, session?: ViewSession)
             netId: port.net,
             netName: port.name,
             width: referenceWidth({ net: port.net }, module.nets),
+            widthText: arrayShape(module.nets.find((n) => n.id === port.net)),
             collapsed: collapsed.has(port.net),
           },
         ],

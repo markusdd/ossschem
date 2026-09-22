@@ -1,4 +1,4 @@
-import { prettyNet, type Design, type SourceSpan } from "@ossschem/ir";
+import { prettyNet, viewIdKey, type Design, type SourceSpan } from "@ossschem/ir";
 import { isPortLike, parseViewKey, type Level0Node } from "./level0.js";
 import { moduleAtKey, type ViewSession } from "./session.js";
 import { buildLevel0Connectivity } from "./connect.js";
@@ -25,13 +25,21 @@ function signalContext(design: Design, session: ViewSession, key: string) {
   const nodes = flattenNodes(graph.nodes);
   const allEdges = sceneEdges(graph);
   const wire = allEdges.find(e => e.key === key);
-  // an open end is a signal entering or leaving the drawing, same as a port
-  const port = nodes.find(n => n.key === key && isPortLike(n.kind));
-  const pin = port?.pins[0] ?? nodes.flatMap(n => n.pins).find(p => p.id === key);
+  // an open end is a signal entering or leaving the drawing, same as a port,
+  // and a splitter is the net itself, drawn where its elements separate
+  const box = nodes.find(n => n.key === key && (isPortLike(n.kind) || n.kind === "split"));
+  const pin = box?.pins[0] ?? nodes.flatMap(n => n.pins).find(p => p.id === key);
   const netId = wire?.netId ?? pin?.netId;
   if (!netId) return null;
-  return { nodes, netId, edges: allEdges.filter(e => e.netId === netId),
-    starts: wire ? [wire.sourcePin, wire.targetPin] : [pin!.id],
+  const starts = wire ? [wire.sourcePin, wire.targetPin] : [pin!.id];
+  /* Which array element was meant. A branch off a splitter is one element by
+   * construction, and so is a pin on an instance. Anything else -- the trunk,
+   * the array's own box, a net drawn without a splitter -- is the whole
+   * array: its connections share a route, so the pointer cannot pick one. */
+  const owner = wire === undefined ? nodes.find(n => n.pins.some(p => p.id === pin!.id)) : undefined;
+  const element = wire !== undefined ? wire.element
+    : owner?.kind === "instance" ? pin!.element : undefined;
+  return { nodes, netId, edges: allEdges.filter(e => e.netId === netId), starts, element,
     name: wire?.netName ?? pin!.netName };
 }
 
@@ -57,7 +65,8 @@ function signalInfo(design: Design, session: ViewSession, key: string): Selectio
     .filter(pin => !opposite.has(pin))
     .flatMap(pinKey => {
       const node = nodes.find(n => n.pins.some(p => p.id === pinKey));
-      if (!node) return [];
+      // a splitter is part of the net's drawing, not a driver or a load of it
+      if (!node || node.kind === "split") return [];
       const pin = node.pins.find(p => p.id === pinKey)!;
       return [{ pinKey, nodeKey: node.key,
         title: `${node.id.path.join(" / ")} / ${node.title || node.symbol || node.kind}${node.kind === "port" ? "" : ` · ${pin.name}`}`,
@@ -85,6 +94,23 @@ const MAX_PROBE_ELEMENTS = 64;
  * Empty for anything with no counterpart in a dump -- a temporary inside an
  * expanded box, or a selection that is not a signal at all.
  */
+/* The name of one net, addressed by its view id. An unpacked array has no
+ * single name -- its elements are separate signals -- so it reports nothing;
+ * probeTargets expands those from the selection instead. */
+export function netProbePath(design: Design, session: ViewSession, netId: string): string[] | null {
+  const split = netId.lastIndexOf("#net:");
+  if (split < 0) {
+    return null;
+  }
+  const irId = netId.slice(split + 5);
+  const owner = moduleAtKey(design, session, `${netId.slice(0, split)}#${irId}`);
+  const declared = design.modules[owner.moduleId]?.nets.find((n) => n.id === irId);
+  if (declared === undefined || declared.kind === "memory") {
+    return null;
+  }
+  return [...owner.path, declared.name];
+}
+
 export function probeTargets(design: Design, session: ViewSession, key: string | null): string[][] {
   if (key === null) {
     return [];
@@ -103,9 +129,8 @@ export function probeTargets(design: Design, session: ViewSession, key: string |
   if (declared.kind !== "memory") {
     return [[...owner.path, declared.name]];
   }
-  const element = /\[\d+\]$/.exec(context.name ?? "");
-  if (element !== null) {
-    return [[...owner.path, declared.name, element[0]]];
+  if (context.element !== undefined) {
+    return [[...owner.path, declared.name, `[${context.element}]`]];
   }
   const range = declared.memory?.range;
   const low = range === undefined ? 0 : Math.min(range.msb, range.lsb);
@@ -167,6 +192,62 @@ export function resolveProbePath(design: Design, instancePath: string[]): ProbeL
   return { moduleId, path, netId: net.id, netName: net.name };
 }
 
+export interface RevealPlan {
+  session: ViewSession;
+  /** The net to select, qualified by the occurrence it belongs to. */
+  netId: string;
+}
+
+/* Show a signal without leaving the scope on screen.
+ *
+ * Descending would answer the question and lose the context it was asked in,
+ * so the instances between here and the signal are opened in place instead --
+ * which is what the schematic does when you expand one by hand.
+ *
+ * Null when the signal is not under the current scope; there is nothing to
+ * open in that case, and the caller has to decide whether to move.
+ */
+export function revealPath(design: Design, session: ViewSession, instancePath: string[]): RevealPlan | null {
+  if (!session.path.every((part, i) => instancePath[i] === part)) {
+    return null;
+  }
+  const next = copySession(session);
+  let moduleId = session.moduleId;
+  let path = [...session.path];
+  let rest = instancePath.slice(session.path.length);
+  for (;;) {
+    const mod = design.modules[moduleId];
+    if (mod === undefined) {
+      return null;
+    }
+    const step = mod.instances.find((i): i is typeof i & { kind: "instance" } =>
+      i.kind === "instance" && i.relPath.length > 0 && i.relPath.length < rest.length &&
+      i.relPath.every((part, k) => rest[k] === part));
+    if (step === undefined) {
+      break;
+    }
+    // a member of a generate array is only a node of its own once exploded
+    const array = mod.instances.find((i) => i.kind === "instanceArray" && i.members.includes(step.id));
+    if (array !== undefined) {
+      next.exploded.add(viewIdKey({ path, irId: array.id }));
+    }
+    next.expansion.add(viewIdKey({ path, irId: step.id }));
+    path = [...path, ...step.relPath];
+    rest = rest.slice(step.relPath.length);
+    moduleId = step.module;
+  }
+  const name = rest.length === 1 ? rest[0]
+    : rest.length === 2 && /^\[\d+\]$/.test(rest[1]) ? rest[0]
+    : undefined;
+  const net = name === undefined ? undefined : design.modules[moduleId]?.nets.find((n) => n.name === name);
+  if (net === undefined) {
+    return null;
+  }
+  // an isolated view would hide the very thing that was asked for
+  next.visible = undefined;
+  return { session: next, netId: `${path.join("/")}#net:${net.id}` };
+}
+
 /** Reveal just the route to one listed endpoint, preserving isolation and partial expansion. */
 export function revealSignalConnection(design: Design, session: ViewSession, key: string, endpoint: string): ViewSession {
   const next = copySession(session);
@@ -175,6 +256,7 @@ export function revealSignalConnection(design: Design, session: ViewSession, key
   const visited = new Set(context.starts);
   const queue = [...context.starts];
   const previous = new Map<string, { pin: string; edge: typeof context.edges[number] }>();
+  const owners = new Map(context.nodes.flatMap(n => n.pins.map(p => [p.id, n] as const)));
   while (queue.length && !visited.has(endpoint)) {
     const pin = queue.shift()!;
     for (const edge of context.edges) {
@@ -183,6 +265,15 @@ export function revealSignalConnection(design: Design, session: ViewSession, key
       visited.add(other);
       previous.set(other, { pin, edge });
       queue.push(other);
+      // a splitter is one connection drawn in two parts: cross to the rest of it
+      const node = owners.get(other);
+      if (node?.kind !== "split") continue;
+      for (const across of node.pins) {
+        if (visited.has(across.id)) continue;
+        visited.add(across.id);
+        previous.set(across.id, { pin: other, edge });
+        queue.push(across.id);
+      }
     }
   }
   if (!visited.has(endpoint)) return next;

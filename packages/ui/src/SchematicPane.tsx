@@ -6,6 +6,14 @@ import { attachCanvas, attachMinimap, mountSchematicSvg, traceFocusKeys, type Ca
 
 export interface ViewportRequest { key: string; direction?: TraceDirection; keys?: string[]; fit?: boolean }
 
+function applyViewport(ctl: CanvasController, request: ViewportRequest): void {
+  if (request.fit) {
+    ctl.zoomToFit();
+    return;
+  }
+  ctl.focusElements(request.keys === undefined ? [request.key] : traceFocusKeys(ctl.scene().nodes, request.keys));
+}
+
 export function SchematicPane(props: {
   design: Design | null;
   session: ViewSession | null;
@@ -23,6 +31,21 @@ export function SchematicPane(props: {
   const minimapRef = useRef<ReturnType<typeof attachMinimap> | null>(null);
   const genRef = useRef(0);
   const previousRef = useRef<{ design: Design; session: ViewSession; keys: Set<string> } | null>(null);
+  const requestRef = useRef<ViewportRequest | null | undefined>(null);
+
+  /* A request can name something that exists only once the scene does -- a
+   * reveal learns its wire from the rebuilt graph -- so it is kept for the
+   * layout in flight, and applied here when the scene is already settled. */
+  useEffect(() => {
+    requestRef.current = props.viewportRequest;
+    const ctl = ctlRef.current;
+    const request = props.viewportRequest;
+    if (ctl === null || request === null || request === undefined ||
+        previousRef.current?.session !== props.session) {
+      return;
+    }
+    applyViewport(ctl, request);
+  }, [props.viewportRequest, props.session]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -98,16 +121,21 @@ export function SchematicPane(props: {
           junctions: laid.junctions,
         });
         previousRef.current = { design, session, keys };
-        if (!sameView || props.viewportRequest?.fit) ctl.zoomToFit();
-        else if (props.viewportRequest?.keys) ctl.focusElements(traceFocusKeys(laid.nodes, props.viewportRequest.keys));
-        else if (props.viewportRequest?.direction) {
+        // whatever was asked for last, including while this layout ran
+        const request = requestRef.current;
+        if (!sameView || request?.fit) ctl.zoomToFit();
+        else if (request?.keys) ctl.focusElements(traceFocusKeys(laid.nodes, request.keys));
+        else if (request?.direction) {
           const progress = session.trace;
-          const trace = progress?.origin === props.viewportRequest.key && progress.direction === props.viewportRequest.direction
-            ? progress.focus : hopAtBoundary(design, props.viewportRequest.key, props.viewportRequest.direction, session);
+          const trace = progress?.origin === request.key && progress.direction === request.direction
+            ? progress.focus : hopAtBoundary(design, request.key, request.direction, session);
           const added = [...keys].filter(k => !previous.keys.has(k));
           ctl.focusElements(traceFocusKeys(laid.nodes, [...trace, ...added]));
         }
-        else if (props.viewportRequest && keys.has(props.viewportRequest.key)) ctl.focusElements([props.viewportRequest.key]);
+        // a wire is not a node, but it is still something to frame
+        else if (request && (keys.has(request.key) || laid.edges.some(e => e.key === request.key))) {
+          ctl.focusElements([request.key]);
+        }
         else if (focusKeys.length > 0) ctl.focusElements(focusKeys);
         else if ([...keys].some(k => !previous.keys.has(k)) || [...previous.keys].some(k => !keys.has(k))) ctl.zoomToFit();
       })

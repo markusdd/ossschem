@@ -43,11 +43,20 @@ own and names each element by index alone, so `wen_s[0]` is
 small bundle, the first element for anything larger, or an index, range
 (`0-7`) or list (`0,2,5`) typed into the picker.
 
-The reverse direction needs no gesture: selecting a signal in vaporview
-switches the schematic to the module that signal lives in and highlights it,
-with its declaration, drivers and loads in the source pane. Probing out is
-explicit (`W`) while probing in is automatic, so the two cannot chase each
-other.
+The reverse direction is **Reveal in schematic**, on the right click menu of a
+signal in the waveform viewer and in its netlist tree. It switches the
+schematic to the module that signal lives in and highlights it, with its
+declaration, drivers and loads in the source pane. Both directions are
+deliberate: scrubbing the cursor moves the waveform selection around, and a
+schematic that followed it would not stay still long enough to read.
+
+**Values** in the toolbar labels each wire with its value at the waveform
+cursor, following the cursor as it moves. The schematic asks only about the
+nets it is currently showing, so the extension needs to know nothing about the
+view. Unpacked arrays are left out: the array as a whole has no single value.
+Values are written as Verilog writes them (`1'b1`, `8'h0f`), with unknown bits
+kept in binary (`4'b010x`), and a signal that changes at the cursor shows the
+step across it (`8'h0f→a3`).
 
 `ossschem: Show log` traces every step. `ossschem: Diagnose waveform probing`
 reports what vaporview knows about the last signal picked, which is the first

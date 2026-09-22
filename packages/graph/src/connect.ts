@@ -1,7 +1,8 @@
-import type { Design, Module } from "@ossschem/ir";
+import { viewIdKey, type Design, type Module } from "@ossschem/ir";
 import {
   buildLevel0,
   clockResetNetIds,
+  pinId,
   type Level0Edge,
   type Level0Node,
   type Pin,
@@ -26,6 +27,86 @@ function allPins(nodes: Level0Node[]): { node: Level0Node; pin: Pin }[] {
     }
   }
   return out;
+}
+
+type PinHit = { node: Level0Node; pin: Pin };
+
+const SPLIT_W = 22;
+const SPLIT_PITCH = 26;
+const SPLIT_MARGIN = 16;
+
+/* An unpacked array is several signals under one name, and a fan-out to its
+ * elements is several connections over one route -- indistinguishable on the
+ * sheet, and unaddressable with the pointer. A splitter gives them somewhere
+ * to separate: the array arrives on one side, one branch per element leaves
+ * the other, each branch a wire of its own.
+ *
+ * Nothing to split when the elements do not all face the same way: the array
+ * is then read and written here, and there is no single trunk to draw.
+ */
+function planSplit(
+  module: Module, path: string[], netId: string, hits: PinHit[],
+): { node: Level0Node; edges: Level0Edge[] } | undefined {
+  const irId = netId.slice(netId.lastIndexOf("#net:") + 5);
+  const net = module.nets.find((n) => n.id === irId);
+  if (net === undefined || net.kind !== "memory") {
+    return undefined;
+  }
+  const branches = hits.filter((h) => h.pin.element !== undefined);
+  const trunks = hits.filter((h) => h.pin.element === undefined);
+  const elements = [...new Set(branches.map((h) => h.pin.element!))].sort((a, b) => a - b);
+  const branchSide = new Set(branches.map((h) => h.pin.side));
+  if (elements.length < 2 || trunks.length === 0 || branchSide.size !== 1) {
+    return undefined;
+  }
+  // branches are loads: they sit to the right, so they leave the splitter east
+  const fanOut = branches[0].pin.side === "W";
+  if (trunks.some((h) => h.pin.side === branches[0].pin.side)) {
+    return undefined;
+  }
+  const id = { path, irId: `${irId}:split` };
+  const key = viewIdKey(id);
+  const h = SPLIT_MARGIN * 2 + SPLIT_PITCH * Math.max(elements.length - 1, 1);
+  const elementWidth = branches[0].pin.width ?? 1;
+  const trunkPin: Pin = {
+    // unnamed: the wire into a splitter already carries the array's name
+    id: pinId(key, net.name), name: "", side: fanOut ? "W" : "E",
+    netId, netName: net.name, width: elementWidth * elements.length,
+    x: fanOut ? 0 : SPLIT_W, y: h / 2,
+  };
+  const branchPin = (element: number, index: number): Pin => ({
+    id: pinId(key, `[${element}]`), name: `[${element}]`, side: fanOut ? "E" : "W",
+    netId, netName: `${net.name}[${element}]`, width: elementWidth, element,
+    x: fanOut ? SPLIT_W : 0, y: SPLIT_MARGIN + index * SPLIT_PITCH,
+  });
+  const pins = [trunkPin, ...elements.map(branchPin)];
+  const byElement = new Map(elements.map((element, index) => [element, pins[index + 1]]));
+  const edge = (from: PinHit | Pin, to: PinHit | Pin, extra: Partial<Level0Edge>): Level0Edge => {
+    const source = "pin" in from ? from.pin : from;
+    const target = "pin" in to ? to.pin : to;
+    return {
+      key: `${netId}:${source.id}->${target.id}`,
+      netId, netName: net.name, width: source.width ?? target.width,
+      sourceKey: "pin" in from ? from.node.key : key,
+      targetKey: "pin" in to ? to.node.key : key,
+      sourcePin: source.id, targetPin: target.id, ...extra,
+    };
+  };
+  const trunkText = `${elements.length}\u00d7${elementWidth}b`;
+  const edges = [
+    ...trunks.map((t) => (fanOut ? edge(t, trunkPin, { widthText: trunkText, width: trunkPin.width })
+      : edge(trunkPin, t, { widthText: trunkText, width: trunkPin.width }))),
+    ...branches.map((b) => {
+      const branch = byElement.get(b.pin.element!)!;
+      const extra = { element: b.pin.element, netName: branch.netName, width: elementWidth };
+      return fanOut ? edge(branch, b, extra) : edge(b, branch, extra);
+    }),
+  ];
+  return {
+    node: { key, id, kind: "split", title: net.name, badge: fanOut ? "fanout" : "fanin",
+      x: 0, y: 0, w: SPLIT_W, h, pins },
+    edges,
+  };
 }
 
 export function buildLevel0Connectivity(
@@ -117,6 +198,12 @@ function buildModuleConnectivity(
         stubKeys: uniqueNodes,
       });
       if (!includeCollapsed) continue;
+    }
+    const split = stubbed ? undefined : planSplit(module, sess.path, netId, hits);
+    if (split !== undefined) {
+      nodes.push(split.node);
+      edges.push(...split.edges);
+      continue;
     }
     for (const d of drivers) {
       for (const l of loads) {
