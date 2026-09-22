@@ -19,6 +19,7 @@
     "build": "npm run build:viewer",
     "build:viewer": "npm run build -w @ossschem/web && node scripts/package-viewer.mjs",
     "package:vsix": "node scripts/package-extension.mjs",
+    "package:dist": "node scripts/package-dist.mjs",
     "typecheck": "tsc -b",
     "fixture:dump": "node scripts/dump-verilator.mjs",
     "fixture:ir": "node packages/cli/dist/index.js dump --fixture svb_afifo",

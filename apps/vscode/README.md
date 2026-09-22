@@ -1,89 +1,124 @@
-# ossschem VS Code extension
+# ossschem — RTL schematic tracer
 
-Opens a schematic inside VS Code. The webview runs the same bundle the
-standalone page runs, handed the design and the source text on `window`, so
-there is one viewer rather than two.
+Opens an interactive schematic of a (System)Verilog design inside VS Code:
+process and instance structure first, gates and expressions when you ask for
+them, signals traced forward and backward through the hierarchy, and the
+declaration, drivers and loads of whatever is selected in a source pane
+beneath it.
 
-Not published to the Marketplace; install the `.vsix`, or run it from the
-checkout.
+With [vaporview](https://marketplace.visualstudio.com/items?itemName=lramseyer.vaporview)
+installed it also works with a waveform dump: signals go from the schematic to
+the waveform, a signal in the waveform is revealed in the schematic, and every
+wire can be labelled with its value at the cursor.
 
-## Install it
+## 1. Build a schematic from your design
 
-    npm install && npm run package:vsix      # in the repo root
+The extension opens a `schematic-ir.json`, which the `ossschem` command writes
+from your RTL. It runs Verilator's `--json-only` elaboration, so the design has
+to elaborate with **Verilator 5.046 or newer** — nothing is simulated and no
+C++ is generated. The version is detected, recorded in the IR, and reported
+when it is older than that.
 
-Writes `apps/vscode/ossschem-vscode-<version>.vsix`, viewer bundle included.
-Install it with **Extensions: Install from VSIX…** in the command palette, or
-`code --install-extension apps/vscode/ossschem-vscode-<version>.vsix`. VS Code
-only replaces an extension with a higher version, so pass a new one when
-rebuilding: `npm run package:vsix -- 0.2.0`.
+```bash
+ossschem build --top my_top --out-dir build/schematic rtl/*.sv
+```
 
-## Run it from the checkout
+That writes `schematic-ir.json`, `sources.json` and a standalone `index.html`
+into `build/schematic`. Useful flags:
 
-1. `npm install && npm run build` in the repo root — the extension loads the
-   viewer from `packages/cli/viewer`, which `build` produces.
-2. Open the repo in VS Code and press **F5** ("Run ossschem extension"). A
-   second window opens with the extension loaded.
-3. In that window, open a design's schematic directory and run **ossschem: Open
-   schematic** on `schematic-ir.json`, or right-click the file in the explorer.
+- `--sources path/to/rtl` — add source text that is not on the Verilator
+  command line; repeatable. Without it, a file that was only included shows no
+  source in the pane.
+- `--verilator /path/to/verilator` — when it is not on `PATH`.
+- `--open` — open the standalone page in a browser instead of, or as well as,
+  using VS Code.
 
-Produce the input with `ossschem build --top <top> --out-dir <dir> <sources>`;
-it writes `schematic-ir.json` and `sources.json`, and the extension reads both.
+In a Makefile, next to the simulation that produces the dump:
 
-## How the page is built
+```make
+TOP           := my_top
+RTL           := $(wildcard rtl/*.sv) $(wildcard tb/*.sv)
+SCHEMATIC_DIR := build/schematic
 
-`src/webview-html.ts` is free of the VS Code API so it can be tested directly
-(`apps/vscode/test`). It takes the viewer's `index.html` and adds:
+.PHONY: schematic
+schematic: $(SCHEMATIC_DIR)/schematic-ir.json
 
-- a `<base href>` pointing at the viewer directory — the bundle builds asset
-  URLs relative to the document, which in a webview is not where the files are;
-- a Content-Security-Policy that denies everything by default and allows the
-  scripts by nonce;
-- the design and sources, escaped for embedding in a script tag.
+$(SCHEMATIC_DIR)/schematic-ir.json: $(RTL)
+	ossschem build --top $(TOP) --out-dir $(SCHEMATIC_DIR) $(RTL)
+```
 
-## Cross probing
+Getting the `ossschem` command, and the rest of the install:
+[INSTALL.md](https://github.com/markusdd/ossschem/blob/main/INSTALL.md).
 
-Select a signal in the schematic and press `W`, or use the **Waveform** button,
-to add it to vaporview. The extension resolves the name against the open dump
-before adding: `addVariable` accepts a name it cannot find without complaining,
-so an unverified spelling looks exactly like success.
+## 2. Open it
 
-Names come from the same elaboration as the dump, so they line up. Unpacked
-arrays are the exception worth knowing: a dump gives the array a scope of its
-own and names each element by index alone, so `wen_s[0]` is
-`tb.wen_s.[0]`. Selecting an array asks which elements to add -- whole for a
-small bundle, the first element for anything larger, or an index, range
-(`0-7`) or list (`0,2,5`) typed into the picker.
+Open `schematic-ir.json` — clicking it in the explorer is enough. The extension
+is the default editor for it, and for any `*.ir.json`, so the schematic is what
+you get rather than the JSON text.
 
-The reverse direction is **Reveal in schematic**, on the right click menu of a
-signal in the waveform viewer and in its netlist tree. It opens the instances
-between the current scope and that signal in place, highlights it and frames
-it, with its declaration, drivers and loads in the source pane -- the scope on
-screen does not change, so the answer arrives in the context the question was
-asked in. Both directions are deliberate: scrubbing the cursor moves the
-waveform selection around, and a schematic that followed it would not stay
-still long enough to read.
+When the JSON itself is the question, **Reopen Editor With… → Text Editor** on
+the tab shows the file; **ossschem: Open schematic** (or the title bar button)
+switches back.
 
-With no waveform open there is nowhere to add a signal, and the extension says
-so and offers to open one.
+## 3. Read it
 
-One dump serves everything -- adding signals, values at the cursor, the
-diagnostic -- rather than values being read from one and signals added to
-another. Which one it is, is named by the **Waveform** picker at the top of the
-schematic's sidebar, and changed there. It is settled once, from the dump on
-screen when there are several, and then left alone: a target that followed the
-focus would move under the user between one operation and the next. Closing
-that dump settles it again.
+Click to select; **Fit** restores the whole view. Double-click a process or
+instance (or press `E`) to expand its structure in place, `L` to expand its
+logic into gates and flip-flops, `I` to isolate one component, `C` to collapse
+one, and `Backspace` to go back. Select a wire or pin and press `F` or `B` to
+trace its loads or drivers, repeatedly to advance one step at a time.
 
-**Values** in the toolbar labels each wire with its value at the waveform
-cursor, following the cursor as it moves. The schematic asks only about the
-nets it is currently showing, so the extension needs to know nothing about the
-view. An unpacked array has no single value, so the wire into its splitter
-carries none, but each branch off it is one element and does. Values are
-written as Verilog writes them (`1'b1`, `8'h0f`), with unknown bits kept in
-binary (`4'b010x`), and a signal that changes at the cursor shows the step
-across it (`8'h0f→a3`). The value of the selected signal lights up with it,
-and is written out on the heading of the source pane.
+Press `H` for the full list of shortcuts and operations.
 
-`ossschem: Show log` traces every step. `ossschem: Diagnose waveform probing`
-reports what vaporview knows about the last signal picked, which is the first
-thing to check when something does not appear.
+Unpacked arrays are drawn as one wire marked `4×8b` into a splitter, with one
+branch per element labelled `[0]`, `[1]`, and so on.
+
+## 4. Waveform cross probing
+
+Requires vaporview, with a dump open.
+
+**Schematic → waveform.** Select a signal and press `W`, or use the
+**Waveform** button. The name is checked against the dump before it is added:
+vaporview accepts a name it cannot resolve without complaining, so an
+unverified spelling would look exactly like success. Selecting a whole unpacked
+array asks which elements to add — all of them for a small one, otherwise the
+first, or type an index, a range (`0-7`) or a list (`0,2,5`). Selecting one
+branch off a splitter adds just that element.
+
+**Waveform → schematic.** Right-click a signal in the waveform or in its
+netlist tree and choose **Reveal in schematic**. The instances between the
+current scope and that signal open in place, the signal is highlighted and
+framed, and its declaration, drivers and loads appear in the source pane. The
+scope on screen does not change, so the answer arrives in the context the
+question was asked in.
+
+Both directions are deliberate rather than automatic: scrubbing the cursor
+moves the waveform selection around, and a schematic that followed it would not
+stay still long enough to read.
+
+**Values at the cursor.** Toggle **Values** in the toolbar to label every wire
+on screen with its value at the waveform cursor; the labels follow the cursor
+as it moves. Values read as Verilog writes them (`1'b1`, `8'h0f`), with unknown
+bits in binary (`4'b010x`), and a signal that changes at the cursor shows the
+step across it (`8'h0f→a3`). An unpacked array has no single value, so the wire
+into its splitter carries none, but each branch off it does. The value of the
+selected signal lights up with it and is written out on the heading of the
+source pane.
+
+**Which dump.** The **Waveform** picker at the top of the sidebar names the
+dump everything reads and writes, and switches it when several are open. It is
+settled once — from the one on screen — and then left alone, so the target does
+not move between one operation and the next.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `ossschem: Open schematic` | Show a `schematic-ir.json` as a schematic, from the text editor |
+| `ossschem: Reveal in schematic` | Show the waveform's selected signal (context menus) |
+| `ossschem: Link selection to waveform viewer (toggle)` | Stop or resume sending signals to vaporview |
+| `ossschem: Show log` | Every cross-probing step, in an output channel |
+| `ossschem: Diagnose waveform probing` | What vaporview knows about the last signal picked |
+
+If a signal does not appear in the waveform, the diagnostic is the first thing
+to check: it prints the spellings vaporview recognises for it.

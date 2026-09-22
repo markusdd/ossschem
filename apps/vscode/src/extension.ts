@@ -455,47 +455,39 @@ function revealFromWaveform(target: SignalContext | undefined): void {
   }
 }
 
-async function openSchematic(context: vscode.ExtensionContext, target?: vscode.Uri): Promise<void> {
-  const uri = target ?? vscode.window.activeTextEditor?.document.uri;
-  if (uri === undefined) {
-    void vscode.window.showErrorMessage("ossschem: open a schematic IR file first.");
-    return;
-  }
-  const name = uri.path.split("/").pop() ?? "";
-  if (!SCHEMATIC_IR.test(name)) {
-    void vscode.window.showErrorMessage(
-      `ossschem: ${name} is not a schematic IR. Expected schematic-ir.json or *.ir.json, as written by \`ossschem build\`.`,
-    );
-    return;
-  }
+/** The editor the IR opens in, so a schematic is what a click on one gives. */
+const SCHEMATIC_VIEW = "ossschem.schematic";
 
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] ?? c);
+}
+
+/** Fill a panel with the schematic for one IR file, however that panel was made. */
+function mountSchematic(context: vscode.ExtensionContext, panel: vscode.WebviewPanel, uri: vscode.Uri): void {
+  const name = uri.path.split("/").pop() ?? "";
+  const fail = (message: string): void => {
+    trace(`  ${message}`);
+    void vscode.window.showErrorMessage(`ossschem: ${message}`);
+    panel.webview.html = `<!doctype html><meta charset="utf-8"><body style="font-family: sans-serif; padding: 2rem">`
+      + `<p>ossschem: ${escapeHtml(message)}</p></body>`;
+  };
   const viewerRoot = findViewer(context);
   if (viewerRoot === undefined) {
-    void vscode.window.showErrorMessage(
-      "ossschem: the viewer bundle is missing. Run `npm run build` in the ossschem checkout.",
-    );
+    fail("the viewer bundle is missing. Run `npm run build` in the ossschem checkout.");
     return;
   }
-
   let design: unknown;
   try {
     design = JSON.parse(readFileSync(uri.fsPath, "utf8"));
   } catch (err) {
-    void vscode.window.showErrorMessage(`ossschem: could not read ${name}: ${String(err)}`);
+    fail(`could not read ${name}: ${String(err)}`);
     return;
   }
 
-  const panel = vscode.window.createWebviewPanel(
-    "ossschem.schematic",
-    `ossschem — ${name}`,
-    vscode.ViewColumn.Active,
-    {
-      enableScripts: true,
-      // the drawing is laid out on open, so keep it rather than redo it
-      retainContextWhenHidden: true,
-      localResourceRoots: [vscode.Uri.file(viewerRoot), vscode.Uri.file(dirname(uri.fsPath))],
-    },
-  );
+  panel.webview.options = {
+    enableScripts: true,
+    localResourceRoots: [vscode.Uri.file(viewerRoot), vscode.Uri.file(dirname(uri.fsPath))],
+  };
   trace(`opened ${name} with the viewer from ${viewerRoot}`);
   panels.add(panel);
   panel.onDidDispose(() => panels.delete(panel));
@@ -534,12 +526,49 @@ async function openSchematic(context: vscode.ExtensionContext, target?: vscode.U
   });
 }
 
+/* A schematic IR is a drawing, not a document to read as text, so it opens as
+ * one: VS Code hands the file to this editor, and `Reopen Editor With…` still
+ * offers the text editor for the times the JSON itself is the question. */
+class SchematicEditorProvider implements vscode.CustomReadonlyEditorProvider {
+  constructor(private readonly context: vscode.ExtensionContext) {}
+
+  openCustomDocument(uri: vscode.Uri): vscode.CustomDocument {
+    return { uri, dispose: () => { /* the webview holds no handle on the file */ } };
+  }
+
+  resolveCustomEditor(document: vscode.CustomDocument, panel: vscode.WebviewPanel): void {
+    mountSchematic(this.context, panel, document.uri);
+  }
+}
+
+/** The command, for a file that is already open as text or picked in the explorer. */
+async function openSchematic(target?: vscode.Uri): Promise<void> {
+  const uri = target ?? vscode.window.activeTextEditor?.document.uri;
+  if (uri === undefined) {
+    void vscode.window.showErrorMessage("ossschem: open a schematic IR file first.");
+    return;
+  }
+  const name = uri.path.split("/").pop() ?? "";
+  if (!SCHEMATIC_IR.test(name)) {
+    void vscode.window.showErrorMessage(
+      `ossschem: ${name} is not a schematic IR. Expected schematic-ir.json or *.ir.json, as written by \`ossschem build\`.`,
+    );
+    return;
+  }
+  await vscode.commands.executeCommand("vscode.openWith", uri, SCHEMATIC_VIEW);
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   log = vscode.window.createOutputChannel("ossschem");
   context.subscriptions.push(
     log,
+    vscode.window.registerCustomEditorProvider(SCHEMATIC_VIEW, new SchematicEditorProvider(context), {
+      // the drawing is laid out on open, so keep it rather than redo it
+      webviewOptions: { retainContextWhenHidden: true },
+      supportsMultipleEditorsPerDocument: false,
+    }),
     vscode.commands.registerCommand("ossschem.open", (target?: vscode.Uri) => {
-      void openSchematic(context, target);
+      void openSchematic(target);
     }),
     vscode.commands.registerCommand("ossschem.revealFromWaveform", (target?: SignalContext) => {
       revealFromWaveform(target);

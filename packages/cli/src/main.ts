@@ -12,6 +12,35 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = resolve(packageRoot, "../..");
 const sourceExtensions = new Set([".sv", ".svh", ".v", ".vh"]);
 
+/* The oldest Verilator this has been tested against. What it reads is the
+ * --json-only AST, whose shape and node names move between releases, so an
+ * older one is worth saying out loud rather than leaving to fail obscurely. */
+export const MIN_VERILATOR = "5.046";
+
+/** The version out of `verilator --version`: "Verilator 5.050 2026-07-01 rev v5.050". */
+export function parseVerilatorVersion(text: string): string | undefined {
+  return /Verilator\s+(\d+\.\d+(?:\.\d+)?)/.exec(text)?.[1];
+}
+
+export function verilatorOlderThan(version: string, minimum = MIN_VERILATOR): boolean {
+  const parts = (text: string): number[] => text.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const [have, want] = [parts(version), parts(minimum)];
+  for (let i = 0; i < Math.max(have.length, want.length); i++) {
+    const a = have[i] ?? 0;
+    const b = want[i] ?? 0;
+    if (a !== b) {
+      return a < b;
+    }
+  }
+  return false;
+}
+
+/** What the Verilator on PATH says it is, recorded in the IR next to the design. */
+function detectVerilatorVersion(command: string): string | undefined {
+  const result = spawnSync(command, ["--version"], { encoding: "utf8" });
+  return result.error ? undefined : parseVerilatorVersion(`${result.stdout ?? ""} ${result.stderr ?? ""}`);
+}
+
 function printHelp(): void {
   process.stdout.write(`ossschem — interactive RTL schematic tracer
 
@@ -24,6 +53,8 @@ Commands:
 build runs Verilator --json-only, writes schematic-ir.json, copies the browser viewer,
 embeds the design and source files in index.html, and optionally opens that file.
 Use --sources dir more than once when source files are outside the Verilator command line.
+
+Needs Verilator ${MIN_VERILATOR} or newer; its version is detected and recorded in the IR.
 `);
 }
 
@@ -178,7 +209,12 @@ function build(argv: readonly string[]): number {
   }
   const outDir = resolvePath(argValue(argv, "--out-dir") ?? "ossschem-build");
   const verilator = argValue(argv, "--verilator") ?? "verilator";
-  const version = argValue(argv, "--verilator-version") ?? "unknown";
+  const detected = detectVerilatorVersion(verilator);
+  const version = argValue(argv, "--verilator-version") ?? detected ?? "unknown";
+  if (detected !== undefined && verilatorOlderThan(detected)) {
+    process.stderr.write(`ossschem: Verilator ${detected} is older than ${MIN_VERILATOR}, the oldest tested;`
+      + " the JSON it writes may not read correctly\n");
+  }
   const tempDir = resolve(outDir, ".verilator");
   mkdirSync(tempDir, { recursive: true });
   const tree = resolve(tempDir, `${top}.tree.json`);

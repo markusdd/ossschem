@@ -4,7 +4,7 @@
   <img src="assets/ossschem_banner.svg" alt="ossschem open-source RTL schematic tracer banner" width="100%">
 </p>
 
-ossschem is an open-source RTL schematic tracer - for now for (System-)Verilog designs that are compileable with Verilator. It reads Verilator's `--json-only` output directly and turns it into an interactive hierarchical schematic without requiring a separate netlister. Start with process and instance structure, expand gates and expressions when needed, and trace signals forward or backward through the design.
+ossschem is an open-source RTL schematic tracer - for now for (System-)Verilog designs that are compileable with Verilator 5.046 or newer. It reads Verilator's `--json-only` output directly and turns it into an interactive hierarchical schematic without requiring a separate netlister. Start with process and instance structure, expand gates and expressions when needed, and trace signals forward or backward through the design.
 
 The viewer combines schematic navigation with source mapping: select a port, pin, wire, or component to inspect its declaration, expression, drivers, loads, and source code. It is designed for exploring large RTL designs while keeping the initial view readable and focused.
 
@@ -14,18 +14,35 @@ It is planned to support other input formats and also waveform coss-probing.
 
 ## Quick start
 
+Install a release (below), then turn a design into a schematic and open it:
+
 ```bash
-npm install
-npm run dev
+ossschem build --top my_top --out-dir build/schematic --open rtl/*.sv
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in a browser. The bundled viewer loads the `svb_afifo` example from the checked-in fixture data.
+From a checkout, `npm install && npm run dev` serves the viewer at [http://localhost:5173](http://localhost:5173) with the `svb_afifo` example from the checked-in fixture data.
 
 In the schematic, click to select and use **Fit** to restore the full view. Double-click a process or instance, or press `E`, to expand its structure; press `L` to expand its logic. Select a pin or wire and press `F` or `B` to trace forward or backward. Use **Isolate** or `I` to focus on one component, and `Backspace` to return to the parent view. The **Help** button or `H` shows all shortcuts.
 
+## Install
+
+Releases are self-contained: a tarball with the `ossschem` command, the viewer
+it writes, and a Node runtime, and a `.vsix` for the VS Code extension. Neither
+needs npm. Verilator stays a system dependency, since it is what reads the RTL:
+**5.046 or newer**, which is what `--json-only` has been tested against here
+(5.046 and 5.050). `ossschem build` detects the version, records it in the IR,
+and says so when it is older than that.
+
+```bash
+tar -xzf ossschem-<version>-linux-x64.tar.gz -C /opt
+ln -s /opt/ossschem-<version>-linux-x64/bin/ossschem ~/.local/bin/ossschem
+```
+
+Installing, building from a checkout and packaging a release: [`INSTALL.md`](INSTALL.md).
+
 ## Use from a Makefile
 
-After installing the repository or the published CLI package, `ossschem` can build a browser-ready schematic in one command. It runs Verilator's JSON-only dump, converts it to Schematic IR, copies the viewer assets, embeds the design and source text, and optionally opens the result with `$BROWSER` (or the platform's default browser):
+Installed as above, or from a checkout, `ossschem` builds a browser-ready schematic in one command. It runs Verilator's JSON-only dump, converts it to Schematic IR, copies the viewer assets, embeds the design and source text, and optionally opens the result with `$BROWSER` (or the platform's default browser):
 
 ```make
 TOP := my_top
@@ -34,23 +51,16 @@ SCHEMATIC_DIR := build/ossschem
 
 .PHONY: schematic
 schematic:
-	npx --no-install ossschem build --top $(TOP) --out-dir $(SCHEMATIC_DIR) --open $(RTL)
+	ossschem build --top $(TOP) --out-dir $(SCHEMATIC_DIR) --open $(RTL)
 ```
 
 The generated directory contains `index.html`, `schematic-ir.json`, `sources.json`, and the viewer assets. Use `ossschem open build/ossschem` later to reopen an existing result. Add `--sources path/to/rtl` when source files are not present in the Verilator input list. The generated `index.html` embeds its data, so it can be opened directly without a development server.
 
 v1 golden design is `svb_afifo` from the adjacent `sv_base_lib` tree. Architecture and acceptance scenes: [`docs/DESIGN.md`](docs/DESIGN.md).
 
-## Development
+## Using the viewer
 
-```bash
-npm install
-npm test            # typecheck + AFIFO JSON fixture smoke
-npm run dev         # Vite app at http://localhost:5173
-npm run fixture:dump  # regen Verilator --json-only (needs Verilator 5.046)
-```
-
-Requires Node 20+. The viewer opens Schematic IR (`.ir.json`) only. `npm run ossschem -- dump --fixture svb_afifo` rebuilds the golden IR. CI never runs Verilator — it uses `fixtures/svb_afifo/verilator/`.
+Build it and run the tests as [`INSTALL.md`](INSTALL.md) describes. The viewer opens Schematic IR (`.ir.json`) only.
 
 Canvas: pan (middle-drag / Alt-drag), zoom (wheel), **Fit**, click to select, **double-click** or `E` to expand a process (gates) or instance in place, or explode a generate array, `L` to expand logic beneath the selection, **Enter** on an instance drills in, **Backspace** / **Back** returns. Click a wire, pin handle, or pin label to select an individual signal. `B`/`F` trace its drivers/loads to the next visible boundary, including inside expanded instances. Shift+B/F traces into the selection. `C` / **Collapse** collapses a selected container; Escape clears tracing. Clocks and resets are stubbed, not drawn as a tree.
 

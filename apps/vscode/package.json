@@ -46,6 +46,21 @@
         "category": "ossschem"
       }
     ],
+    "customEditors": [
+      {
+        "viewType": "ossschem.schematic",
+        "displayName": "ossschem schematic",
+        "selector": [
+          {
+            "filenamePattern": "schematic-ir.json"
+          },
+          {
+            "filenamePattern": "*.ir.json"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "menus": {
       "explorer/context": [
         {
