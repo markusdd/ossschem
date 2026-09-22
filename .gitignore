@@ -5,3 +5,6 @@ dist/
 apps/web/dist/
 packages/cli/viewer/
 .vite/
+apps/vscode/viewer/
+apps/vscode/*.vsix
+apps/vscode/LICENSE

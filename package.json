@@ -18,15 +18,18 @@
     "dev": "npm run dev -w @ossschem/web",
     "build": "npm run build:viewer",
     "build:viewer": "npm run build -w @ossschem/web && node scripts/package-viewer.mjs",
+    "package:vsix": "node scripts/package-extension.mjs",
     "typecheck": "tsc -b",
     "fixture:dump": "node scripts/dump-verilator.mjs",
     "fixture:ir": "node packages/cli/dist/index.js dump --fixture svb_afifo",
     "fixture:check": "node scripts/check-fixture-ports.mjs",
     "ossschem": "node packages/cli/dist/index.js",
+    "pretest": "node scripts/ensure-viewer.mjs",
     "test": "npm run typecheck && npm run fixture:check && npm run fixture:ir && vitest run"
   },
   "devDependencies": {
     "@types/node": "^26.6.1",
+    "@vscode/vsce": "^3.9.2",
     "tsx": "^4.23.13",
     "typescript": "^5.9.2",
     "vitest": "^5.0.1"

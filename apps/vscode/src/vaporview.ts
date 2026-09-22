@@ -8,14 +8,49 @@
  */
 export type OpenDocuments = string[] | { documents?: string[]; lastActiveDocument?: string } | undefined | null;
 
-export function pickDocument(result: OpenDocuments): string | undefined {
-  if (Array.isArray(result)) {
-    return result.find((uri) => typeof uri === "string" && uri.length > 0);
-  }
-  if (result === undefined || result === null) {
+/** Every open dump, the one vaporview calls active first when it says so. */
+export function openDocuments(result: OpenDocuments): string[] {
+  const listed = Array.isArray(result)
+    ? result
+    : result === undefined || result === null
+      ? []
+      : [...(result.lastActiveDocument === undefined ? [] : [result.lastActiveDocument]), ...(result.documents ?? [])];
+  return listed.filter((uri, i, all): uri is string =>
+    typeof uri === "string" && uri.length > 0 && all.indexOf(uri) === i);
+}
+
+/* Which of several open dumps everything works against.
+ *
+ * A choice already made stands while that dump is open, whether the user made
+ * it or it was settled the first time something needed one -- a target that
+ * moved with the focus would annotate from one dump and add to another. Until
+ * then the one on screen is the one being looked at, and failing that the
+ * first vaporview lists.
+ */
+export function chooseDocument(open: string[], onScreen: string[], remembered?: string): string | undefined {
+  if (open.length === 0) {
     return undefined;
   }
-  return result.lastActiveDocument ?? result.documents?.find((uri) => uri.length > 0);
+  if (remembered !== undefined && open.includes(remembered)) {
+    return remembered;
+  }
+  if (open.length === 1) {
+    return open[0];
+  }
+  return onScreen.find((uri) => open.includes(uri)) ?? open[0];
+}
+
+/* Names for the picker: the file, and enough of its directory to tell two
+ * dumps of the same name apart. */
+export function documentLabels(open: string[]): { uri: string; label: string }[] {
+  const parts = open.map((uri) => decodeURIComponent(uri).split(/[/\\]/).filter((part) => part.length > 0));
+  const names = parts.map((p) => p[p.length - 1] ?? "");
+  return open.map((uri, i) => {
+    const name = names[i];
+    const shared = names.filter((other) => other === name).length > 1;
+    const parent = parts[i][parts[i].length - 2];
+    return { uri, label: shared && parent !== undefined ? `${parent}/${name}` : name };
+  });
 }
 
 /* Spellings a dump might use for one selected signal, most likely first.

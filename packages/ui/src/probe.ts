@@ -15,6 +15,16 @@ export interface ProbeProvider {
   values?(paths: string[][]): Promise<Record<string, string | string[]>>;
   /** The cursor moved in the waveform viewer. Returns an unsubscribe. */
   onCursorMoved?(cb: () => void): () => void;
+  /** The dumps the host can read and the one it is using. Returns an unsubscribe. */
+  onWaveformsChanged?(cb: (state: WaveformChoice) => void): () => void;
+  /** Work against this dump from now on. */
+  useWaveform?(uri: string): void;
+}
+
+export interface WaveformChoice {
+  documents: { uri: string; label: string }[];
+  /** Undefined until the host has one open. */
+  active?: string;
 }
 
 export const NullProbeProvider: ProbeProvider = {

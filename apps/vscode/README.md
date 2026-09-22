@@ -4,9 +4,20 @@ Opens a schematic inside VS Code. The webview runs the same bundle the
 standalone page runs, handed the design and the source text on `window`, so
 there is one viewer rather than two.
 
-Not published to the Marketplace; run it locally.
+Not published to the Marketplace; install the `.vsix`, or run it from the
+checkout.
 
-## Run it
+## Install it
+
+    npm install && npm run package:vsix      # in the repo root
+
+Writes `apps/vscode/ossschem-vscode-<version>.vsix`, viewer bundle included.
+Install it with **Extensions: Install from VSIX…** in the command palette, or
+`code --install-extension apps/vscode/ossschem-vscode-<version>.vsix`. VS Code
+only replaces an extension with a higher version, so pass a new one when
+rebuilding: `npm run package:vsix -- 0.2.0`.
+
+## Run it from the checkout
 
 1. `npm install && npm run build` in the repo root — the extension loads the
    viewer from `packages/cli/viewer`, which `build` produces.
@@ -44,19 +55,34 @@ small bundle, the first element for anything larger, or an index, range
 (`0-7`) or list (`0,2,5`) typed into the picker.
 
 The reverse direction is **Reveal in schematic**, on the right click menu of a
-signal in the waveform viewer and in its netlist tree. It switches the
-schematic to the module that signal lives in and highlights it, with its
-declaration, drivers and loads in the source pane. Both directions are
-deliberate: scrubbing the cursor moves the waveform selection around, and a
-schematic that followed it would not stay still long enough to read.
+signal in the waveform viewer and in its netlist tree. It opens the instances
+between the current scope and that signal in place, highlights it and frames
+it, with its declaration, drivers and loads in the source pane -- the scope on
+screen does not change, so the answer arrives in the context the question was
+asked in. Both directions are deliberate: scrubbing the cursor moves the
+waveform selection around, and a schematic that followed it would not stay
+still long enough to read.
+
+With no waveform open there is nowhere to add a signal, and the extension says
+so and offers to open one.
+
+One dump serves everything -- adding signals, values at the cursor, the
+diagnostic -- rather than values being read from one and signals added to
+another. Which one it is, is named by the **Waveform** picker at the top of the
+schematic's sidebar, and changed there. It is settled once, from the dump on
+screen when there are several, and then left alone: a target that followed the
+focus would move under the user between one operation and the next. Closing
+that dump settles it again.
 
 **Values** in the toolbar labels each wire with its value at the waveform
 cursor, following the cursor as it moves. The schematic asks only about the
 nets it is currently showing, so the extension needs to know nothing about the
-view. Unpacked arrays are left out: the array as a whole has no single value.
-Values are written as Verilog writes them (`1'b1`, `8'h0f`), with unknown bits
-kept in binary (`4'b010x`), and a signal that changes at the cursor shows the
-step across it (`8'h0f→a3`).
+view. An unpacked array has no single value, so the wire into its splitter
+carries none, but each branch off it is one element and does. Values are
+written as Verilog writes them (`1'b1`, `8'h0f`), with unknown bits kept in
+binary (`4'b010x`), and a signal that changes at the cursor shows the step
+across it (`8'h0f→a3`). The value of the selected signal lights up with it,
+and is written out on the heading of the source pane.
 
 `ossschem: Show log` traces every step. `ossschem: Diagnose waveform probing`
 reports what vaporview knows about the last signal picked, which is the first

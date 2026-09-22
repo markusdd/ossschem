@@ -1,0 +1,11 @@
+# sources and their build metadata: the extension ships dist/ and viewer/
+src/**
+test/**
+tsconfig.json
+tsconfig.tsbuildinfo
+**/*.map
+**/*.ts
+.vscodeignore
+# the extension hands the webview its own design; this one is the standalone
+# page's demo
+viewer/schematic-ir.json

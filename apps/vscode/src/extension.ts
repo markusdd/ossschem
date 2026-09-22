@@ -10,8 +10,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import * as vscode from "vscode";
 
-import { arrayShape, parseIndexSpec, pathCandidates, pickDocument, SMALL_ARRAY,
-  type OpenDocuments } from "./vaporview.js";
+import { arrayShape, chooseDocument, documentLabels, openDocuments, parseIndexSpec, pathCandidates,
+  SMALL_ARRAY, type OpenDocuments } from "./vaporview.js";
 import { viewerHtml } from "./webview-html.js";
 
 /** What `ossschem build` writes, and what `ossschem dump --out` is called. */
@@ -42,6 +42,8 @@ function readSources(irPath: string): Record<string, string> {
 }
 
 const VAPORVIEW = "lramseyer.vaporview";
+/** vaporview's custom editor, which is how its tabs are recognised. */
+const WAVEFORM_EDITOR = "vaporview.waveformViewer";
 
 /** Selection is forwarded to the waveform viewer unless the user turns it off. */
 let linkSelection = true;
@@ -51,6 +53,8 @@ let warnedNoViewer = false;
 let log: vscode.OutputChannel | undefined;
 /** The last thing the schematic offered, for the diagnostic command. */
 let lastPicked: string[][] = [];
+/** The waveform in use, shown in the schematic's sidebar and switched from there. */
+let chosenWaveform: string | undefined;
 /** Open schematic panels, so a selection in the waveform can reach them. */
 const panels = new Set<vscode.WebviewPanel>();
 let listeningToViewer = false;
@@ -73,21 +77,87 @@ function isNetPicked(message: unknown): message is NetPicked {
 /* vaporview's documented API: a variable is addressed by its instance path,
  * and `reveal` selects one that is already displayed instead of adding it a
  * second time. */
-/** The waveform the signals should go to, asked of vaporview rather than assumed. */
-async function activeWaveform(): Promise<string | undefined> {
-  try {
-    const open = await vscode.commands.executeCommand<OpenDocuments>("waveformViewer.getOpenDocuments");
-    const uri = pickDocument(open);
-    if (uri === undefined) {
-      trace(`  vaporview reports no open waveform: ${JSON.stringify(open)}`);
-    } else if (Array.isArray(open) && open.length > 1) {
-      trace(`  ${open.length} waveforms open, using the first`);
+/* The waveform documents currently on screen, most likely intended first: the
+ * focused tab, then the other groups' active tabs, then anything else open.
+ * Reported the way vaporview names them, so the two lists can be compared. */
+function waveformsOnScreen(open: string[]): string[] {
+  const byPath = new Map(open.map((uri) => [vscode.Uri.parse(uri).fsPath, uri]));
+  const groups = [...vscode.window.tabGroups.all];
+  groups.sort((a, b) => Number(b.isActive) - Number(a.isActive));
+  const tabs = [...groups.flatMap((g) => (g.activeTab === undefined ? [] : [g.activeTab])),
+    ...groups.flatMap((g) => g.tabs)];
+  const shown: string[] = [];
+  for (const tab of tabs) {
+    const input = tab.input as { uri?: vscode.Uri; viewType?: string } | undefined;
+    if (input?.uri === undefined || input.viewType !== WAVEFORM_EDITOR) {
+      continue;
     }
-    return uri;
+    const uri = byPath.get(input.uri.fsPath);
+    if (uri !== undefined && !shown.includes(uri)) {
+      shown.push(uri);
+    }
+  }
+  return shown;
+}
+
+/** Every dump vaporview has open, in the order it lists them. */
+async function openWaveforms(): Promise<string[]> {
+  try {
+    return openDocuments(await vscode.commands.executeCommand<OpenDocuments>("waveformViewer.getOpenDocuments"));
   } catch (err) {
     trace(`  could not ask vaporview for its documents: ${String(err)}`);
-    return undefined;
+    return [];
   }
+}
+
+/* The waveform every operation works against: the one the picker in the
+ * sidebar names. Settled once and then left alone, so signals are added to
+ * the dump whose values are on the wires. */
+async function activeWaveform(): Promise<string | undefined> {
+  const open = await openWaveforms();
+  const uri = chooseDocument(open, waveformsOnScreen(open), chosenWaveform);
+  if (uri !== chosenWaveform) {
+    chosenWaveform = uri;
+    trace(uri === undefined ? "  no waveform open" : `  using waveform ${uri}`);
+    showWaveforms(open);
+  }
+  return uri;
+}
+
+/* What the schematic's picker shows. Sent on every change rather than asked
+ * for, so the sidebar always names the dump the values came from -- and only
+ * on a change, since the schematic re-reads its values whenever it is told. */
+let lastShown = "";
+function showWaveforms(open: string[], force = false): void {
+  const state = { type: "ossschem/waveforms", documents: documentLabels(open), active: chosenWaveform };
+  const shown = JSON.stringify(state);
+  if (shown === lastShown && !force) {
+    return;
+  }
+  lastShown = shown;
+  for (const panel of panels) {
+    void panel.webview.postMessage(state);
+  }
+}
+
+/** The schematic's picker, used by hand: it stands until that dump is closed. */
+async function useWaveform(uri: string): Promise<void> {
+  const open = await openWaveforms();
+  if (!open.includes(uri)) {
+    trace(`  waveform ${uri} is no longer open`);
+    showWaveforms(open);
+    return;
+  }
+  chosenWaveform = uri;
+  trace(`  waveform chosen by hand: ${uri}`);
+  showWaveforms(open);
+}
+
+/** Waveforms opening and closing change what the picker should offer. */
+async function refreshWaveforms(force = false): Promise<void> {
+  const open = await openWaveforms();
+  chosenWaveform = chooseDocument(open, waveformsOnScreen(open), chosenWaveform);
+  showWaveforms(open, force);
 }
 
 /* vaporview accepts an add for a name it cannot resolve without complaining,
@@ -198,6 +268,17 @@ async function chooseElements(paths: string[][]): Promise<string[][] | undefined
   return chosen.map((i) => [...array.scope, `[${i}]`]);
 }
 
+/* Nothing to add to: say so where the user is looking, and offer the step
+ * they would take next, since a dump is a file they have to open. */
+async function noWaveformOpen(): Promise<void> {
+  const open = "Open waveform\u2026";
+  const answer = await vscode.window.showWarningMessage(
+    "ossschem: no waveform is open in vaporview, so there is nowhere to add the signal.", open);
+  if (answer === open) {
+    await vscode.commands.executeCommand("workbench.action.files.openFile");
+  }
+}
+
 async function sendToWaveform(offered: string[][]): Promise<void> {
   lastPicked = offered;
   const offeredText = offered.map((p) => p.join("."));
@@ -224,7 +305,7 @@ async function sendToWaveform(offered: string[][]): Promise<void> {
   const uri = await activeWaveform();
   if (uri === undefined) {
     trace("  no waveform document is open");
-    void vscode.window.showWarningMessage("ossschem: open a waveform in vaporview first.");
+    void noWaveformOpen();
     return;
   }
   trace(`  target document ${uri}`);
@@ -418,11 +499,20 @@ async function openSchematic(context: vscode.ExtensionContext, target?: vscode.U
   trace(`opened ${name} with the viewer from ${viewerRoot}`);
   panels.add(panel);
   panel.onDidDispose(() => panels.delete(panel));
+  // a waveform opening or closing changes what the picker offers, and can
+  // retire the dump in use
+  const tabs = vscode.window.tabGroups.onDidChangeTabs(() => { void refreshWaveforms(); });
+  panel.onDidDispose(() => { tabs.dispose(); });
   void listenToViewer(context);
   panel.webview.onDidReceiveMessage(
     (message: unknown) => {
-      if ((message as { type?: string } | undefined)?.type === "ossschem/ready") {
+      const kind = (message as { type?: string } | undefined)?.type;
+      if (kind === "ossschem/ready") {
         trace("webview connected");
+        // the picker is empty until it is told, and it is told on connect
+        void refreshWaveforms(true);
+      } else if (kind === "ossschem/useWaveform") {
+        void useWaveform(String((message as { uri?: unknown }).uri ?? ""));
       } else if (isValuesRequest(message)) {
         void answerValues(panel, message);
       } else if (isNetPicked(message)) {

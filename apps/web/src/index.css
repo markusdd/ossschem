@@ -1068,6 +1068,22 @@ input:disabled {
 .ossschem-kind-split .ossschem-node-body { fill: color-mix(in srgb, var(--port-color) 45%, var(--bg-raised)); }
 [class*="ossschem-kind-"] { --node-fill: color-mix(in srgb, var(--node-color) 12%, var(--bg-raised)); }
 .ossschem-kind-dot { display: inline-block; width: 7px; height: 7px; border-radius: 2px; background: var(--node-color); flex: none; }
+/* which dump the values come from, where the values are being read */
+.ossschem-waveform {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+.ossschem-waveform select {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+}
+
 .ossschem-hierarchy-actions { position: sticky; top: -8px; z-index: 1; background: var(--bg-raised); padding: 8px 0; }
 .ossschem-selection-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
 .ossschem-selection-actions button { font-size: 11px; }

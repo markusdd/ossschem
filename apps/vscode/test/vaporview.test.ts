@@ -1,22 +1,63 @@
 import { describe, expect, it } from "vitest";
-import { arrayShape, parseIndexSpec, pathCandidates, pickDocument } from "../src/vaporview.js";
+import { arrayShape, chooseDocument, documentLabels, openDocuments, parseIndexSpec, pathCandidates } from "../src/vaporview.js";
 
 describe("what vaporview answers", () => {
   it("takes the bare array of URIs that 1.5.4 returns", () => {
     // getAllDocumentUris() maps documents to uri.toString(); there is no wrapper
-    expect(pickDocument(["file:///a.fst", "file:///b.fst"])).toBe("file:///a.fst");
+    expect(openDocuments(["file:///a.fst", "file:///b.fst"])).toEqual(["file:///a.fst", "file:///b.fst"]);
   });
 
-  it("still takes the object shape the API doc describes", () => {
-    expect(pickDocument({ documents: ["file:///a.fst"], lastActiveDocument: "file:///b.fst" })).toBe("file:///b.fst");
-    expect(pickDocument({ documents: ["file:///a.fst"] })).toBe("file:///a.fst");
+  it("still takes the object shape the API doc describes, the active one first", () => {
+    expect(openDocuments({ documents: ["file:///a.fst"], lastActiveDocument: "file:///b.fst" }))
+      .toEqual(["file:///b.fst", "file:///a.fst"]);
+    expect(openDocuments({ documents: ["file:///a.fst"] })).toEqual(["file:///a.fst"]);
   });
 
   it("reports nothing rather than a bad URI when no waveform is open", () => {
-    expect(pickDocument([])).toBeUndefined();
-    expect(pickDocument(undefined)).toBeUndefined();
-    expect(pickDocument(null)).toBeUndefined();
-    expect(pickDocument({})).toBeUndefined();
+    for (const answer of [[], undefined, null, {}]) {
+      expect(openDocuments(answer)).toEqual([]);
+    }
+  });
+});
+
+describe("choosing between open waveforms", () => {
+  const a = "file:///dumps/a.fst";
+  const b = "file:///dumps/b.fst";
+
+  it("has nothing to choose with none open, and no question with one", () => {
+    expect(chooseDocument([], [])).toBeUndefined();
+    expect(chooseDocument([a], [])).toBe(a);
+  });
+
+  it("keeps to the one in use, so the target does not move with the focus", () => {
+    expect(chooseDocument([a, b], [a], b)).toBe(b);
+  });
+
+  it("drops a choice whose waveform has been closed", () => {
+    expect(chooseDocument([a, b], [b], "file:///dumps/gone.fst")).toBe(b);
+  });
+
+  it("starts from the one on screen, and otherwise from the first listed", () => {
+    expect(chooseDocument([a, b], [b])).toBe(b);
+    expect(chooseDocument([a, b], [])).toBe(a);
+  });
+});
+
+describe("naming the open waveforms", () => {
+  it("uses the file name", () => {
+    expect(documentLabels(["file:///dumps/a.fst"])).toEqual([{ uri: "file:///dumps/a.fst", label: "a.fst" }]);
+  });
+
+  it("adds the directory only where the names collide", () => {
+    expect(documentLabels(["file:///one/dump.fst", "file:///two/dump.fst", "file:///two/other.fst"])).toEqual([
+      { uri: "file:///one/dump.fst", label: "one/dump.fst" },
+      { uri: "file:///two/dump.fst", label: "two/dump.fst" },
+      { uri: "file:///two/other.fst", label: "other.fst" },
+    ]);
+  });
+
+  it("reads an escaped path the way it is written", () => {
+    expect(documentLabels(["file:///my%20sims/dump.fst"])[0].label).toBe("dump.fst");
   });
 });
 

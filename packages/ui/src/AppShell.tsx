@@ -20,7 +20,7 @@ import {
 } from "@ossschem/graph";
 import type { Design } from "@ossschem/ir";
 import type { CanvasController } from "@ossschem/render";
-import { NullProbeProvider, type ProbeProvider } from "./probe.js";
+import { NullProbeProvider, type ProbeProvider, type WaveformChoice } from "./probe.js";
 import { ResizablePanels } from "./ResizablePanels.js";
 import { HierarchyPane } from "./HierarchyPane.js";
 import { SchematicPane, type ViewportRequest } from "./SchematicPane.js";
@@ -108,6 +108,8 @@ export function AppShell(props: {
   const [pendingReveal, setPendingReveal] = useState<string | null>(null);
   /** The last values answered for the wires on screen, by signal. */
   const [values, setValues] = useState<Record<string, string>>({});
+  /** The dumps the host has open, and which one it is reading. */
+  const [waveforms, setWaveforms] = useState<WaveformChoice>({ documents: [] });
   const [showValues, setShowValues] = useState(false);
   /** Bumped when the cursor moves, to re-ask for values. */
   const [cursorTick, setCursorTick] = useState(0);
@@ -397,6 +399,18 @@ export function AppShell(props: {
     return probe.onCursorMoved(() => { setCursorTick((t) => t + 1); });
   }, [probe]);
 
+  /* Which dump the host is reading is the schematic's business: the values on
+   * the wires came from it, and switching it re-reads them. */
+  useEffect(() => {
+    if (probe.onWaveformsChanged === undefined) {
+      return;
+    }
+    return probe.onWaveformsChanged((state) => {
+      setWaveforms(state);
+      setCursorTick((t) => t + 1);
+    });
+  }, [probe]);
+
   useEffect(() => {
     if (ctl === null) {
       return;
@@ -575,6 +589,17 @@ export function AppShell(props: {
       </header>
       <ResizablePanels left={
         <HierarchyPane
+          waveform={probe.useWaveform === undefined ? undefined : (
+            <label className="ossschem-waveform">Waveform
+              <select value={waveforms.active ?? ""} disabled={waveforms.documents.length === 0}
+                title={waveforms.active ?? "No waveform is open in the viewer"}
+                onChange={(ev) => { probe.useWaveform?.(ev.target.value); }}>
+                {waveforms.documents.length === 0
+                  ? <option value="">none open</option>
+                  : waveforms.documents.map((doc) => <option key={doc.uri} value={doc.uri}>{doc.label}</option>)}
+              </select>
+            </label>
+          )}
           key={session?.path.join("/")}
           moduleName={top?.name} moduleKey={rootKey ?? undefined} items={hierarchy} selectedKey={rootSelected ? rootKey : selectedNode?.key ?? null}
           canIsolate={!!selectedNode} canExpand={canExpand} canExpandStructure={canExpandStructure} canCollapse={canCollapse}
@@ -693,7 +718,7 @@ export function AppShell(props: {
                     <li>Use <strong>Expand logic</strong> to reveal the internals of a selected process or instance.</li>
                     <li>Select a wire or port to inspect its source, drivers, loads, and bus width in the bottom pane.</li>
                     <li>An unpacked array arrives as one wire marked <strong>4×8b</strong> and separates at a splitter, one branch per element labelled <strong>[0]</strong>, <strong>[1]</strong>, and so on. A branch is that one element; the trunk, the splitter, and the array's own box are all of them.</li>
-                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice. An unpacked array asks which elements to add: Enter accepts the default, or type an index, a range like <strong>0-7</strong>, or a list like <strong>0,2,5</strong>. The other way round, <strong>Reveal in schematic</strong> on a signal in the waveform viewer (right click, or from its netlist tree) opens the instances between here and it in place and highlights it, without leaving the current scope.</li>}
+                    {canProbe && <li>Select a signal and press <strong>W</strong> (or the <strong>Waveform</strong> button) to add it to the waveform viewer. A signal already shown there is selected rather than added twice. An unpacked array asks which elements to add: Enter accepts the default, or type an index, a range like <strong>0-7</strong>, or a list like <strong>0,2,5</strong>. The other way round, <strong>Reveal in schematic</strong> on a signal in the waveform viewer (right click, or from its netlist tree) opens the instances between here and it in place and highlights it, without leaving the current scope. The <strong>Waveform</strong> picker at the top of the sidebar names the dump all of this reads and writes, and switches it when several are open.</li>}
                     {canAnnotate && <li>Toggle <strong>Values</strong> to label the wires with their value at the waveform cursor. The labels follow the cursor and cover the nets currently on screen. Values read as Verilog writes them (<strong>1'b1</strong>, <strong>8'h0f</strong>), and a signal that changes at the cursor shows the step across it (<strong>8'h0f\u2192a3</strong>). The value of the selected signal lights up with it and is written out in the bottom pane. An unpacked array has no single value, so its trunk carries none, but each branch off its splitter does.</li>}
                     <li>Use the <strong>Hide fanout</strong> control to keep large, noisy nets out of the initial view.</li>
                     <li>Choose a current, Tokyo, Nord, Arctic, Solarized, EDA, EDA Classic, Signal Contrast, Catppuccin, Neon Arcade, Fluorescent, 80s X, or Monokai palette from the theme selector; the preference is remembered.</li>

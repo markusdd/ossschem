@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AppShell, type ProbeProvider } from "@ossschem/ui";
+import { AppShell, type ProbeProvider, type WaveformChoice } from "@ossschem/ui";
 import type { Design } from "@ossschem/ir";
 import logoUrl from "../../../assets/ossschem_logo_gradient.svg";
 import bannerUrl from "../../../assets/ossschem_banner.svg";
@@ -24,6 +24,9 @@ host?.postMessage({ type: "ossschem/ready" });
  * app can subscribe and unsubscribe without the page caring how many. */
 const revealListeners = new Set<(instancePath: string[]) => void>();
 const cursorListeners = new Set<() => void>();
+const waveformListeners = new Set<(state: WaveformChoice) => void>();
+/** The last state the host sent, for a listener that subscribes after it. */
+let waveforms: WaveformChoice = { documents: [] };
 /** Outstanding value requests, by the id they were sent with. */
 const pendingValues = new Map<number, (values: Record<string, string | string[]>) => void>();
 let nextRequest = 0;
@@ -37,6 +40,10 @@ if (host !== undefined) {
       revealListeners.forEach((listener) => { listener(path); });
     } else if (message?.type === "ossschem/cursorMoved") {
       cursorListeners.forEach((listener) => { listener(); });
+    } else if (message?.type === "ossschem/waveforms") {
+      const state = message as unknown as WaveformChoice;
+      waveforms = { documents: state.documents ?? [], active: state.active };
+      waveformListeners.forEach((listener) => { listener(waveforms); });
     } else if (message?.type === "ossschem/values" && typeof message.id === "number") {
       pendingValues.get(message.id)?.(message.values ?? {});
       pendingValues.delete(message.id);
@@ -58,6 +65,14 @@ const probe: ProbeProvider | undefined =
         onCursorMoved: (cb) => {
           cursorListeners.add(cb);
           return () => { cursorListeners.delete(cb); };
+        },
+        onWaveformsChanged: (cb) => {
+          waveformListeners.add(cb);
+          cb(waveforms);
+          return () => { waveformListeners.delete(cb); };
+        },
+        useWaveform: (uri) => {
+          host.postMessage({ type: "ossschem/useWaveform", uri });
         },
         values: (paths) =>
           new Promise((resolve) => {
