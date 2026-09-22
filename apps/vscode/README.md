@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="images/banner.png" alt="ossschem RTL schematic tracer" width="100%">
+</p>
+
 # ossschem — RTL schematic tracer
 
 Opens an interactive schematic of a (System)Verilog design inside VS Code:

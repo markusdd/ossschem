@@ -15,6 +15,10 @@ jobs:
       valid: ${{ steps.tag.outputs.valid }}
       number: ${{ steps.tag.outputs.number }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - id: tag
         env:
           TAG: ${{ github.ref_name }}
@@ -25,6 +29,9 @@ jobs:
           else
             echo "valid=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Check release manifest versions
+        if: steps.tag.outputs.valid == 'true'
+        run: npm run version:check -- "${{ steps.tag.outputs.number }}"
 
   test:
     needs: version

@@ -91,11 +91,28 @@ one.
 
 ## Publish a release
 
-Push a tag such as `v1.2.3`. The release workflow runs tests, builds the
-Linux x64/ARM64, macOS x64/ARM64, and Windows x64 command archives plus the
-VSIX, then publishes them together as GitHub Release assets. The tag's version
-is used for every asset and for the version inside the VSIX. Tags must match
-`vMAJOR.MINOR.PATCH` exactly.
+Commit all intended source and asset changes first. Set the release version,
+commit the resulting manifest and lockfile changes, then tag that commit:
+
+```bash
+npm run version:set -- 1.2.3
+npm run version:check -- 1.2.3
+git add package.json apps/vscode/package.json package-lock.json
+git commit -m "Prepare v1.2.3"
+git tag v1.2.3
+git push origin main v1.2.3
+```
+
+The tag must point at the commit containing the version change and every
+intended release asset. Use a new version if that tag has already been
+published.
+
+The private implementation workspaces keep their internal `0.0.0` versions.
+The release workflow checks that the tag matches both release manifests and
+the lockfile. It then runs tests, builds Linux x64/ARM64, macOS x64/ARM64, and
+Windows x64 command archives plus the VSIX, and publishes them together as
+GitHub Release assets. The tag's version is used for every asset and for the
+version inside the VSIX. Tags must match `vMAJOR.MINOR.PATCH` exactly.
 
 ## How the webview page is built
 
