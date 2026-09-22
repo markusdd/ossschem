@@ -836,15 +836,10 @@ input:disabled {
 }
 
 .ossschem-cursor-value {
-  margin: 0.4rem 0;
-  color: var(--fg-muted);
-  font-size: 12px;
-}
-
-.ossschem-cursor-value strong {
   color: var(--accent);
   font-family: ui-monospace, monospace;
-  font-size: 13px;
+  /* a value is written the way Verilog writes it, not in the heading's caps */
+  text-transform: none;
 }
 
 .ossschem-junction {

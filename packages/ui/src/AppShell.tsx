@@ -584,7 +584,9 @@ export function AppShell(props: {
         />
       } bottom={
         <aside className="ossschem-source" aria-label="Source">
-          <h2>{info?.sourceKind === "declaration" ? "Declaration" : info?.sourceKind === "expression" ? "Expression source" : "Source"}{info?.fileBasename ? ` · ${info.fileBasename}:${info.span?.startLine}` : ""}</h2>
+          {/* the value rides along on the heading, so it stays in sight however small this pane is */}
+          <h2>{info?.sourceKind === "declaration" ? "Declaration" : info?.sourceKind === "expression" ? "Expression source" : "Source"}{info?.fileBasename ? ` · ${info.fileBasename}:${info.span?.startLine}` : ""}
+            {selectedValue !== undefined && <> · Value at cursor <strong className="ossschem-cursor-value">{selectedValue}</strong></>}</h2>
           {snip === null || info === null ? (
             <p className="ossschem-muted">{info?.title ?? "Select an element."}</p>
           ) : (
@@ -602,9 +604,6 @@ export function AppShell(props: {
             </pre>
           )}
           {info?.expr && <><h2>Expression</h2><p className="ossschem-muted">{info.expr}</p></>}
-          {selectedValue !== undefined && <p className="ossschem-cursor-value">
-            Value at cursor <strong>{selectedValue}</strong>
-          </p>}
           {info?.signal && <div className="ossschem-connections">
             {(["drivers", "loads"] as const).map(role => <section key={role} aria-label={role === "drivers" ? "Drivers" : "Loads"}>
               <h2>{role === "drivers" ? "Drivers" : "Loads"} ({info.signal![role].length})</h2>
