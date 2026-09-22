@@ -26,9 +26,11 @@ In the schematic, click to select and use **Fit** to restore the full view. Doub
 
 ## Install
 
-Releases are self-contained: a tarball with the `ossschem` command, the viewer
-it writes, and a Node runtime, and a `.vsix` for the VS Code extension. Neither
-needs npm. Verilator stays a system dependency, since it is what reads the RTL:
+Releases are self-contained: Linux and macOS tarballs, a Windows zip, and a
+`.vsix` for the VS Code extension. Each command archive includes the viewer it
+writes and a Node runtime, so neither install needs npm. Download them from
+[GitHub Releases](https://github.com/markusdd/ossschem/releases). Verilator
+stays a system dependency, since it is what reads the RTL:
 **5.046 or newer**, which is what `--json-only` has been tested against here
 (5.046 and 5.050). `ossschem build` detects the version, records it in the IR,
 and says so when it is older than that.

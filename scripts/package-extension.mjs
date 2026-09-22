@@ -24,6 +24,7 @@ cpSync(viewer, bundled, { recursive: true });
 copyFileSync(`${root}LICENSE`, `${root}apps/vscode/LICENSE`);
 
 const vsce = `${root}node_modules/.bin/vsce`;
-execFileSync(vsce, ["package", "--no-dependencies", ...process.argv.slice(2)], {
+// A release tag supplies the VSIX version without changing the checkout.
+execFileSync(vsce, ["package", "--no-dependencies", "--no-update-package-json", ...process.argv.slice(2)], {
   cwd: `${root}apps/vscode`, stdio: "inherit", shell: process.platform === "win32",
 });
