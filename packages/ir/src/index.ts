@@ -1,6 +1,6 @@
 export const packageName = "@ossschem/ir" as const;
 
-export { prettyConst, prettyNet, prettyPrimitive } from "./pretty.js";
+export { prettyConst, prettyNet, prettyPrimitive, type NetNames } from "./pretty.js";
 export { serializeDesign } from "./serialize.js";
 export {
   EMPTY_PRIMITIVE_GRAPH,

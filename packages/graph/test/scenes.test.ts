@@ -5,7 +5,7 @@ import { findBox, findNet, hopAtBoundary, snippet } from "@ossschem/graph";
 import { prettyNet, type Design } from "@ossschem/ir";
 import { ingestToIr, parseVerilatorDump } from "@ossschem/ingest-verilator";
 import { describe, expect, it } from "vitest";
-import { buildLevel0, buildLevel0Connectivity, defaultSession } from "../src/index.js";
+import { buildLevel0, buildLevel0Connectivity, defaultSession, flattenNodes, sceneEdges } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const design: Design = ingestToIr(
@@ -138,5 +138,19 @@ describe("visible hierarchy tracing", () => {
     const copy = structuredClone(design);
     copy.modules[copy.top].instances = copy.modules[copy.top].instances.filter(i => i.kind === "instance");
     expect(buildLevel0(copy).filter(n => n.kind === "instance")).toHaveLength(copy.modules[copy.top].instances.length);
+  });
+});
+
+describe("constants in a drawing", () => {
+  it("leaves out a constant nothing reads, such as a folded shift amount", () => {
+    const session = defaultSession(design);
+    const box = buildLevel0Connectivity(design).nodes.find(n => n.title === "proc_pointer_next")!;
+    session.expansion.add(box.key);
+    const graph = buildLevel0Connectivity(design, undefined, session);
+    const cells = findBox(design.modules[design.top], "proc_pointer_next")!.contents.cells;
+    // the shifter carries its amount as a parameter, so the constant it was
+    // lowered from drives nothing
+    expect(cells.filter(c => c.kind === "const").length).toBeGreaterThan(0);
+    expect(flattenNodes(graph.nodes).some(n => n.symbol === "const")).toBe(false);
   });
 });

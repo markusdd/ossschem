@@ -68,6 +68,8 @@ export function symbolSize(kind: string): { w: number; h: number } {
       return { w: 64, h: 52 };
     case "mux":
       return { w: 56, h: 64 };
+    case "const":
+      return { w: 48, h: 40 };
     case "dff":
     case "adff":
     case "dffe":
@@ -98,6 +100,10 @@ function glyph(kind: string): SVGGElement {
       break;
     case "mux":
       g.append(path("M22,8 L58,18 L58,46 L22,56 Z"), txt(40, 36, "1"));
+      break;
+    // a tie-off: a fixed value driving a wire, its value in the caption
+    case "const":
+      g.append(path("M20,20 H50 L62,32 L50,44 H20 Z"));
       break;
     case "dff":
     case "adff":

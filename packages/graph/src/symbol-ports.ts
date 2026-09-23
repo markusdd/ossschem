@@ -42,6 +42,8 @@ const PORTS: Record<string, Record<string, { vx: number; vy: number }>> = {
   shiftl: { A: { vx: 16, vy: 32 }, Y: { vx: 64, vy: 32 } },
   slice: { A: { vx: 16, vy: 32 }, Y: { vx: 64, vy: 32 } },
   concat: { A0: { vx: 14, vy: 21 }, A1: { vx: 14, vy: 43 }, Y: { vx: 66, vy: 32 } },
+  // the tag's point, where the wire leaves it
+  const: { Y: { vx: 62, vy: 32 } },
   dff: flipFlopPorts("dff"),
   adff: flipFlopPorts("adff"),
   dffe: flipFlopPorts("dffe"),

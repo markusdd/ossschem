@@ -341,6 +341,201 @@ function collectAssigns(root: VerilatorNode): AssignHit[] {
   return hits;
 }
 
+/* The value a register takes, read the way synthesis reads the block: a later
+ * assignment wins over an earlier one, a branch that assigns nothing holds
+ * what was there, and the whole body resolves to one expression. That
+ * expression is a mux tree -- which is what a state machine is, whatever its
+ * branches assign, constants included.
+ */
+function sameRef(a: WireRef | undefined, b: WireRef | undefined): boolean {
+  return a?.net === b?.net && a?.bits?.msb === b?.bits?.msb && a?.bits?.lsb === b?.bits?.lsb;
+}
+
+function selectBetween(
+  ctx: Ctx, select: WireRef | undefined, whenTrue: WireRef | undefined, whenFalse: WireRef | undefined,
+  span: SourceSpan,
+): WireRef | undefined {
+  if (select === undefined || sameRef(whenTrue, whenFalse)) {
+    return whenTrue ?? whenFalse;
+  }
+  if (whenTrue === undefined || whenFalse === undefined) {
+    return whenTrue ?? whenFalse;
+  }
+  const y = tempNet(ctx);
+  emit(ctx, {
+    id: ctx.mint.next("c"),
+    kind: "mux",
+    pins: { S: select, B: whenTrue, A: whenFalse, Y: { net: y } },
+    span,
+  });
+  return { net: y };
+}
+
+/** `case (sel) a, b:` is one branch, taken when the selector matches either. */
+function caseMatch(ctx: Ctx, selector: VerilatorNode | undefined, conds: VerilatorNode[]): WireRef | undefined {
+  const sel = lowerExpr(ctx, selector);
+  if (sel === undefined) {
+    return undefined;
+  }
+  let match: WireRef | undefined;
+  for (const cond of conds) {
+    const value = lowerExpr(ctx, cond);
+    if (value === undefined) {
+      continue;
+    }
+    const y = tempNet(ctx);
+    emit(ctx, {
+      id: ctx.mint.next("c"),
+      kind: "eq",
+      pins: { A: sel, B: value, Y: { net: y } },
+      span: spanOf(ctx, cond),
+      expr: `${prettyAst(selector, true)} == ${prettyAst(cond, true)}`,
+    });
+    const hit: WireRef = { net: y };
+    if (match === undefined) {
+      match = hit;
+      continue;
+    }
+    const or = tempNet(ctx);
+    emit(ctx, {
+      id: ctx.mint.next("c"),
+      kind: "or",
+      pins: { A: match, B: hit, Y: { net: or } },
+      span: spanOf(ctx, cond),
+    });
+    match = { net: or };
+  }
+  return match;
+}
+
+function caseValue(
+  ctx: Ctx, node: VerilatorNode, target: string, current: WireRef | undefined,
+): WireRef | undefined {
+  const selector = child(node, "exprp");
+  const items = asNodes(node.itemsp);
+  // items are exclusive, so only the default is ordered: it is what is left
+  const fallback = items.find((item) => asNodes(item.condsp).length === 0);
+  let value = fallback === undefined ? current : branchValue(ctx, asNodes(fallback.stmtsp), target, current);
+  for (const item of items) {
+    const conds = asNodes(item.condsp);
+    if (conds.length === 0) {
+      continue;
+    }
+    const taken = branchValue(ctx, asNodes(item.stmtsp), target, current);
+    if (sameRef(taken, value)) {
+      continue;
+    }
+    value = selectBetween(ctx, caseMatch(ctx, selector, conds), taken, value, spanOf(ctx, item));
+  }
+  return value;
+}
+
+function branchValue(
+  ctx: Ctx, stmts: VerilatorNode[], target: string, current: WireRef | undefined,
+): WireRef | undefined {
+  let value = current;
+  for (const stmt of stmts) {
+    if (stmt.type === "ASSIGNDLY" || stmt.type === "ASSIGN" || stmt.type === "ASSIGNW") {
+      if (lhsTarget(stmt)?.name === target) {
+        value = lowerExpr(ctx, child(stmt, "rhsp")) ?? value;
+      }
+    } else if (stmt.type === "IF") {
+      const whenTrue = branchValue(ctx, asNodes(stmt.thensp), target, value);
+      const whenFalse = branchValue(ctx, asNodes(stmt.elsesp), target, value);
+      value = selectBetween(ctx, lowerExpr(ctx, child(stmt, "condp")), whenTrue, whenFalse, spanOf(ctx, stmt));
+    } else if (stmt.type === "CASE") {
+      value = caseValue(ctx, stmt, target, value);
+    } else {
+      // BEGIN and any other wrapper: a block is its statements
+      value = branchValue(ctx, asNodes(stmt.stmtsp), target, value);
+    }
+  }
+  return value;
+}
+
+function assignsTo(stmts: VerilatorNode[], target: string): number {
+  let count = 0;
+  for (const stmt of stmts) {
+    if (stmt.type === "ASSIGNDLY" || stmt.type === "ASSIGN" || stmt.type === "ASSIGNW") {
+      if (lhsTarget(stmt)?.name === target) {
+        count += 1;
+      }
+      continue;
+    }
+    for (const value of Object.values(stmt)) {
+      count += assignsTo(asNodes(value), target);
+    }
+  }
+  return count;
+}
+
+function mentions(node: VerilatorNode | undefined, name: string): boolean {
+  if (node === undefined) {
+    return false;
+  }
+  if (node.type === "VARREF" && node.name === name) {
+    return true;
+  }
+  return Object.values(node).some((value) => asNodes(value).some((child) => mentions(child, name)));
+}
+
+/* The two halves of a reset block: what it does while reset is asserted, which
+ * is the flip-flop's reset value, and what it does the rest of the time, which
+ * is its data path.
+ *
+ * Which branch is which is not fixed: `if (rst_an_i == 1'b0) reset else work`
+ * reaches here as `if (rst_an_i) work else reset`, Verilator having folded the
+ * comparison into the branch order. A plain read of the reset signal is the
+ * released case; testing it any other way -- `!rst`, `rst == 0` -- is the
+ * asserted one.
+ */
+function splitReset(always: VerilatorNode, rstName: string | undefined): {
+  active: VerilatorNode[];
+  reset: VerilatorNode[];
+} {
+  // a named block is a wrapper, and the reset branch is inside it
+  const flatten = (stmts: VerilatorNode[]): VerilatorNode[] =>
+    stmts.flatMap((stmt) => (stmt.type === "BEGIN" ? flatten(asNodes(stmt.stmtsp)) : [stmt]));
+  const body = flatten(asNodes(always.stmtsp));
+  if (rstName === undefined) {
+    return { active: body, reset: [] };
+  }
+  const active: VerilatorNode[] = [];
+  const reset: VerilatorNode[] = [];
+  for (const stmt of body) {
+    const cond = stmt.type === "IF" ? child(stmt, "condp") : undefined;
+    if (cond === undefined || !mentions(cond, rstName)) {
+      active.push(stmt);
+      continue;
+    }
+    const released = cond.type === "VARREF" ? stmt.thensp : stmt.elsesp;
+    const asserted = cond.type === "VARREF" ? stmt.elsesp : stmt.thensp;
+    active.push(...flatten(asNodes(released)));
+    reset.push(...flatten(asNodes(asserted)));
+  }
+  return { active, reset };
+}
+
+/** The constant a register is reset to, read off the reset branch itself. */
+function resetValue(stmts: VerilatorNode[], target: string): string | undefined {
+  for (const stmt of stmts) {
+    if (stmt.type === "ASSIGNDLY" || stmt.type === "ASSIGN") {
+      const value = lhsTarget(stmt)?.name === target ? isConst(child(stmt, "rhsp")) : undefined;
+      if (value !== undefined) {
+        return prettyConst(value);
+      }
+      continue;
+    }
+    for (const value of Object.values(stmt)) {
+      const found = resetValue(asNodes(value), target);
+      if (found !== undefined) {
+        return found;
+      }
+    }
+  }
+  return undefined;
+}
+
 function clockNet(always: VerilatorNode, ctx: Ctx): WireRef | undefined {
   for (const tree of asNodes(always.sentreep)) {
     for (const sen of asNodes(tree.sensesp)) {
@@ -400,6 +595,7 @@ function lowerSeq(ctx: Ctx, always: VerilatorNode): void {
   const clk = clockNet(always, ctx);
   const rstName = resetNetName(always);
   const rst = rstName !== undefined ? bindVar(ctx, rstName) : undefined;
+  const { active, reset: resetBody } = splitReset(always, rst === undefined ? undefined : rstName);
   const assigns = collectAssigns(always);
   const byLhs = new Map<string, AssignHit[]>();
   for (const a of assigns) {
@@ -449,8 +645,19 @@ function lowerSeq(ctx: Ctx, always: VerilatorNode): void {
 
     const constHit = hits.find((h) => isConst(h.rhs) !== undefined);
     const dataHit = hits.find((h) => isConst(h.rhs) === undefined) ?? hits[0];
-    const rstVal = constHit !== undefined ? prettyConst(isConst(constHit.rhs) ?? "0") : undefined;
-    const d = lowerExpr(ctx, dataHit.rhs);
+    // the reset branch says what the reset value is; any other constant in the
+    // block is data, and reading it as a reset value would simply be wrong
+    const rstVal = resetValue(resetBody, qName)
+      ?? (constHit !== undefined ? prettyConst(isConst(constHit.rhs) ?? "0") : undefined);
+    const reset = rst !== undefined && rstVal !== undefined;
+    /* Assigned in one place, the value is that expression and the branch it
+     * sits in is an enable. Assigned in several -- a state machine, or any
+     * register written differently per case -- no single branch is the value:
+     * the mux tree over all of them is, holding Q where nothing assigns. */
+    const branched = assignsTo(active, qName) > 1
+      ? branchValue(ctx, active, qName, q)
+      : undefined;
+    const d = branched ?? lowerExpr(ctx, dataHit.rhs);
     const nestedEn = dataHit.ifConds.find((c) => condName(c) !== rstName);
     const pins: Primitive["pins"] = { Q: q };
     if (clk !== undefined) {
@@ -461,19 +668,18 @@ function lowerSeq(ctx: Ctx, always: VerilatorNode): void {
     }
     let kind: Primitive["kind"] = "dff";
     const params: Record<string, string | number> = {};
-    if (rst !== undefined && rstVal !== undefined) {
+    if (reset) {
       pins.ARST = rst;
-      params.RST_VAL = rstVal;
-      if (nestedEn !== undefined) {
+      params.RST_VAL = rstVal as string;
+      kind = "adff";
+      if (branched === undefined && nestedEn !== undefined) {
         const en = lowerExpr(ctx, nestedEn);
         if (en !== undefined) {
           pins.EN = en;
         }
         kind = "adffe";
-      } else {
-        kind = "adff";
       }
-    } else if (dataHit.ifConds.length > 0) {
+    } else if (branched === undefined && dataHit.ifConds.length > 0) {
       const en = lowerExpr(ctx, dataHit.ifConds[dataHit.ifConds.length - 1]);
       if (en !== undefined) {
         pins.EN = en;

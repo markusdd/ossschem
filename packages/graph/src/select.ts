@@ -1,4 +1,4 @@
-import { prettyNet, viewIdKey, type Design, type SourceSpan } from "@ossschem/ir";
+import { prettyNet, viewIdKey, type Design, type Module, type NetNames, type SourceSpan } from "@ossschem/ir";
 import { isPortLike, parseViewKey, type Level0Node } from "./level0.js";
 import { moduleAtKey, type ViewSession } from "./session.js";
 import { buildLevel0Connectivity } from "./connect.js";
@@ -18,6 +18,13 @@ export interface SelectionInfo {
   fileBasename?: string;
   sourceKind?: "declaration" | "expression";
   signal?: { netId: string; element?: number; drivers: SignalEndpoint[]; loads: SignalEndpoint[] };
+}
+
+/* A box's own graph knows only its temporaries, so the module says what the
+ * nets crossing into it are called -- an expression full of net ids reads as
+ * nothing at all. */
+function netNamer(mod: Module | undefined): NetNames {
+  return (netId) => mod?.nets.find((n) => n.id === netId)?.name;
 }
 
 function signalContext(design: Design, session: ViewSession, key: string) {
@@ -74,7 +81,7 @@ function signalInfo(design: Design, session: ViewSession, key: string): Selectio
     });
   return { title: declared?.name ?? temporary?.name ?? context.name, span,
     fileBasename: span?.file.split("/").pop(), sourceKind: declaration ? "declaration" : "expression",
-    expr: !declaration && box ? prettyNet(irId, box.contents) : undefined,
+    expr: !declaration && box ? prettyNet(irId, box.contents, netNamer(mod)) : undefined,
     signal: { netId, element: context.element, drivers: endpoints(sources, targets), loads: endpoints(targets, sources) } };
 }
 
@@ -336,7 +343,7 @@ export function selectionInfo(design: Design, session: ViewSession, key: string 
   const box = mod.boxes.find((b) => b.id === irId);
   if (box !== undefined) {
     const out = box.ports.find((p) => p.dir === "out");
-    const expr = out !== undefined ? prettyNet(out.net, box.contents) : undefined;
+    const expr = out !== undefined ? prettyNet(out.net, box.contents, netNamer(mod)) : undefined;
     return { title: box.name, span: box.span, expr, fileBasename: box.span.file.split("/").pop() };
   }
   const inst = mod.instances.find((i) => i.id === irId);
@@ -346,7 +353,7 @@ export function selectionInfo(design: Design, session: ViewSession, key: string 
   for (const b of mod.boxes) {
     const cell = b.contents.cells.find((c) => c.id === irId);
     if (cell !== undefined) {
-      const expr = cell.expr ?? prettyNet(cell.pins.Y?.net ?? cell.pins.Q?.net ?? "", b.contents);
+      const expr = cell.expr ?? prettyNet(cell.pins.Y?.net ?? cell.pins.Q?.net ?? "", b.contents, netNamer(mod));
       return { title: `${cell.kind}`, span: cell.span, expr, fileBasename: cell.span.file.split("/").pop() };
     }
   }

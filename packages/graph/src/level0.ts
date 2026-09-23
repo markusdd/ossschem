@@ -253,6 +253,8 @@ function symbolMin(kind: string | undefined): { w: number; h: number } {
       return { w: 64, h: 52 };
     case "mux":
       return { w: 56, h: 64 };
+    case "const":
+      return { w: 48, h: 40 };
     case "dff":
     case "adff":
     case "dffe":
@@ -286,13 +288,21 @@ function interior(box: AlwaysBox | AssignBox, boxKey: string, path: string[], mo
   interiorEdges: Level0Edge[];
 } {
   const children: Level0Node[] = [];
+  /* A constant is worth drawing where something reads it -- the branches of a
+   * state machine are constants, and a mux with nothing on its inputs says
+   * nothing. One that nothing reads is left out: a shift amount, say, which
+   * the shifter already carries as a parameter. */
+  const consumed = new Set(box.contents.cells.flatMap((c) =>
+    Object.entries(c.pins).filter(([name]) => name !== "Y" && name !== "Q").map(([, ref]) => ref.net)));
   for (const cell of box.contents.cells) {
-    if (cell.kind === "const") {
+    if (cell.kind === "const" && !consumed.has(cell.pins.Y?.net ?? "")) {
       continue;
     }
     const id = { path: [...path, box.name], irId: cell.id };
     const key = viewIdKey(id);
-    const { title, badge } = primitiveTitle(cell, mod);
+    const { title, badge } = cell.kind === "const"
+      ? { title: String(cell.params?.value ?? "0"), badge: "" }
+      : primitiveTitle(cell, mod);
     children.push(
       finishNode({
         key,

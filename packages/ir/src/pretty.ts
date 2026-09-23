@@ -42,8 +42,11 @@ function pinNet(cell: Primitive, pin: string): string | undefined {
   return cell.pins[pin]?.net;
 }
 
+/** What a net outside this graph is called, when the caller knows. */
+export type NetNames = (netId: string) => string | undefined;
+
 /** Pretty-print a primitive's output, parenthesizing nested binaries, not the root. */
-export function prettyPrimitive(cell: Primitive, graph: PrimitiveGraph, nested = false): string {
+export function prettyPrimitive(cell: Primitive, graph: PrimitiveGraph, nested = false, names?: NetNames): string {
   if (cell.expr !== undefined && cell.expr.length > 0) {
     return nested && /[ ?:&|^+<>]/.test(cell.expr) ? `(${cell.expr})` : cell.expr;
   }
@@ -59,10 +62,12 @@ export function prettyPrimitive(cell: Primitive, graph: PrimitiveGraph, nested =
       return "?";
     }
     const src = byOut.get(net);
-    if (src === undefined) {
-      return net;
+    // a register is where an expression ends: its own output reads as its name,
+    // which is what a value held over from the last cycle is called
+    if (src === undefined || src.pins.Q !== undefined) {
+      return names?.(net) ?? net;
     }
-    return prettyPrimitive(src, graph, nest);
+    return prettyPrimitive(src, graph, nest, names);
   };
   if (cell.kind === "const") {
     return prettyConst(String(cell.params?.value ?? "0"));
@@ -107,11 +112,11 @@ export function prettyPrimitive(cell: Primitive, graph: PrimitiveGraph, nested =
   return cell.kind;
 }
 
-export function prettyNet(netId: string, graph: PrimitiveGraph): string {
+export function prettyNet(netId: string, graph: PrimitiveGraph, names?: NetNames): string {
   const cell = [...graph.cells].reverse().find((c) => c.pins.Y?.net === netId || c.pins.Q?.net === netId);
   if (cell === undefined) {
-    return netId;
+    return names?.(netId) ?? netId;
   }
-  const s = prettyPrimitive(cell, graph, false);
+  const s = prettyPrimitive(cell, graph, false, names);
   return s.length > 120 ? `${s.slice(0, 117)}...` : s;
 }
