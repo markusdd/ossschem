@@ -34,11 +34,12 @@ from `PATH` instead.
 
 ## Install the VS Code extension
 
-Install `ossschem-vscode-<version>.vsix` with **Extensions: Install from
-VSIX…** in the command palette, or:
+`ossschem-<version>.vsix` is attached to each
+[GitHub release](https://github.com/markusdd/ossschem/releases). Install it
+with **Extensions: Install from VSIX…** in the command palette, or:
 
 ```bash
-code --install-extension ossschem-vscode-<version>.vsix
+code --install-extension ossschem-<version>.vsix
 ```
 
 The viewer is inside the `.vsix`; the extension needs nothing else. VS Code
@@ -82,7 +83,7 @@ the runtime, an archive is about 45 MB packed and 120 MB unpacked, nearly all
 of it the interpreter.
 
 ```bash
-npm run package:vsix                             # apps/vscode/ossschem-vscode-<version>.vsix
+npm run package:vsix                             # apps/vscode/ossschem-<version>.vsix
 npm run package:vsix -- 0.2.0                    # set the packaged version
 ```
 

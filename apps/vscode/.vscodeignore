@@ -9,3 +9,7 @@ tsconfig.tsbuildinfo
 # the extension hands the webview its own design; this one is the standalone
 # page's demo
 viewer/schematic-ir.json
+# README artwork: the marketplace and the extension details page load it from
+# the repository, so only the extension's own icon travels in the package
+images/banner.png
+images/vscode_vaporview_ossscheem_screenshot.png

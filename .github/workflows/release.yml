@@ -95,8 +95,42 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: vscode-extension
-          path: apps/vscode/ossschem-vscode-${{ needs.version.outputs.number }}.vsix
+          path: apps/vscode/ossschem-${{ needs.version.outputs.number }}.vsix
           if-no-files-found: error
+
+  # Off until the marketplace publisher accounts are in place: turn it on with
+  # the repository variable PUBLISH_EXTENSION set to "true" (Settings ->
+  # Secrets and variables -> Actions -> Variables), and add whichever tokens
+  # apply. Until then the .vsix rides on the GitHub release and is uploaded by
+  # hand. Each step also skips itself when its token is missing, so one
+  # marketplace can be published to without the other.
+  marketplace:
+    needs: [version, extension]
+    if: ${{ vars.PUBLISH_EXTENSION == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      VSIX: release/ossschem-${{ needs.version.outputs.number }}.vsix
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vscode-extension
+          path: release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Publishes the same file the release carries, rather than building a
+      # second one. With Entra ID instead of a token, drop VSCE_PAT and use
+      # `--azure-credential` after an azure/login step.
+      - name: Publish to the VS Code Marketplace
+        if: env.VSCE_PAT != ''
+        run: npx --yes @vscode/vsce publish --packagePath "$VSIX"
+      # VSCodium, Cursor, Windsurf and Theia install from Open VSX, not from
+      # the Microsoft marketplace
+      - name: Publish to Open VSX
+        if: env.OVSX_PAT != ''
+        run: npx --yes ovsx publish "$VSIX" -p "$OVSX_PAT"
 
   publish:
     needs: [version, command, extension]

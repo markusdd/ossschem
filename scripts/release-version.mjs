@@ -21,10 +21,13 @@ const version = requestedVersion ?? rootManifest.version;
 if (!versionPattern.test(version)) {
   throw new Error(`expected a major.minor.patch version, got ${version}`);
 }
-if (rootManifest.name !== "ossschem" || extensionManifest.name !== "ossschem-vscode"
-  || lock.name !== "ossschem" || lock.packages?.[""]?.name !== "ossschem"
-  || lock.packages?.["apps/vscode"]?.name !== "ossschem-vscode") {
-  throw new Error("release manifest or lockfile layout changed; update this script before releasing");
+/* The lockfile carries its own copy of both names and versions, so a rename
+ * that never reached it would ship a package built from a stale tree. Checked
+ * against the manifests rather than against literals: renaming is allowed,
+ * forgetting to run npm install after one is not. */
+if (lock.name !== rootManifest.name || lock.packages?.[""]?.name !== rootManifest.name
+  || lock.packages?.["apps/vscode"]?.name !== extensionManifest.name) {
+  throw new Error("package-lock.json does not match the manifests; run npm install before releasing");
 }
 
 const fields = [

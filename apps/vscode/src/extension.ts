@@ -7,7 +7,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import * as vscode from "vscode";
 
 import { arrayShape, chooseDocument, documentLabels, openDocuments, parseIndexSpec, pathCandidates,
@@ -28,15 +28,21 @@ function findViewer(context: vscode.ExtensionContext): string | undefined {
   return candidates.find((dir) => existsSync(join(dir, "index.html")));
 }
 
+/* The workspace is read through VS Code rather than through node, so a design
+ * opens wherever it lives: a checkout on disk, a remote over SSH, a repository
+ * browsed without cloning it. The extension's own files stay on node's fs --
+ * those are always local. */
+async function readWorkspaceFile(uri: vscode.Uri): Promise<string> {
+  return new TextDecoder().decode(await vscode.workspace.fs.readFile(uri));
+}
+
 /** Source text written next to the IR by `ossschem build`, when it is there. */
-function readSources(irPath: string): Record<string, string> {
-  const beside = join(dirname(irPath), "sources.json");
-  if (!existsSync(beside)) {
-    return {};
-  }
+async function readSources(ir: vscode.Uri): Promise<Record<string, string>> {
   try {
-    return JSON.parse(readFileSync(beside, "utf8")) as Record<string, string>;
+    const beside = vscode.Uri.joinPath(ir, "..", "sources.json");
+    return JSON.parse(await readWorkspaceFile(beside)) as Record<string, string>;
   } catch {
+    // not written, or not readable: the panes simply have no source to show
     return {};
   }
 }
@@ -463,7 +469,9 @@ function escapeHtml(text: string): string {
 }
 
 /** Fill a panel with the schematic for one IR file, however that panel was made. */
-function mountSchematic(context: vscode.ExtensionContext, panel: vscode.WebviewPanel, uri: vscode.Uri): void {
+async function mountSchematic(
+  context: vscode.ExtensionContext, panel: vscode.WebviewPanel, uri: vscode.Uri,
+): Promise<void> {
   const name = uri.path.split("/").pop() ?? "";
   const fail = (message: string): void => {
     trace(`  ${message}`);
@@ -477,16 +485,20 @@ function mountSchematic(context: vscode.ExtensionContext, panel: vscode.WebviewP
     return;
   }
   let design: unknown;
+  let sources: Record<string, string>;
   try {
-    design = JSON.parse(readFileSync(uri.fsPath, "utf8"));
+    design = JSON.parse(await readWorkspaceFile(uri));
+    sources = await readSources(uri);
   } catch (err) {
     fail(`could not read ${name}: ${String(err)}`);
     return;
   }
 
   panel.webview.options = {
+    // the design and its sources are embedded in the page, so the viewer
+    // bundle is the only thing the webview loads from disk
     enableScripts: true,
-    localResourceRoots: [vscode.Uri.file(viewerRoot), vscode.Uri.file(dirname(uri.fsPath))],
+    localResourceRoots: [vscode.Uri.file(viewerRoot)],
   };
   trace(`opened ${name} with the viewer from ${viewerRoot}`);
   panels.add(panel);
@@ -522,7 +534,7 @@ function mountSchematic(context: vscode.ExtensionContext, panel: vscode.WebviewP
     cspSource: panel.webview.cspSource,
     nonce: randomBytes(16).toString("base64"),
     design,
-    sources: readSources(uri.fsPath),
+    sources,
   });
 }
 
@@ -536,8 +548,8 @@ class SchematicEditorProvider implements vscode.CustomReadonlyEditorProvider {
     return { uri, dispose: () => { /* the webview holds no handle on the file */ } };
   }
 
-  resolveCustomEditor(document: vscode.CustomDocument, panel: vscode.WebviewPanel): void {
-    mountSchematic(this.context, panel, document.uri);
+  async resolveCustomEditor(document: vscode.CustomDocument, panel: vscode.WebviewPanel): Promise<void> {
+    await mountSchematic(this.context, panel, document.uri);
   }
 }
 

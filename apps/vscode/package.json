@@ -1,9 +1,9 @@
 {
-  "name": "ossschem-vscode",
+  "name": "ossschem",
   "displayName": "ossschem",
   "description": "Interactive RTL schematics, source mapping, and vaporview waveform cross probing",
-  "version": "0.5.0",
-  "publisher": "ossschem",
+  "version": "0.6.0",
+  "publisher": "markusdd",
   "icon": "images/icon.png",
   "license": "MIT",
   "repository": {
@@ -14,8 +14,21 @@
   "engines": {
     "vscode": "^1.90.0"
   },
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
   "categories": [
     "Visualization"
+  ],
+  "keywords": [
+    "verilog",
+    "systemverilog",
+    "rtl",
+    "schematic",
+    "verilator"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
