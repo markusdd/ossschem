@@ -1,9 +1,10 @@
 {
   "name": "ossschem-vscode",
   "displayName": "ossschem",
-  "description": "RTL schematic tracer webview (opens .ir.json)",
-  "version": "0.2.0",
+  "description": "Interactive RTL schematics, source mapping, and vaporview waveform cross probing",
+  "version": "0.4.0",
   "publisher": "ossschem",
+  "icon": "images/icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",

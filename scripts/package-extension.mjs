@@ -13,6 +13,8 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const viewer = `${root}packages/cli/viewer`;
 const bundled = `${root}apps/vscode/viewer`;
+const imageRef = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(process.env.GITHUB_REF_NAME ?? "")
+  ? process.env.GITHUB_REF_NAME : "main";
 
 execFileSync("npm", ["run", "build"], { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
 if (!existsSync(`${viewer}/index.html`)) {
@@ -24,6 +26,13 @@ cpSync(viewer, bundled, { recursive: true });
 copyFileSync(`${root}LICENSE`, `${root}apps/vscode/LICENSE`);
 
 const vsce = `${root}node_modules/.bin/vsce`;
-execFileSync(vsce, ["package", "--no-dependencies", ...process.argv.slice(2)], {
+// A release tag supplies the VSIX version without changing the checkout.
+execFileSync(vsce, [
+  "package", "--no-dependencies", "--no-update-package-json",
+  // vsce otherwise resolves README images from the repository root, while
+  // this extension (and its banner) live under apps/vscode.
+  "--baseImagesUrl", `https://raw.githubusercontent.com/markusdd/ossschem/${imageRef}/apps/vscode`,
+  ...process.argv.slice(2),
+], {
   cwd: `${root}apps/vscode`, stdio: "inherit", shell: process.platform === "win32",
 });

@@ -21,8 +21,14 @@ ln -s /opt/ossschem-<version>-linux-x64/bin/ossschem ~/.local/bin/ossschem
 ossschem --help
 ```
 
-The tree is relocatable and the launcher resolves its own directory through
-symlinks, so it can be moved, shared read-only, or mounted on a build machine.
+On Windows, unpack `ossschem-<version>-win-x64.zip` and run
+`ossschem-<version>-win-x64\bin\ossschem.cmd`. Add that `bin` directory to
+`PATH` to use `ossschem` from any terminal. The Windows archive also includes
+Node; Verilator must be installed separately on every platform.
+
+The tree is relocatable. On Linux and macOS, the launcher resolves its own
+directory through symlinks, so it can be moved, shared read-only, or mounted on
+a build machine.
 A build without the bundled runtime (`-nodeless`) is about 2 MB and uses `node`
 from `PATH` instead.
 
@@ -61,26 +67,52 @@ viewer from `packages/cli/viewer` when it is not bundled beside itself.
 
 ```bash
 npm run package:dist                             # host platform, runtime included
-npm run package:dist -- --platform linux-arm64   # also darwin-x64, darwin-arm64
+npm run package:dist -- --platform linux-arm64   # on a Linux ARM64 host
 npm run package:dist -- --no-runtime             # ~2 MB; uses node from PATH
-npm run package:dist -- --version 1.2.3          # names the tarball
+npm run package:dist -- --version 1.2.3          # names the archive
 ```
 
-Writes `dist/ossschem-<version>-<platform>.tar.gz`. The CLI is bundled into one
-ESM file with every dependency inlined, the viewer is copied beside it, and the
-launcher prefers `runtime/bin/node` over anything on `PATH`. The first run
-downloads the pinned Node release from nodejs.org and verifies it against the
-published SHA-256; later runs reuse `dist/.cache`. With the runtime that is
-about 45 MB packed and 120 MB unpacked, nearly all of it the interpreter.
-Windows is not packaged.
+Writes `dist/ossschem-<version>-<platform>.tar.gz`, or `.zip` on Windows. Build
+each platform on a matching host so its launcher can be tested. The CLI is
+bundled into one ESM file with every dependency inlined, the viewer is copied
+beside it, and the launcher prefers the bundled Node over anything on `PATH`.
+The first packaging run downloads the pinned Node release from nodejs.org and
+verifies it against the published SHA-256; later runs reuse `dist/.cache`. With
+the runtime, an archive is about 45 MB packed and 120 MB unpacked, nearly all
+of it the interpreter.
 
 ```bash
 npm run package:vsix                             # apps/vscode/ossschem-vscode-<version>.vsix
-npm run package:vsix -- 0.2.0                    # bump the version while packaging
+npm run package:vsix -- 0.2.0                    # set the packaged version
 ```
 
 Both commands build the viewer first, so a package always carries a current
 one.
+
+## Publish a release
+
+Commit all intended source and asset changes first. Set the release version,
+commit the resulting manifest and lockfile changes, then tag that commit:
+
+```bash
+npm run version:set -- 1.2.3
+npm run version:check -- 1.2.3
+git add package.json apps/vscode/package.json package-lock.json
+git commit -m "Prepare v1.2.3"
+git tag v1.2.3
+git push origin main v1.2.3
+```
+
+The tag must point at the commit containing the version change and every
+intended release asset. Use a new version if that tag has already been
+published.
+
+The private implementation workspaces keep their internal `0.0.0` versions.
+The release workflow checks that the tag matches both release manifests and
+the lockfile. It then runs tests, builds Linux x64/ARM64, macOS x64/ARM64, and
+Windows x64 command archives plus the VSIX, and publishes them together as
+GitHub Release assets. The tag's version is used for every asset and for the
+version inside the VSIX. Tags must match `vMAJOR.MINOR.PATCH` exactly.
 
 ## How the webview page is built
 

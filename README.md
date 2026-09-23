@@ -8,9 +8,13 @@ ossschem is an open-source RTL schematic tracer - for now for (System-)Verilog d
 
 The viewer combines schematic navigation with source mapping: select a port, pin, wire, or component to inspect its declaration, expression, drivers, loads, and source code. It is designed for exploring large RTL designs while keeping the initial view readable and focused.
 
-It is planned to support other input formats and also waveform coss-probing.
+In VS Code, the extension also connects the schematic to waveform dumps through
+[vaporview](https://marketplace.visualstudio.com/items?itemName=lramseyer.vaporview):
+send a selected signal to the waveform, reveal a waveform signal in the
+schematic, and inspect values at the waveform cursor. Other RTL input formats
+are planned.
 
-![ossschem interactive schematic viewer](assets/screenshot.png)
+![ossschem interactive schematic viewer](assets/vscode_vaporview_ossscheem_screenshot.png)
 
 ## Quick start
 
@@ -24,11 +28,25 @@ From a checkout, `npm install && npm run dev` serves the viewer at [http://local
 
 In the schematic, click to select and use **Fit** to restore the full view. Double-click a process or instance, or press `E`, to expand its structure; press `L` to expand its logic. Select a pin or wire and press `F` or `B` to trace forward or backward. Use **Isolate** or `I` to focus on one component, and `Backspace` to return to the parent view. The **Help** button or `H` shows all shortcuts.
 
+### Waveform cross probing in VS Code
+
+Install the ossschem VS Code extension and vaporview, then open a schematic IR
+and a waveform dump. Select a schematic signal and press `W` (or use
+**Waveform**) to add it to the dump. To go the other way, right-click a waveform
+signal and choose **Reveal in schematic**; ossschem opens the path to it,
+highlights the signal, and shows its source, drivers, and loads. Turn on
+**Values** to label visible wires with their values at the waveform cursor.
+When several dumps are open, the sidebar's **Waveform** picker chooses which
+one these actions use. See the [extension guide](apps/vscode/README.md) for
+array signals and the other cross probing controls.
+
 ## Install
 
-Releases are self-contained: a tarball with the `ossschem` command, the viewer
-it writes, and a Node runtime, and a `.vsix` for the VS Code extension. Neither
-needs npm. Verilator stays a system dependency, since it is what reads the RTL:
+Releases are self-contained: Linux and macOS tarballs, a Windows zip, and a
+`.vsix` for the VS Code extension. Each command archive includes the viewer it
+writes and a Node runtime, so neither install needs npm. Download them from
+[GitHub Releases](https://github.com/markusdd/ossschem/releases). Verilator
+stays a system dependency, since it is what reads the RTL:
 **5.046 or newer**, which is what `--json-only` has been tested against here
 (5.046 and 5.050). `ossschem build` detects the version, records it in the IR,
 and says so when it is older than that.

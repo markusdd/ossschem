@@ -1,0 +1,121 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.tag.outputs.valid }}
+      number: ${{ steps.tag.outputs.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [[ "$TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+            echo "number=${TAG#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check release manifest versions
+        if: steps.tag.outputs.valid == 'true'
+        run: npm run version:check -- "${{ steps.tag.outputs.number }}"
+
+  test:
+    needs: version
+    if: needs.version.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  command:
+    needs: [version, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux-x64
+          - runner: ubuntu-24.04-arm
+            platform: linux-arm64
+          - runner: macos-15-intel
+            platform: darwin-x64
+          - runner: macos-15
+            platform: darwin-arm64
+          - runner: windows-2022
+            platform: win-x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Package command and viewer
+        run: npm run package:dist -- --version "${{ needs.version.outputs.number }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: command-${{ matrix.platform }}
+          path: |
+            dist/ossschem-${{ needs.version.outputs.number }}-${{ matrix.platform }}.tar.gz
+            dist/ossschem-${{ needs.version.outputs.number }}-${{ matrix.platform }}.zip
+          if-no-files-found: error
+
+  extension:
+    needs: [version, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Package VS Code extension
+        run: npm run package:vsix -- "${{ needs.version.outputs.number }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension
+          path: apps/vscode/ossschem-vscode-${{ needs.version.outputs.number }}.vsix
+          if-no-files-found: error
+
+  publish:
+    needs: [version, command, extension]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: command-*
+          path: release
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: vscode-extension
+          path: release
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" release/* --verify-tag --generate-notes

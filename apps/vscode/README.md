@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="images/banner.png" alt="ossschem RTL schematic tracer" width="100%">
+</p>
+
 # ossschem — RTL schematic tracer
 
 Opens an interactive schematic of a (System)Verilog design inside VS Code:
@@ -10,6 +14,10 @@ With [vaporview](https://marketplace.visualstudio.com/items?itemName=lramseyer.v
 installed it also works with a waveform dump: signals go from the schematic to
 the waveform, a signal in the waveform is revealed in the schematic, and every
 wire can be labelled with its value at the cursor.
+
+<p align="center">
+  <img src="images/vscode_vaporview_ossscheem_screenshot.png" alt="ossschem vs code with vaporview" width="100%">
+</p>
 
 ## 1. Build a schematic from your design
 
