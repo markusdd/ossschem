@@ -105,6 +105,19 @@ function prettyAst(node: VerilatorNode | undefined, nested: boolean, shiftAmt = 
   return node.type.toLowerCase();
 }
 
+function constNet(ctx: Ctx, value: string, span: SourceSpan): WireRef {
+  const y = tempNet(ctx);
+  emit(ctx, {
+    id: ctx.mint.next("c"),
+    kind: "const",
+    params: { value: prettyConst(value) },
+    pins: { Y: { net: y } },
+    span,
+    expr: prettyConst(value),
+  });
+  return { net: y };
+}
+
 function bindVar(ctx: Ctx, name: string): WireRef | undefined {
   const net = ctx.netsByName.get(name);
   return net === undefined ? undefined : { net: net.id };
@@ -126,17 +139,7 @@ export function lowerExpr(ctx: Ctx, node: VerilatorNode | undefined): WireRef | 
   } else if (node.type === "EXTEND") {
     out = lowerExpr(ctx, child(node, "lhsp") ?? child(node, "fromp"));
   } else if (node.type === "CONST") {
-    const y = tempNet(ctx);
-    const value = typeof node.name === "string" ? node.name : "0";
-    emit(ctx, {
-      id: ctx.mint.next("c"),
-      kind: "const",
-      params: { value: prettyConst(value) },
-      pins: { Y: { net: y } },
-      span: spanOf(ctx, node),
-      expr: prettyAst(node, false),
-    });
-    out = { net: y };
+    out = constNet(ctx, typeof node.name === "string" ? node.name : "0", spanOf(ctx, node));
   } else if (node.type === "NOT") {
     const a = lowerExpr(ctx, child(node, "lhsp"));
     if (a !== undefined) {
@@ -297,16 +300,6 @@ function isConst(node: VerilatorNode | undefined): string | undefined {
   return node?.type === "CONST" && typeof node.name === "string" ? node.name : undefined;
 }
 
-function condName(cond: VerilatorNode | undefined): string | undefined {
-  if (cond?.type === "VARREF") {
-    return cond.name;
-  }
-  if (cond?.type === "NOT") {
-    return condName(child(cond, "lhsp"));
-  }
-  return undefined;
-}
-
 interface AssignHit {
   node: VerilatorNode;
   rhs: VerilatorNode | undefined;
@@ -341,45 +334,123 @@ function collectAssigns(root: VerilatorNode): AssignHit[] {
   return hits;
 }
 
-/* The value a register takes, read the way synthesis reads the block: a later
+/* The value a signal takes, read the way synthesis reads the block: a later
  * assignment wins over an earlier one, a branch that assigns nothing holds
  * what was there, and the whole body resolves to one expression. That
  * expression is a mux tree -- which is what a state machine is, whatever its
- * branches assign, constants included.
+ * branches assign, constants included, and whatever process it sits in.
  */
 function sameRef(a: WireRef | undefined, b: WireRef | undefined): boolean {
   return a?.net === b?.net && a?.bits?.msb === b?.bits?.msb && a?.bits?.lsb === b?.bits?.lsb;
 }
 
+/** The select is lowered only when there is something to select between. */
 function selectBetween(
-  ctx: Ctx, select: WireRef | undefined, whenTrue: WireRef | undefined, whenFalse: WireRef | undefined,
+  ctx: Ctx, select: () => WireRef | undefined, whenTrue: WireRef | undefined, whenFalse: WireRef | undefined,
   span: SourceSpan,
 ): WireRef | undefined {
-  if (select === undefined || sameRef(whenTrue, whenFalse)) {
+  if (sameRef(whenTrue, whenFalse) || whenTrue === undefined || whenFalse === undefined) {
     return whenTrue ?? whenFalse;
   }
-  if (whenTrue === undefined || whenFalse === undefined) {
-    return whenTrue ?? whenFalse;
+  const s = select();
+  if (s === undefined) {
+    return whenTrue;
   }
   const y = tempNet(ctx);
   emit(ctx, {
     id: ctx.mint.next("c"),
     kind: "mux",
-    pins: { S: select, B: whenTrue, A: whenFalse, Y: { net: y } },
+    pins: { S: s, B: whenTrue, A: whenFalse, Y: { net: y } },
     span,
   });
   return { net: y };
 }
 
+/** A literal as its bits, MSB first, with `x`/`z` kept: `2'b1z` is "1z". */
+function literalBits(text: string | undefined): string | undefined {
+  const m = text === undefined ? null : /^(\d+)'s?([bhod])([0-9a-fA-FxXzZ?_]+)$/.exec(text);
+  if (m === null) {
+    return undefined;
+  }
+  const width = Number(m[1]);
+  const digits = m[3].replace(/_/g, "").toLowerCase().replace(/\?/g, "z");
+  let bits = "";
+  if (m[2] === "d") {
+    if (!/^\d+$/.test(digits)) {
+      return undefined;
+    }
+    bits = BigInt(digits).toString(2);
+  } else {
+    const radix = m[2] === "b" ? 2 : m[2] === "o" ? 8 : 16;
+    const per = Math.log2(radix);
+    for (const d of digits) {
+      const v = parseInt(d, radix);
+      if (d === "x" || d === "z") {
+        bits += d.repeat(per);
+      } else if (Number.isNaN(v)) {
+        return undefined;
+      } else {
+        bits += v.toString(2).padStart(per, "0");
+      }
+    }
+  }
+  return bits.length >= width ? bits.slice(bits.length - width) : bits.padStart(width, "0");
+}
+
+function selectorWidth(ctx: Ctx, selector: VerilatorNode | undefined): number | undefined {
+  if (selector?.type !== "VARREF" || typeof selector.name !== "string") {
+    return undefined;
+  }
+  const width = ctx.netsByName.get(selector.name)?.width;
+  return width === undefined ? undefined : Math.abs(width.msb - width.lsb) + 1;
+}
+
+/** Items that name every value of the selector leave nothing for a default. */
+function coversAll(ctx: Ctx, selector: VerilatorNode | undefined, items: VerilatorNode[]): boolean {
+  const width = selectorWidth(ctx, selector);
+  if (width === undefined || width > 16) {
+    return false;
+  }
+  const seen = new Set<string>();
+  for (const cond of items.flatMap((item) => asNodes(item.condsp))) {
+    const bits = literalBits(isConst(cond));
+    if (bits === undefined || /[xz]/.test(bits)) {
+      return false;
+    }
+    seen.add(bits.slice(-width).padStart(width, "0"));
+  }
+  return seen.size === 2 ** width;
+}
+
 /** `case (sel) a, b:` is one branch, taken when the selector matches either. */
-function caseMatch(ctx: Ctx, selector: VerilatorNode | undefined, conds: VerilatorNode[]): WireRef | undefined {
+function caseMatch(
+  ctx: Ctx, selector: VerilatorNode | undefined, conds: VerilatorNode[], kwd: unknown,
+): WireRef | undefined {
   const sel = lowerExpr(ctx, selector);
   if (sel === undefined) {
     return undefined;
   }
+  // bits a casez/casex item leaves open are masked off before the compare
+  const wildcard = kwd === "casez" ? /z/ : kwd === "casex" ? /[xz]/ : undefined;
   let match: WireRef | undefined;
   for (const cond of conds) {
-    const value = lowerExpr(ctx, cond);
+    const span = spanOf(ctx, cond);
+    const bits = wildcard === undefined ? undefined : literalBits(isConst(cond));
+    const open = bits !== undefined && wildcard !== undefined && wildcard.test(bits)
+      ? [...bits].map((b) => wildcard.test(b)) : undefined;
+    const masked = bits !== undefined && open !== undefined;
+    let lhs: WireRef = sel;
+    let value: WireRef | undefined;
+    if (masked) {
+      const care = open.map((o) => (o ? "0" : "1")).join("");
+      const mask = constNet(ctx, `${bits.length}'b${care}`, span);
+      const and = tempNet(ctx);
+      emit(ctx, { id: ctx.mint.next("c"), kind: "and", pins: { A: sel, B: mask, Y: { net: and } }, span });
+      lhs = { net: and };
+      value = constNet(ctx, `${bits.length}'b${[...bits].map((b, i) => (open[i] ? "0" : b)).join("")}`, span);
+    } else {
+      value = lowerExpr(ctx, cond);
+    }
     if (value === undefined) {
       continue;
     }
@@ -387,9 +458,9 @@ function caseMatch(ctx: Ctx, selector: VerilatorNode | undefined, conds: Verilat
     emit(ctx, {
       id: ctx.mint.next("c"),
       kind: "eq",
-      pins: { A: sel, B: value, Y: { net: y } },
-      span: spanOf(ctx, cond),
-      expr: `${prettyAst(selector, true)} == ${prettyAst(cond, true)}`,
+      pins: { A: lhs, B: value, Y: { net: y } },
+      span,
+      expr: `${prettyAst(selector, true)} ${masked ? "==?" : "=="} ${prettyAst(cond, true)}`,
     });
     const hit: WireRef = { net: y };
     if (match === undefined) {
@@ -413,19 +484,26 @@ function caseValue(
 ): WireRef | undefined {
   const selector = child(node, "exprp");
   const items = asNodes(node.itemsp);
-  // items are exclusive, so only the default is ordered: it is what is left
+  const branches = items.filter((item) => asNodes(item.condsp).length > 0);
   const fallback = items.find((item) => asNodes(item.condsp).length === 0);
-  let value = fallback === undefined ? current : branchValue(ctx, asNodes(fallback.stmtsp), target, current);
-  for (const item of items) {
-    const conds = asNodes(item.condsp);
-    if (conds.length === 0) {
-      continue;
-    }
+  // `unique` and `priority` promise a match: a default that does nothing for
+  // this signal -- Verilator adds one carrying the assertion -- is not a path
+  const promised = node.unique === true || node.priority === true;
+  const usable = fallback !== undefined && !(promised && assignsTo(asNodes(fallback.stmtsp), target) === 0);
+  let rest = branches;
+  let value = current;
+  if (usable) {
+    value = branchValue(ctx, asNodes(fallback.stmtsp), target, current);
+  } else if (branches.length > 0 && (promised || coversAll(ctx, selector, branches))) {
+    // a full case needs no fallback: its last item is what is left
+    value = branchValue(ctx, asNodes(branches[branches.length - 1].stmtsp), target, current);
+    rest = branches.slice(0, -1);
+  }
+  // the first item that matches wins, so it is the outermost select
+  for (const item of [...rest].reverse()) {
     const taken = branchValue(ctx, asNodes(item.stmtsp), target, current);
-    if (sameRef(taken, value)) {
-      continue;
-    }
-    value = selectBetween(ctx, caseMatch(ctx, selector, conds), taken, value, spanOf(ctx, item));
+    value = selectBetween(ctx, () => caseMatch(ctx, selector, asNodes(item.condsp), node.kwd), taken, value,
+      spanOf(ctx, item));
   }
   return value;
 }
@@ -442,7 +520,7 @@ function branchValue(
     } else if (stmt.type === "IF") {
       const whenTrue = branchValue(ctx, asNodes(stmt.thensp), target, value);
       const whenFalse = branchValue(ctx, asNodes(stmt.elsesp), target, value);
-      value = selectBetween(ctx, lowerExpr(ctx, child(stmt, "condp")), whenTrue, whenFalse, spanOf(ctx, stmt));
+      value = selectBetween(ctx, () => lowerExpr(ctx, child(stmt, "condp")), whenTrue, whenFalse, spanOf(ctx, stmt));
     } else if (stmt.type === "CASE") {
       value = caseValue(ctx, stmt, target, value);
     } else {
@@ -578,9 +656,13 @@ function connectTo(ctx: Ctx, src: WireRef | undefined, destName: string, span: S
   if (src.net === dest.net) {
     return;
   }
-  const last = ctx.cells.find((c) => c.pins.Y?.net === src.net);
+  // only a temporary nothing else reads is renamed: a named signal keeps its own driver
+  const read = ctx.cells.some((c) => Object.entries(c.pins).some(([pin, ref]) => pin !== "Y" && ref.net === src.net));
+  const last = ctx.temps.some((t) => t.id === src.net) && src.bits === undefined && !read
+    ? ctx.cells.find((c) => c.pins.Y?.net === src.net) : undefined;
   if (last !== undefined) {
     retargetY(last, dest.net);
+    ctx.temps = ctx.temps.filter((t) => t.id !== src.net);
     return;
   }
   emit(ctx, {
@@ -589,6 +671,34 @@ function connectTo(ctx: Ctx, src: WireRef | undefined, destName: string, span: S
     pins: { A: src, Y: dest },
     span,
   });
+}
+
+/* A register that keeps its value unless something selects a new one has an
+ * enable: the outermost mux holding Q is that enable, and what it selects is D.
+ * Read off the mux tree, it is the same for an `if`, a `case` item or an
+ * `else`, however deep. */
+function peelEnable(ctx: Ctx, d: WireRef, q: WireRef, span: SourceSpan): { d: WireRef; en?: WireRef } {
+  const top = d.bits === undefined ? ctx.cells.find((c) => c.kind === "mux" && c.pins.Y?.net === d.net) : undefined;
+  const shared = ctx.cells.some((c) => c !== top && Object.entries(c.pins).some(([, ref]) => ref.net === d.net));
+  if (top === undefined || shared) {
+    return { d };
+  }
+  let en: WireRef;
+  let data: WireRef;
+  if (sameRef(top.pins.A, q)) {
+    en = top.pins.S;
+    data = top.pins.B;
+  } else if (sameRef(top.pins.B, q)) {
+    const y = tempNet(ctx);
+    emit(ctx, { id: ctx.mint.next("c"), kind: "not", pins: { A: top.pins.S, Y: { net: y } }, span });
+    en = { net: y };
+    data = top.pins.A;
+  } else {
+    return { d };
+  }
+  ctx.cells = ctx.cells.filter((c) => c !== top);
+  ctx.temps = ctx.temps.filter((t) => t.id !== d.net);
+  return { d: data, en };
 }
 
 function lowerSeq(ctx: Ctx, always: VerilatorNode): void {
@@ -650,61 +760,60 @@ function lowerSeq(ctx: Ctx, always: VerilatorNode): void {
     const rstVal = resetValue(resetBody, qName)
       ?? (constHit !== undefined ? prettyConst(isConst(constHit.rhs) ?? "0") : undefined);
     const reset = rst !== undefined && rstVal !== undefined;
-    /* Assigned in one place, the value is that expression and the branch it
-     * sits in is an enable. Assigned in several -- a state machine, or any
-     * register written differently per case -- no single branch is the value:
-     * the mux tree over all of them is, holding Q where nothing assigns. */
-    const branched = assignsTo(active, qName) > 1
-      ? branchValue(ctx, active, qName, q)
-      : undefined;
-    const d = branched ?? lowerExpr(ctx, dataHit.rhs);
-    const nestedEn = dataHit.ifConds.find((c) => condName(c) !== rstName);
-    const pins: Primitive["pins"] = { Q: q };
+    const span = spanOf(ctx, dataHit.node);
+    // D is the mux tree over every assignment, holding Q where none applies
+    const { d, en } = peelEnable(ctx, branchValue(ctx, active, qName, q) ?? q, q, span);
+    const pins: Primitive["pins"] = { Q: q, D: d };
     if (clk !== undefined) {
       pins.CLK = clk;
     }
-    if (d !== undefined) {
-      pins.D = d;
+    if (en !== undefined) {
+      pins.EN = en;
     }
-    let kind: Primitive["kind"] = "dff";
     const params: Record<string, string | number> = {};
     if (reset) {
       pins.ARST = rst;
       params.RST_VAL = rstVal as string;
-      kind = "adff";
-      if (branched === undefined && nestedEn !== undefined) {
-        const en = lowerExpr(ctx, nestedEn);
-        if (en !== undefined) {
-          pins.EN = en;
-        }
-        kind = "adffe";
-      }
-    } else if (branched === undefined && dataHit.ifConds.length > 0) {
-      const en = lowerExpr(ctx, dataHit.ifConds[dataHit.ifConds.length - 1]);
-      if (en !== undefined) {
-        pins.EN = en;
-      }
-      kind = "dffe";
     }
+    const kind: Primitive["kind"] = reset ? (en ? "adffe" : "adff") : (en ? "dffe" : "dff");
     emit(ctx, {
       id: ctx.mint.next("c"),
       kind,
       params: Object.keys(params).length > 0 ? params : undefined,
       pins,
-      span: spanOf(ctx, dataHit.node),
+      span,
     });
   }
 }
 
+/* Without a clock the value is the same mux tree a register's D would be. A
+ * path that assigns nothing holds the signal itself: that feedback is the
+ * latch an incomplete `always_comb` or an `always_latch` describes, and it
+ * does not appear where every path assigns. */
 function lowerComb(ctx: Ctx, always: VerilatorNode): void {
+  const body = asNodes(always.stmtsp);
+  const done = new Set<string>();
   for (const hit of collectAssigns(always)) {
     const lhs = lhsTarget(hit.node);
     if (lhs === undefined) {
       continue;
     }
-    const src = lowerExpr(ctx, hit.rhs);
-    connectTo(ctx, src, lhs.name, spanOf(ctx, hit.node));
+    if (lhs.array !== undefined) {
+      connectTo(ctx, lowerExpr(ctx, hit.rhs), lhs.name, spanOf(ctx, hit.node));
+      continue;
+    }
+    if (done.has(lhs.name)) {
+      continue;
+    }
+    done.add(lhs.name);
+    connectTo(ctx, branchValue(ctx, body, lhs.name, bindVar(ctx, lhs.name)), lhs.name, spanOf(ctx, hit.node));
   }
+}
+
+/** A process with an edge in its sensitivity list is a register, whatever its keyword. */
+function edgeTriggered(always: VerilatorNode): boolean {
+  return asNodes(always.sentreep).some((tree) =>
+    asNodes(tree.sensesp).some((sen) => sen.edgeType === "POS" || sen.edgeType === "NEG"));
 }
 
 export function lowerAlways(
@@ -714,8 +823,7 @@ export function lowerAlways(
   mint: IdMint,
 ): PrimitiveGraph {
   const ctx: Ctx = { dump, netsByName, mint, cells: [], cse: new Map(), temps: [] };
-  const kw = always.keyword;
-  if (kw === "always_ff") {
+  if (edgeTriggered(always)) {
     lowerSeq(ctx, always);
   } else {
     lowerComb(ctx, always);

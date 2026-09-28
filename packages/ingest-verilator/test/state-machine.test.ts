@@ -90,7 +90,7 @@ describe("a register assigned across the branches of a case", () => {
   it("selects on the state, one comparison per case item", () => {
     const compares = graph.cells.filter((c) => c.kind === "eq" && c.pins.A?.net === "n0");
     const matched = compares.map((c) => driver(c.pins.B?.net)?.params?.value);
-    expect(matched).toEqual(["0", "1", "2"]);
+    expect(matched.sort()).toEqual(["0", "1", "2"]);
     // `1, 2:` is one branch taken on either value
     expect(graph.cells.some((c) => c.kind === "or")).toBe(true);
   });

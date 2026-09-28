@@ -34,7 +34,8 @@ const PORTS: Record<string, Record<string, { vx: number; vy: number }>> = {
   and: { A: { vx: 8, vy: 22 }, B: { vx: 8, vy: 42 }, Y: { vx: 64, vy: 32 } },
   or: { A: { vx: 8, vy: 22 }, B: { vx: 8, vy: 42 }, Y: { vx: 62, vy: 32 } },
   xor: { A: { vx: 12, vy: 22 }, B: { vx: 12, vy: 42 }, Y: { vx: 64, vy: 32 } },
-  mux: { A: { vx: 22, vy: 20 }, B: { vx: 22, vy: 44 }, S: { vx: 22, vy: 32 }, Y: { vx: 58, vy: 32 } },
+  // `S ? B : A`: A is the 0 input, B the 1 input, S on the middle of the top edge
+  mux: { A: { vx: 22, vy: 20 }, B: { vx: 22, vy: 44 }, S: { vx: 40, vy: 13 }, Y: { vx: 58, vy: 32 } },
   add: { A: { vx: 16, vy: 24 }, B: { vx: 16, vy: 40 }, Y: { vx: 64, vy: 32 } },
   sub: { A: { vx: 16, vy: 24 }, B: { vx: 16, vy: 40 }, Y: { vx: 64, vy: 32 } },
   eq: { A: { vx: 16, vy: 24 }, B: { vx: 16, vy: 40 }, Y: { vx: 64, vy: 32 } },

@@ -160,13 +160,17 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
     const py = p.y ?? 24;
     const on = selected === p.id || (netSel !== null && p.netId === netSel);
     const expandable = ["always", "assign", "instance", "instanceArray"].includes(n.kind);
-    const inward = p.side === "W" ? 1 : -1;
+    // a top-edge pin has its lead going up; inward is down, into the symbol
+    const vertical = p.face === "N";
+    const inward = vertical || p.side === "W" ? 1 : -1;
     for (const face of (expandable ? ["inside", "outside"] : ["outside"]) as PinFace[]) {
       const offset = inward * (face === "inside" ? 10 : -10);
+      const hx = px + (vertical ? 0 : offset);
+      const hy = py + (vertical ? offset : 0);
       const direction = pinTraceDirection(p.side, face);
       const attrs = { "data-id": p.id, "data-face": face, "data-trace": direction };
       const hit = svgEl("rect", {
-        class: "ossschem-pin-hit", x: String(px + offset - 9), y: String(py - 8),
+        class: "ossschem-pin-hit", x: String(hx - 9), y: String(hy - 8),
         width: "18", height: "16", ...attrs,
       });
       const title = svgEl("title");
@@ -175,18 +179,21 @@ export function attachCanvas(svg: SVGSVGElement): CanvasController {
       g.appendChild(hit);
       if (p.handles?.[face] ?? true) {
         g.appendChild(svgEl("line", {
-          x1: String(px), y1: String(py), x2: String(px + offset), y2: String(py),
+          x1: String(px), y1: String(py), x2: String(hx), y2: String(hy),
           class: "ossschem-pin-lead",
         }));
         const handle = svgEl("rect", {
           class: `ossschem-pin${p.collapsed ? " ossschem-pin-stub" : ""}${on ? " ossschem-pin-on" : ""}`,
-          x: String(px + offset - 5), y: String(py - 5), width: "10", height: "10", rx: "1",
+          x: String(hx - 5), y: String(hy - 5), width: "10", height: "10", rx: "1",
           ...attrs,
         });
         g.appendChild(handle);
+        // tracing back points outward, towards the drivers
         const arrow = direction === "back" ? -1 : 1;
         g.appendChild(svgEl("path", {
-          d: `M${px + offset - arrow * 2} ${py - 3} l${arrow * 3} 3 l${-arrow * 3} 3`,
+          d: vertical
+            ? `M${hx - 3} ${hy - arrow * 2} l3 ${arrow * 3} l3 ${-arrow * 3}`
+            : `M${hx - arrow * 2} ${hy - 3} l${arrow * 3} 3 l${-arrow * 3} 3`,
           class: "ossschem-pin-arrow",
         }));
       }

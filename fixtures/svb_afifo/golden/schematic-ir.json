@@ -26,7 +26,7 @@
     }
   },
   "meta": {
-    "dumpedAt": "2026-09-22T07:01:06.839Z",
+    "dumpedAt": "2026-09-28T11:41:31.388Z",
     "producer": "verilator-json-only",
     "verilatorVersion": "5.046"
   },
@@ -338,7 +338,7 @@
                 }
               },
               {
-                "id": "c6",
+                "id": "c7",
                 "kind": "dffe",
                 "pins": {
                   "CLK": {
@@ -456,7 +456,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c7",
+                "id": "c8",
                 "kind": "buf",
                 "pins": {
                   "A": {
@@ -508,14 +508,14 @@
             "cells": [
               {
                 "expr": "~empty_r",
-                "id": "c8",
+                "id": "c9",
                 "kind": "not",
                 "pins": {
                   "A": {
                     "net": "n17"
                   },
                   "Y": {
-                    "net": "t5"
+                    "net": "t6"
                   }
                 },
                 "span": {
@@ -529,17 +529,17 @@
               },
               {
                 "expr": "ren_i & ~empty_r",
-                "id": "c9",
+                "id": "c10",
                 "kind": "and",
                 "pins": {
                   "A": {
                     "net": "n8"
                   },
                   "B": {
-                    "net": "t5"
+                    "net": "t6"
                   },
                   "Y": {
-                    "net": "t6"
+                    "net": "t7"
                   }
                 },
                 "span": {
@@ -553,14 +553,14 @@
               },
               {
                 "expr": "bin_rpointer_r + (ren_i & ~empty_r)",
-                "id": "c10",
+                "id": "c11",
                 "kind": "add",
                 "pins": {
                   "A": {
                     "net": "n25"
                   },
                   "B": {
-                    "net": "t6"
+                    "net": "t7"
                   },
                   "Y": {
                     "net": "n23"
@@ -577,14 +577,14 @@
               },
               {
                 "expr": "1",
-                "id": "c11",
+                "id": "c12",
                 "kind": "const",
                 "params": {
                   "value": "1"
                 },
                 "pins": {
                   "Y": {
-                    "net": "t8"
+                    "net": "t9"
                   }
                 },
                 "span": {
@@ -598,7 +598,7 @@
               },
               {
                 "expr": "bin_rpointer_next_s >> 1",
-                "id": "c12",
+                "id": "c13",
                 "kind": "shiftr",
                 "params": {
                   "amount": "1"
@@ -608,7 +608,7 @@
                     "net": "n23"
                   },
                   "Y": {
-                    "net": "t9"
+                    "net": "t10"
                   }
                 },
                 "span": {
@@ -622,11 +622,11 @@
               },
               {
                 "expr": "(bin_rpointer_next_s >> 1) ^ bin_rpointer_next_s",
-                "id": "c13",
+                "id": "c14",
                 "kind": "xor",
                 "pins": {
                   "A": {
-                    "net": "t9"
+                    "net": "t10"
                   },
                   "B": {
                     "net": "n23"
@@ -646,14 +646,14 @@
               },
               {
                 "expr": "~full_r",
-                "id": "c14",
+                "id": "c15",
                 "kind": "not",
                 "pins": {
                   "A": {
                     "net": "n15"
                   },
                   "Y": {
-                    "net": "t11"
+                    "net": "t12"
                   }
                 },
                 "span": {
@@ -667,17 +667,17 @@
               },
               {
                 "expr": "wen_i & ~full_r",
-                "id": "c15",
+                "id": "c16",
                 "kind": "and",
                 "pins": {
                   "A": {
                     "net": "n2"
                   },
                   "B": {
-                    "net": "t11"
+                    "net": "t12"
                   },
                   "Y": {
-                    "net": "t12"
+                    "net": "t13"
                   }
                 },
                 "span": {
@@ -691,14 +691,14 @@
               },
               {
                 "expr": "bin_wpointer_r + (wen_i & ~full_r)",
-                "id": "c16",
+                "id": "c17",
                 "kind": "add",
                 "pins": {
                   "A": {
                     "net": "n20"
                   },
                   "B": {
-                    "net": "t12"
+                    "net": "t13"
                   },
                   "Y": {
                     "net": "n18"
@@ -715,14 +715,14 @@
               },
               {
                 "expr": "1",
-                "id": "c17",
+                "id": "c18",
                 "kind": "const",
                 "params": {
                   "value": "1"
                 },
                 "pins": {
                   "Y": {
-                    "net": "t14"
+                    "net": "t15"
                   }
                 },
                 "span": {
@@ -736,7 +736,7 @@
               },
               {
                 "expr": "bin_wpointer_next_s >> 1",
-                "id": "c18",
+                "id": "c19",
                 "kind": "shiftr",
                 "params": {
                   "amount": "1"
@@ -746,7 +746,7 @@
                     "net": "n18"
                   },
                   "Y": {
-                    "net": "t15"
+                    "net": "t16"
                   }
                 },
                 "span": {
@@ -760,11 +760,11 @@
               },
               {
                 "expr": "(bin_wpointer_next_s >> 1) ^ bin_wpointer_next_s",
-                "id": "c19",
+                "id": "c20",
                 "kind": "xor",
                 "pins": {
                   "A": {
-                    "net": "t15"
+                    "net": "t16"
                   },
                   "B": {
                     "net": "n18"
@@ -784,7 +784,7 @@
               },
               {
                 "expr": "gray_rpointer_next_s == gray_wpointer_sync_s",
-                "id": "c20",
+                "id": "c21",
                 "kind": "eq",
                 "pins": {
                   "A": {
@@ -808,7 +808,7 @@
               },
               {
                 "expr": "gray_rpointer_sync_s[4:3]",
-                "id": "c21",
+                "id": "c22",
                 "kind": "slice",
                 "params": {
                   "lsb": 3,
@@ -819,7 +819,7 @@
                     "net": "n27"
                   },
                   "Y": {
-                    "net": "t18"
+                    "net": "t19"
                   }
                 },
                 "span": {
@@ -833,7 +833,7 @@
               },
               {
                 "expr": "~gray_rpointer_sync_s[4:3]",
-                "id": "c22",
+                "id": "c23",
                 "kind": "not",
                 "pins": {
                   "A": {
@@ -841,10 +841,10 @@
                       "lsb": 3,
                       "msb": 4
                     },
-                    "net": "t18"
+                    "net": "t19"
                   },
                   "Y": {
-                    "net": "t19"
+                    "net": "t20"
                   }
                 },
                 "span": {
@@ -858,7 +858,7 @@
               },
               {
                 "expr": "gray_rpointer_sync_s[2:0]",
-                "id": "c23",
+                "id": "c24",
                 "kind": "slice",
                 "params": {
                   "lsb": 0,
@@ -869,7 +869,7 @@
                     "net": "n27"
                   },
                   "Y": {
-                    "net": "t20"
+                    "net": "t21"
                   }
                 },
                 "span": {
@@ -883,21 +883,21 @@
               },
               {
                 "expr": "{~gray_rpointer_sync_s[4:3], gray_rpointer_sync_s[2:0]}",
-                "id": "c24",
+                "id": "c25",
                 "kind": "concat",
                 "pins": {
                   "A0": {
-                    "net": "t19"
+                    "net": "t20"
                   },
                   "A1": {
                     "bits": {
                       "lsb": 0,
                       "msb": 2
                     },
-                    "net": "t20"
+                    "net": "t21"
                   },
                   "Y": {
-                    "net": "t21"
+                    "net": "t22"
                   }
                 },
                 "span": {
@@ -911,14 +911,14 @@
               },
               {
                 "expr": "gray_wpointer_next_s == {~gray_rpointer_sync_s[4:3], gray_rpointer_sync_s[2:0]}",
-                "id": "c25",
+                "id": "c26",
                 "kind": "eq",
                 "pins": {
                   "A": {
                     "net": "n19"
                   },
                   "B": {
-                    "net": "t21"
+                    "net": "t22"
                   },
                   "Y": {
                     "net": "n14"
@@ -935,26 +935,6 @@
               }
             ],
             "nets": [
-              {
-                "drivers": [],
-                "id": "t5",
-                "kind": "wire",
-                "loads": [],
-                "name": "t5",
-                "span": {
-                  "endCol": 0,
-                  "endLine": 0,
-                  "file": "",
-                  "fileId": "?",
-                  "startCol": 0,
-                  "startLine": 0
-                },
-                "width": {
-                  "lsb": 0,
-                  "msb": 0,
-                  "packed": true
-                }
-              },
               {
                 "drivers": [],
                 "id": "t6",
@@ -981,26 +961,6 @@
                 "kind": "wire",
                 "loads": [],
                 "name": "t7",
-                "span": {
-                  "endCol": 0,
-                  "endLine": 0,
-                  "file": "",
-                  "fileId": "?",
-                  "startCol": 0,
-                  "startLine": 0
-                },
-                "width": {
-                  "lsb": 0,
-                  "msb": 0,
-                  "packed": true
-                }
-              },
-              {
-                "drivers": [],
-                "id": "t8",
-                "kind": "wire",
-                "loads": [],
-                "name": "t8",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -1057,26 +1017,6 @@
               },
               {
                 "drivers": [],
-                "id": "t11",
-                "kind": "wire",
-                "loads": [],
-                "name": "t11",
-                "span": {
-                  "endCol": 0,
-                  "endLine": 0,
-                  "file": "",
-                  "fileId": "?",
-                  "startCol": 0,
-                  "startLine": 0
-                },
-                "width": {
-                  "lsb": 0,
-                  "msb": 0,
-                  "packed": true
-                }
-              },
-              {
-                "drivers": [],
                 "id": "t12",
                 "kind": "wire",
                 "loads": [],
@@ -1117,26 +1057,6 @@
               },
               {
                 "drivers": [],
-                "id": "t14",
-                "kind": "wire",
-                "loads": [],
-                "name": "t14",
-                "span": {
-                  "endCol": 0,
-                  "endLine": 0,
-                  "file": "",
-                  "fileId": "?",
-                  "startCol": 0,
-                  "startLine": 0
-                },
-                "width": {
-                  "lsb": 0,
-                  "msb": 0,
-                  "packed": true
-                }
-              },
-              {
-                "drivers": [],
                 "id": "t15",
                 "kind": "wire",
                 "loads": [],
@@ -1161,46 +1081,6 @@
                 "kind": "wire",
                 "loads": [],
                 "name": "t16",
-                "span": {
-                  "endCol": 0,
-                  "endLine": 0,
-                  "file": "",
-                  "fileId": "?",
-                  "startCol": 0,
-                  "startLine": 0
-                },
-                "width": {
-                  "lsb": 0,
-                  "msb": 0,
-                  "packed": true
-                }
-              },
-              {
-                "drivers": [],
-                "id": "t17",
-                "kind": "wire",
-                "loads": [],
-                "name": "t17",
-                "span": {
-                  "endCol": 0,
-                  "endLine": 0,
-                  "file": "",
-                  "fileId": "?",
-                  "startCol": 0,
-                  "startLine": 0
-                },
-                "width": {
-                  "lsb": 0,
-                  "msb": 0,
-                  "packed": true
-                }
-              },
-              {
-                "drivers": [],
-                "id": "t18",
-                "kind": "wire",
-                "loads": [],
-                "name": "t18",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -1406,14 +1286,14 @@
             "cells": [
               {
                 "expr": "~full_r",
-                "id": "c26",
+                "id": "c27",
                 "kind": "not",
                 "pins": {
                   "A": {
                     "net": "n15"
                   },
                   "Y": {
-                    "net": "t23"
+                    "net": "t24"
                   }
                 },
                 "span": {
@@ -1427,17 +1307,17 @@
               },
               {
                 "expr": "wen_i & ~full_r",
-                "id": "c27",
+                "id": "c28",
                 "kind": "and",
                 "pins": {
                   "A": {
                     "net": "n2"
                   },
                   "B": {
-                    "net": "t23"
+                    "net": "t24"
                   },
                   "Y": {
-                    "net": "t24"
+                    "net": "t25"
                   }
                 },
                 "span": {
@@ -1450,7 +1330,7 @@
                 }
               },
               {
-                "id": "c28",
+                "id": "c30",
                 "kind": "adffe",
                 "params": {
                   "RST_VAL": "0"
@@ -1466,7 +1346,7 @@
                     "net": "n18"
                   },
                   "EN": {
-                    "net": "t24"
+                    "net": "t25"
                   },
                   "Q": {
                     "net": "n20"
@@ -1482,7 +1362,7 @@
                 }
               },
               {
-                "id": "c29",
+                "id": "c32",
                 "kind": "adffe",
                 "params": {
                   "RST_VAL": "0"
@@ -1498,7 +1378,7 @@
                     "net": "n19"
                   },
                   "EN": {
-                    "net": "t24"
+                    "net": "t25"
                   },
                   "Q": {
                     "net": "n21"
@@ -1517,10 +1397,10 @@
             "nets": [
               {
                 "drivers": [],
-                "id": "t23",
+                "id": "t24",
                 "kind": "wire",
                 "loads": [],
-                "name": "t23",
+                "name": "t24",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -1537,10 +1417,10 @@
               },
               {
                 "drivers": [],
-                "id": "t24",
+                "id": "t25",
                 "kind": "wire",
                 "loads": [],
-                "name": "t24",
+                "name": "t25",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -1645,14 +1525,14 @@
             "cells": [
               {
                 "expr": "~empty_r",
-                "id": "c30",
+                "id": "c33",
                 "kind": "not",
                 "pins": {
                   "A": {
                     "net": "n17"
                   },
                   "Y": {
-                    "net": "t25"
+                    "net": "t28"
                   }
                 },
                 "span": {
@@ -1666,17 +1546,17 @@
               },
               {
                 "expr": "ren_i & ~empty_r",
-                "id": "c31",
+                "id": "c34",
                 "kind": "and",
                 "pins": {
                   "A": {
                     "net": "n8"
                   },
                   "B": {
-                    "net": "t25"
+                    "net": "t28"
                   },
                   "Y": {
-                    "net": "t26"
+                    "net": "t29"
                   }
                 },
                 "span": {
@@ -1689,7 +1569,7 @@
                 }
               },
               {
-                "id": "c32",
+                "id": "c36",
                 "kind": "adffe",
                 "params": {
                   "RST_VAL": "0"
@@ -1705,7 +1585,7 @@
                     "net": "n23"
                   },
                   "EN": {
-                    "net": "t26"
+                    "net": "t29"
                   },
                   "Q": {
                     "net": "n25"
@@ -1721,7 +1601,7 @@
                 }
               },
               {
-                "id": "c33",
+                "id": "c38",
                 "kind": "adffe",
                 "params": {
                   "RST_VAL": "0"
@@ -1737,7 +1617,7 @@
                     "net": "n24"
                   },
                   "EN": {
-                    "net": "t26"
+                    "net": "t29"
                   },
                   "Q": {
                     "net": "n26"
@@ -1756,10 +1636,10 @@
             "nets": [
               {
                 "drivers": [],
-                "id": "t25",
+                "id": "t28",
                 "kind": "wire",
                 "loads": [],
-                "name": "t25",
+                "name": "t28",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -1776,10 +1656,10 @@
               },
               {
                 "drivers": [],
-                "id": "t26",
+                "id": "t29",
                 "kind": "wire",
                 "loads": [],
-                "name": "t26",
+                "name": "t29",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -1883,7 +1763,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c34",
+                "id": "c39",
                 "kind": "adff",
                 "params": {
                   "RST_VAL": "1'b1"
@@ -1913,7 +1793,7 @@
               },
               {
                 "expr": "ren_i & empty_r",
-                "id": "c35",
+                "id": "c40",
                 "kind": "and",
                 "pins": {
                   "A": {
@@ -1923,7 +1803,7 @@
                     "net": "n17"
                   },
                   "Y": {
-                    "net": "t27"
+                    "net": "t32"
                   }
                 },
                 "span": {
@@ -1936,7 +1816,7 @@
                 }
               },
               {
-                "id": "c36",
+                "id": "c41",
                 "kind": "adff",
                 "params": {
                   "RST_VAL": "1'b0"
@@ -1949,7 +1829,7 @@
                     "net": "n6"
                   },
                   "D": {
-                    "net": "t27"
+                    "net": "t32"
                   },
                   "Q": {
                     "net": "n11"
@@ -1968,10 +1848,10 @@
             "nets": [
               {
                 "drivers": [],
-                "id": "t27",
+                "id": "t32",
                 "kind": "wire",
                 "loads": [],
-                "name": "t27",
+                "name": "t32",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -2065,7 +1945,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c37",
+                "id": "c42",
                 "kind": "adff",
                 "params": {
                   "RST_VAL": "1'b0"
@@ -2095,7 +1975,7 @@
               },
               {
                 "expr": "wen_i & full_r",
-                "id": "c38",
+                "id": "c43",
                 "kind": "and",
                 "pins": {
                   "A": {
@@ -2105,7 +1985,7 @@
                     "net": "n15"
                   },
                   "Y": {
-                    "net": "t28"
+                    "net": "t33"
                   }
                 },
                 "span": {
@@ -2118,7 +1998,7 @@
                 }
               },
               {
-                "id": "c39",
+                "id": "c44",
                 "kind": "adff",
                 "params": {
                   "RST_VAL": "1'b0"
@@ -2131,7 +2011,7 @@
                     "net": "n0"
                   },
                   "D": {
-                    "net": "t28"
+                    "net": "t33"
                   },
                   "Q": {
                     "net": "n5"
@@ -2150,10 +2030,10 @@
             "nets": [
               {
                 "drivers": [],
-                "id": "t28",
+                "id": "t33",
                 "kind": "wire",
                 "loads": [],
-                "name": "t28",
+                "name": "t33",
                 "span": {
                   "endCol": 0,
                   "endLine": 0,
@@ -2233,7 +2113,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c40",
+                "id": "c45",
                 "kind": "buf",
                 "pins": {
                   "A": {
@@ -2283,7 +2163,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c41",
+                "id": "c46",
                 "kind": "buf",
                 "pins": {
                   "A": {
@@ -4812,7 +4692,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c42",
+                "id": "c47",
                 "kind": "adff",
                 "params": {
                   "RST_VAL": "1'b0"
@@ -4841,7 +4721,7 @@
                 }
               },
               {
-                "id": "c43",
+                "id": "c48",
                 "kind": "adff",
                 "params": {
                   "RST_VAL": "1'b0"
@@ -4925,7 +4805,7 @@
           "contents": {
             "cells": [
               {
-                "id": "c44",
+                "id": "c49",
                 "kind": "buf",
                 "pins": {
                   "A": {

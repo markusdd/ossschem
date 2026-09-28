@@ -108,9 +108,21 @@ jobs:
     needs: [version, extension]
     if: ${{ vars.PUBLISH_EXTENSION == 'true' }}
     runs-on: ubuntu-latest
+    # The environment is what makes this job's identity to Microsoft a fixed
+    # name -- `repo:<owner>/<repo>:environment:marketplace` -- rather than one
+    # per tag, which is what the trust rule over there is written against.
+    environment: marketplace
+    permissions:
+      contents: read
+      # lets the runner ask GitHub for the signed token Microsoft trusts
+      id-token: write
     env:
       VSIX: release/ossschem-${{ needs.version.outputs.number }}.vsix
-      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      # set this and vsce signs in with it directly; leave it empty and the
+      # federated login below is used instead
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       OVSX_PAT: ${{ secrets.OVSX_PAT }}
     steps:
       - uses: actions/download-artifact@v4
@@ -120,12 +132,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      # Only for the no-secret route: GitHub signs a statement about this run,
+      # Microsoft trusts it, and the Azure CLI holds the result. vsce asks the
+      # CLI for it, which is one of the things --azure-credential tries. With
+      # AZURE_CLIENT_SECRET set there is nothing to sign in for.
+      - name: Sign in to Microsoft
+        if: env.AZURE_CLIENT_ID != '' && env.AZURE_CLIENT_SECRET == ''
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          # the identity publishes an extension; it owns nothing in Azure
+          allow-no-subscriptions: true
       # Publishes the same file the release carries, rather than building a
-      # second one. With Entra ID instead of a token, drop VSCE_PAT and use
-      # `--azure-credential` after an azure/login step.
+      # second one.
       - name: Publish to the VS Code Marketplace
-        if: env.VSCE_PAT != ''
-        run: npx --yes @vscode/vsce publish --packagePath "$VSIX"
+        if: env.AZURE_CLIENT_ID != ''
+        run: npx --yes @vscode/vsce publish --azure-credential --packagePath "$VSIX"
       # VSCodium, Cursor, Windsurf and Theia install from Open VSX, not from
       # the Microsoft marketplace
       - name: Publish to Open VSX

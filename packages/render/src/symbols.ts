@@ -99,7 +99,8 @@ function glyph(kind: string): SVGGElement {
       g.append(path("M4,10 Q16,32 4,54"), path("M12,10 Q36,10 64,32 Q36,54 12,54 Q26,32 12,10"));
       break;
     case "mux":
-      g.append(path("M22,8 L58,18 L58,46 L22,56 Z"), txt(40, 36, "1"));
+      // the data inputs are named by the select value that picks them
+      g.append(path("M22,8 L58,18 L58,46 L22,56 Z"), txt(29, 24, "0", "11"), txt(29, 48, "1", "11"));
       break;
     // a tie-off: a fixed value driving a wire, its value in the caption
     case "const":

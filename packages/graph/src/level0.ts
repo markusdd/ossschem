@@ -16,6 +16,8 @@ export interface Pin {
   id: string;
   name: string;
   side: "W" | "E";
+  /** Drawn on the top edge instead of `side`'s; `side` still says input or output. */
+  face?: "N";
   netId: string;
   netName: string;
   width?: number;
@@ -222,6 +224,8 @@ function pinsForPrimitive(key: string, cell: Primitive, mod: Module, collapsed: 
       id: pinId(key, name),
       name,
       side: west ? "W" : "E",
+      // a mux select comes in from the top, the data inputs stay on the left
+      ...(cell.kind === "mux" && name === "S" ? { face: "N" as const } : {}),
       netId: ref.net,
       width: referenceWidth(ref, [...localNets, ...mod.nets]),
       netName: netName(mod, ref.net),

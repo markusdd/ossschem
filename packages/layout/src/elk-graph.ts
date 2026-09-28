@@ -57,14 +57,15 @@ function nodeToElk(n: Level0Node): ElkNode {
   const fixed = n.kind === "primitive" || n.kind === "split";
   const elk: ElkNode = {
     id: n.key,
+    // a top-edge port sits on the border above its pin, and the route slides down onto it
     ports: placed.pins.map((p, i) => ({
       id: p.id,
-      x: p.side === "W" ? 0 : placed.w,
-      y: p.y,
+      x: p.face === "N" ? (p.x ?? placed.w / 2) : p.side === "W" ? 0 : placed.w,
+      y: p.face === "N" ? 0 : p.y,
       width: 1,
       height: 1,
       layoutOptions: {
-        "elk.port.side": p.side === "W" ? "WEST" : "EAST",
+        "elk.port.side": p.face === "N" ? "NORTH" : p.side === "W" ? "WEST" : "EAST",
         "elk.port.index": String(i),
       },
     })),
