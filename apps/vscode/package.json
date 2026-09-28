@@ -2,7 +2,7 @@
   "name": "ossschem",
   "displayName": "ossschem",
   "description": "Interactive RTL schematics, source mapping, and vaporview waveform cross probing",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "publisher": "markusdd",
   "icon": "images/icon.png",
   "license": "MIT",
