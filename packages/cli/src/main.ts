@@ -47,15 +47,76 @@ function printHelp(): void {
 Commands:
   ossschem dump [--top name] [--out file] [--verilator-version ver] <tree.json> <meta.json>
   ossschem dump --fixture svb_afifo
-  ossschem build --top name [--out-dir dir] [--verilator path] [--open] <source.sv> [...]
+  ossschem build --top name [--out-dir dir] [--verilator path] [--open] <source.sv> [...] [-- <verilator args>]
+  ossschem build --json [--top name] [--out-dir dir] [--open] <tree.json> [meta.json]
   ossschem open <viewer-dir-or-index.html>
 
 build runs Verilator --json-only, writes schematic-ir.json, copies the browser viewer,
 embeds the design and source files in index.html, and optionally opens that file.
+Everything after -- goes to Verilator as it is: parameters (-pvalue+NAME=value),
+defines, include paths, -f file lists, and sources. A --top-module there stands in
+for --top, and --binary/--build, which Verilator refuses with --json-only, are left out.
+With --json, build reads the JSON a --json-only run already wrote instead of running
+Verilator; meta.json defaults to the tree's name with .tree.json -> .tree.meta.json.
 Use --sources dir more than once when source files are outside the Verilator command line.
 
 Needs Verilator ${MIN_VERILATOR} or newer; its version is detected and recorded in the IR.
 `);
+}
+
+/** Before `--` is ossschem's; after it is Verilator's, untouched. */
+export function splitPassthrough(argv: readonly string[]): { own: string[]; passthrough: string[] } {
+  const at = argv.indexOf("--");
+  return at < 0 ? { own: [...argv], passthrough: [] } : { own: argv.slice(0, at), passthrough: argv.slice(at + 1) };
+}
+
+/* Verilator takes its options with one dash or two; this is the name either way. */
+function verilatorOption(arg: string): string | undefined {
+  return /^--?[A-Za-z]/.test(arg) ? arg.replace(/^--?/, "") : undefined;
+}
+
+/* Only meaningful to a C++ build, and refused outright next to --json-only, so a
+ * simulation's flag set can be handed over as it is. */
+const BUILD_ONLY = new Set(["binary", "build"]);
+/* Where the JSON lands is what the rest of the build reads, so build says. */
+const JSON_OUTPUTS = new Set(["json-only-output", "json-only-meta-output"]);
+const TOP_OPTIONS = new Set(["top-module", "top"]);
+
+export interface PassthroughPlan {
+  /** What goes to Verilator ahead of build's own options. */
+  args: string[];
+  /** A top named in the pass-through arguments, which build then needs no --top for. */
+  top?: string;
+  /** Left out, and why: said out loud rather than dropped silently. */
+  dropped: string[];
+}
+
+export function planPassthrough(passthrough: readonly string[]): PassthroughPlan {
+  const plan: PassthroughPlan = { args: [], dropped: [] };
+  for (let i = 0; i < passthrough.length; i++) {
+    const arg = passthrough[i];
+    const option = verilatorOption(arg);
+    if (option !== undefined && TOP_OPTIONS.has(option) && i + 1 < passthrough.length) {
+      // Verilator would take the last; so does this, and build passes it once
+      plan.top = passthrough[++i];
+    } else if (option !== undefined && BUILD_ONLY.has(option)) {
+      plan.dropped.push(`${arg} (Verilator refuses it with --json-only)`);
+    } else if (option !== undefined && JSON_OUTPUTS.has(option)) {
+      plan.dropped.push(`${arg} ${passthrough[++i] ?? ""}`.trim() + " (build chooses where the JSON goes)");
+    } else {
+      plan.args.push(arg);
+    }
+  }
+  return plan;
+}
+
+/* Where Verilator puts the meta file next to a tree it was given no names for
+ * (`Vtop.tree.json` -> `Vtop.tree.meta.json`), then the shorter name build and
+ * the fixtures use. */
+export function metaCandidates(tree: string): string[] {
+  const base = tree.replace(/\.json$/i, "");
+  const stem = base.replace(/\.tree$/i, "");
+  return [`${base}.meta.json`, `${stem}.meta.json`].filter((path, i, all) => all.indexOf(path) === i);
 }
 
 function argValue(argv: readonly string[], flag: string): string | undefined {
@@ -199,42 +260,86 @@ function dump(argv: readonly string[]): number {
   return 0;
 }
 
+/* The JSON a --json-only run already wrote, read in place of running Verilator:
+ * for a design whose Verilator command line lives in someone else's build. */
+function jsonInputs(positional: readonly string[]): { tree: string; meta: string } | string {
+  if (positional.length === 0 || positional.length > 2) {
+    return "--json takes the tree JSON and, optionally, its meta JSON";
+  }
+  const tree = resolvePath(positional[0]);
+  if (positional.length === 2) return { tree, meta: resolvePath(positional[1]) };
+  const candidates = metaCandidates(tree);
+  const meta = candidates.find((path) => existsSync(path));
+  return meta === undefined ? `no meta JSON next to ${positional[0]}; looked for ${candidates.join(", ")}` : { tree, meta };
+}
+
 function build(argv: readonly string[]): number {
+  const { own, passthrough } = splitPassthrough(argv);
   const valueFlags = new Set(["--top", "--out-dir", "--verilator", "--verilator-version", "--sources"]);
-  const positional = positionalArgs(argv, valueFlags);
-  const top = argValue(argv, "--top");
-  if (top === undefined || positional.length === 0) {
+  const positional = positionalArgs(own, valueFlags);
+  const fromJson = hasFlag(own, "--json");
+  const plan = planPassthrough(passthrough);
+  const named = argValue(own, "--top");
+  if (named !== undefined && plan.top !== undefined && named !== plan.top) {
+    process.stderr.write(`ossschem: --top ${named} and --top-module ${plan.top} disagree\n`);
+    return 1;
+  }
+  const top = named ?? plan.top;
+  // before --, everything that is not build's own is a source file, so a
+  // Verilator option there would otherwise be turned into a path
+  const misplaced = positional.filter((arg) => arg.startsWith("-") || arg.startsWith("+"));
+  const usage = misplaced.length > 0 ? `Verilator options go after --: ${misplaced.join(" ")}`
+    : fromJson && passthrough.length > 0 ? "--json reads existing JSON, so there is no Verilator to pass arguments to"
+    : fromJson ? undefined
+    : top === undefined ? "build needs --top, or --top-module after --"
+    : positional.length + plan.args.length === 0 ? "no sources to build"
+    : undefined;
+  if (usage !== undefined) {
+    process.stderr.write(`ossschem: ${usage}\n`);
     printHelp();
     return 1;
   }
-  const outDir = resolvePath(argValue(argv, "--out-dir") ?? "ossschem-build");
-  const verilator = argValue(argv, "--verilator") ?? "verilator";
+  const outDir = resolvePath(argValue(own, "--out-dir") ?? "ossschem-build");
+  const verilator = argValue(own, "--verilator") ?? "verilator";
   const detected = detectVerilatorVersion(verilator);
-  const version = argValue(argv, "--verilator-version") ?? detected ?? "unknown";
+  const version = argValue(own, "--verilator-version") ?? detected ?? "unknown";
   if (detected !== undefined && verilatorOlderThan(detected)) {
     process.stderr.write(`ossschem: Verilator ${detected} is older than ${MIN_VERILATOR}, the oldest tested;`
       + " the JSON it writes may not read correctly\n");
   }
-  const tempDir = resolve(outDir, ".verilator");
-  mkdirSync(tempDir, { recursive: true });
-  const tree = resolve(tempDir, `${top}.tree.json`);
-  const meta = resolve(tempDir, `${top}.meta.json`);
-  const verilatorArgs = [
-    "--json-only", "--no-json-edit-nums", "--top-module", top,
-    "--json-only-output", tree, "--json-only-meta-output", meta,
-    ...positional.map(resolvePath),
-  ];
-  const result = spawnSync(verilator, verilatorArgs, { cwd: process.cwd(), stdio: "inherit" });
-  if (result.error) {
-    process.stderr.write(`${result.error.message}\n`);
-    return 1;
+  let tree: string;
+  let meta: string;
+  if (fromJson) {
+    const inputs = jsonInputs(positional);
+    if (typeof inputs === "string") {
+      process.stderr.write(`ossschem: ${inputs}\n`);
+      return 1;
+    }
+    ({ tree, meta } = inputs);
+  } else {
+    const tempDir = resolve(outDir, ".verilator");
+    mkdirSync(tempDir, { recursive: true });
+    tree = resolve(tempDir, `${top}.tree.json`);
+    meta = resolve(tempDir, `${top}.meta.json`);
+    for (const dropped of plan.dropped) process.stderr.write(`ossschem: not passed to Verilator: ${dropped}\n`);
+    const verilatorArgs = [
+      "--json-only", "--no-json-edit-nums", "--top-module", top as string,
+      "--json-only-output", tree, "--json-only-meta-output", meta,
+      ...positional.map(resolvePath),
+      ...plan.args,
+    ];
+    const result = spawnSync(verilator, verilatorArgs, { cwd: process.cwd(), stdio: "inherit" });
+    if (result.error) {
+      process.stderr.write(`${result.error.message}\n`);
+      return 1;
+    }
+    if (result.status !== 0) return result.status ?? 1;
   }
-  if (result.status !== 0) return result.status ?? 1;
   const design = loadDesign(tree, meta, top, version);
-  const explicitSources = argv.flatMap((arg, i) => arg === "--sources" && i + 1 < argv.length ? [argv[i + 1]] : []);
+  const explicitSources = own.flatMap((arg, i) => arg === "--sources" && i + 1 < own.length ? [own[i + 1]] : []);
   const indexPath = writeViewer(outDir, design, collectSources(design, explicitSources));
   process.stdout.write(`${indexPath}\n`);
-  if (hasFlag(argv, "--open")) openBrowser(indexPath);
+  if (hasFlag(own, "--open")) openBrowser(indexPath);
   return 0;
 }
 

@@ -40,6 +40,15 @@ into `build/schematic`. Useful flags:
 - `--verilator /path/to/verilator` — when it is not on `PATH`.
 - `--open` — open the standalone page in a browser instead of, or as well as,
   using VS Code.
+- `-- <verilator args>` — everything after `--` goes to Verilator unchanged:
+  parameter overrides (`-pvalue+NAME=value`), `+define+`, include paths, `-f`
+  file lists, and sources. A `--top-module` there replaces `--top`, so a
+  simulation's flag set can be reused as it is; `--binary` and `--build`, which
+  Verilator refuses alongside `--json-only`, are left out with a note.
+- `--json <tree.json> [meta.json]` — build from the JSON a `verilator
+  --json-only` run in your own flow already wrote, instead of running
+  Verilator. Without a meta file, `Vtop.tree.json` looks for
+  `Vtop.tree.meta.json` next to it.
 
 In a Makefile, next to the simulation that produces the dump:
 

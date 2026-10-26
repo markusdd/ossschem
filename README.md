@@ -74,6 +74,17 @@ schematic:
 
 The generated directory contains `index.html`, `schematic-ir.json`, `sources.json`, and the viewer assets. Use `ossschem open build/ossschem` later to reopen an existing result. Add `--sources path/to/rtl` when source files are not present in the Verilator input list. The generated `index.html` embeds its data, so it can be opened directly without a development server.
 
+Everything after `--` goes to Verilator unchanged, so a testbench that needs parameter overrides, defines or a file list can reuse its simulation flags. A `--top-module` there replaces `--top`, and `--binary`/`--build`, which Verilator refuses alongside `--json-only`, are left out with a note:
+
+```make
+VFLAGS := --timing --assert -pvalue+CLK_RATE_HZ=125e6 -f sim/files.f
+
+schematic:
+	ossschem build --out-dir $(SCHEMATIC_DIR) -- $(VFLAGS) --top-module top
+```
+
+If your flow already runs `verilator --json-only`, build from its output instead: `ossschem build --json --out-dir $(SCHEMATIC_DIR) obj_dir/Vtop.tree.json` (the meta file defaults to `Vtop.tree.meta.json` beside it, or name it as a second argument).
+
 v1 golden design is `svb_afifo` from the adjacent `sv_base_lib` tree. Architecture and acceptance scenes: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Using the viewer
