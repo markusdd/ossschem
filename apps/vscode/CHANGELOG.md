@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.8.0
+
+- `ossschem build --json` builds the schematic from the JSON an existing
+  `verilator --json-only` run already wrote, instead of running Verilator
+  itself. The meta file defaults to `Vtop.tree.meta.json` beside the tree.
+- Everything after `--` on the `ossschem build` command line goes to Verilator
+  unchanged: parameter overrides (`-pvalue+NAME=value`), defines, include paths
+  and `-f` file lists. A `--top-module` there replaces `--top`, and `--binary`
+  and `--build`, which Verilator refuses alongside `--json-only`, are left out
+  with a note.
+- Verilator options placed before `--` are refused with a hint, rather than
+  being taken for source file names.
+
+## 0.7.0
+
+- Fixes how a `case` statement is unrolled, and how the resulting muxes are
+  drawn.
+
 ## 0.6.0
 
 - Opens designs through VS Code's file system rather than node's, so a
