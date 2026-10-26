@@ -25,6 +25,7 @@ host?.postMessage({ type: "ossschem/ready" });
 const revealListeners = new Set<(instancePath: string[]) => void>();
 const cursorListeners = new Set<() => void>();
 const waveformListeners = new Set<(state: WaveformChoice) => void>();
+const dumpSignalListeners = new Set<(dumpPath: string[]) => void>();
 /** The last state the host sent, for a listener that subscribes after it. */
 let waveforms: WaveformChoice = { documents: [] };
 /** Outstanding value requests, by the id they were sent with. */
@@ -35,14 +36,19 @@ if (host !== undefined) {
   window.addEventListener("message", (event: MessageEvent<unknown>) => {
     const message = event.data as
       { type?: string; instancePath?: unknown; id?: number; values?: Record<string, string | string[]> } | null;
+    const segments = (path: unknown): string[] =>
+      Array.isArray(path) ? path.filter((part): part is string => typeof part === "string") : [];
     if (message?.type === "ossschem/revealSignal" && Array.isArray(message.instancePath)) {
-      const path = message.instancePath.filter((part): part is string => typeof part === "string");
+      const path = segments(message.instancePath);
       revealListeners.forEach((listener) => { listener(path); });
+    } else if (message?.type === "ossschem/dumpSignal" && Array.isArray(message.instancePath)) {
+      const path = segments(message.instancePath);
+      dumpSignalListeners.forEach((listener) => { listener(path); });
     } else if (message?.type === "ossschem/cursorMoved") {
       cursorListeners.forEach((listener) => { listener(); });
     } else if (message?.type === "ossschem/waveforms") {
       const state = message as unknown as WaveformChoice;
-      waveforms = { documents: state.documents ?? [], active: state.active };
+      waveforms = { documents: state.documents ?? [], active: state.active, scope: state.scope, scopeSource: state.scopeSource };
       waveformListeners.forEach((listener) => { listener(waveforms); });
     } else if (message?.type === "ossschem/values" && typeof message.id === "number") {
       pendingValues.get(message.id)?.(message.values ?? {});
@@ -73,6 +79,16 @@ const probe: ProbeProvider | undefined =
         },
         useWaveform: (uri) => {
           host.postMessage({ type: "ossschem/useWaveform", uri });
+        },
+        useScope: (scope, source) => {
+          host.postMessage({ type: "ossschem/useScope", scope, source });
+        },
+        onDumpSignal: (cb) => {
+          dumpSignalListeners.add(cb);
+          return () => { dumpSignalListeners.delete(cb); };
+        },
+        notify: (message, level) => {
+          host.postMessage({ type: "ossschem/notify", message, level });
         },
         values: (paths) =>
           new Promise((resolve) => {

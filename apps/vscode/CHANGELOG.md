@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.9.0
+
+- Cross probing works when the waveform dump names the design differently
+  from the schematic: a design simulated under a SystemC or C++ harness, a
+  cocotb wrapper or a SystemVerilog testbench sits one or more levels deeper in
+  the dump, possibly under another instance name (`TOP.tb.u_dut`). The new
+  **Scope** field under the sidebar's waveform picker holds the dump's name for
+  the design's top, and **W**, **Values** and **Reveal in schematic** translate
+  every name through it.
+- The scope is usually found without asking: when a dump comes into use,
+  ossschem checks the design's own names and Verilator's `TOP.<top>`, which
+  every trace from a Verilator C++ harness uses; otherwise the first signal of
+  the design selected or added in vaporview, or revealed in the schematic,
+  tells it. A scope is only adopted once the dump confirms it, so a testbench
+  wire named after one of the design's ports is not taken for the design.
+- When detection cannot place the design, right-click its scope in vaporview's
+  netlist tree and choose **Use as ossschem design root**, or type it into the
+  Scope field. A scope given by hand is never replaced, and the field warns
+  when the design is not found under it. Scopes are remembered per dump file
+  and design.
+- Revealing a waveform signal that is not part of the design, such as a
+  testbench signal, now says so instead of doing nothing.
+- `ossschem build` warns when it finds no source text for some of the design's
+  files, as with JSON written in another checkout, and points to `--sources`.
+
 ## 0.8.0
 
 - `ossschem build --json` builds the schematic from the JSON an existing

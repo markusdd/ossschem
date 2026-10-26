@@ -2,7 +2,7 @@
   "name": "ossschem",
   "displayName": "ossschem",
   "description": "Interactive RTL schematics, source mapping, and vaporview waveform cross probing",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "markusdd",
   "icon": "images/icon.png",
   "license": "MIT",
@@ -58,6 +58,11 @@
         "command": "ossschem.revealFromWaveform",
         "title": "Reveal in schematic",
         "category": "ossschem"
+      },
+      {
+        "command": "ossschem.useAsDesignRoot",
+        "title": "Use as ossschem design root",
+        "category": "ossschem"
       }
     ],
     "customEditors": [
@@ -102,6 +107,17 @@
           "command": "ossschem.revealFromWaveform",
           "when": "view == 'waveformViewerNetlistView' && viewItem == 'netlistVar'",
           "group": "1_default@30"
+        },
+        {
+          "command": "ossschem.useAsDesignRoot",
+          "when": "view == 'waveformViewerNetlistView' && viewItem == 'netlistScope'",
+          "group": "1_default@40"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "ossschem.useAsDesignRoot",
+          "when": "false"
         }
       ]
     }

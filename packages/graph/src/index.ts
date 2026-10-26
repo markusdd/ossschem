@@ -26,3 +26,4 @@ export { buildVisibleConnectivity, copySession, collapseWire, expandComponent, f
 export { pinTraceDirection, revealTrace, type PinFace, type TraceDirection } from "./trace.js";
 export { buildHierarchy, flattenHierarchy, prepareHierarchySelection, expandHierarchy, moduleRootKey, type ExpansionMode, type HierarchyItem } from "./hierarchy.js";
 export { formatSignalValue } from "./values.js";
+export { fromDumpPath, inferDumpScope, likelyDumpScopes, scopeWitnesses, splitDumpPath, toDumpPath } from "./dump-scope.js";

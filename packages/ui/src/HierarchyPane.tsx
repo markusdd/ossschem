@@ -32,6 +32,8 @@ function Branch(props: {
 export function HierarchyPane(props: {
   /** The waveform picker, when there is a host with waveforms to offer. */
   waveform?: ReactNode;
+  /** Where the design sits in that waveform, under the picker. */
+  scope?: ReactNode;
   moduleName?: string;
   moduleKey?: string;
   items: HierarchyItem[];
@@ -51,6 +53,7 @@ export function HierarchyPane(props: {
     <aside className="ossschem-hierarchy" aria-label="Hierarchy">
       <div className="ossschem-hierarchy-actions">
         {props.waveform}
+        {props.scope}
         <h2>Hierarchy</h2>
         <div className="ossschem-selection-actions">
           <button type="button" onClick={props.onIsolate} disabled={!props.canIsolate}>Isolate</button>

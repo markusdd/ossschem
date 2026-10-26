@@ -127,12 +127,36 @@ dump everything reads and writes, and switches it when several are open. It is
 settled once — from the one on screen — and then left alone, so the target does
 not move between one operation and the next.
 
+**Where the design is in the dump.** A dump names signals from the
+simulation's top, which is often not the design's: a SystemC or C++ harness, a
+cocotb wrapper or a SystemVerilog testbench puts it one or more levels down,
+and possibly under another instance name (`TOP.tb.u_dut` for a design whose
+top is `my_top`). The **Scope** field under the picker holds the dump's name
+for the design's top; every name crossing between the two is translated
+through it. It is usually found without asking:
+
+- when a dump comes into use, ossschem checks whether it names the design as
+  the schematic does, or as Verilator's own traces do (`TOP.my_top`);
+- otherwise, the first signal of the design you select or add in vaporview, or
+  reveal in the schematic, tells it where the design is.
+
+A scope is only adopted once the dump confirms it: a few of the top's ports
+and one port of an instance inside it must all be there under it, so a
+testbench signal named like one of the design's ports is not mistaken for the
+design. When detection cannot place it, right-click the design's scope in
+vaporview's netlist tree and choose **Use as ossschem design root**, or type it
+into the field (`TOP.tb.u_dut`). A scope given by hand is never replaced;
+emptying the field hands it back to detection. The field warns when the
+design's ports are not found under the scope in use. Scopes are remembered per
+dump file and design.
+
 ## Commands
 
 | Command | What it does |
 | --- | --- |
 | `ossschem: Open schematic` | Show a `schematic-ir.json` as a schematic, from the text editor |
 | `ossschem: Reveal in schematic` | Show the waveform's selected signal (context menus) |
+| `ossschem: Use as ossschem design root` | Take a scope in vaporview's netlist tree as the design's top (context menu) |
 | `ossschem: Link selection to waveform viewer (toggle)` | Stop or resume sending signals to vaporview |
 | `ossschem: Show log` | Every cross-probing step, in an output channel |
 | `ossschem: Diagnose waveform probing` | What vaporview knows about the last signal picked |

@@ -26,13 +26,19 @@ cpSync(viewer, bundled, { recursive: true });
 copyFileSync(`${root}LICENSE`, `${root}apps/vscode/LICENSE`);
 
 const vsce = `${root}node_modules/.bin/vsce`;
-// A release tag supplies the VSIX version without changing the checkout.
-execFileSync(vsce, [
-  "package", "--no-dependencies", "--no-update-package-json",
-  // vsce otherwise resolves README images from the repository root, while
-  // this extension (and its banner) live under apps/vscode.
-  "--baseImagesUrl", `https://raw.githubusercontent.com/markusdd/ossschem/${imageRef}/apps/vscode`,
-  ...process.argv.slice(2),
-], {
-  cwd: `${root}apps/vscode`, stdio: "inherit", shell: process.platform === "win32",
-});
+try {
+  // A release tag supplies the VSIX version without changing the checkout.
+  execFileSync(vsce, [
+    "package", "--no-dependencies", "--no-update-package-json",
+    // vsce otherwise resolves README images from the repository root, while
+    // this extension (and its banner) live under apps/vscode.
+    "--baseImagesUrl", `https://raw.githubusercontent.com/markusdd/ossschem/${imageRef}/apps/vscode`,
+    ...process.argv.slice(2),
+  ], {
+    cwd: `${root}apps/vscode`, stdio: "inherit", shell: process.platform === "win32",
+  });
+} finally {
+  // findViewer prefers this copy, so one left behind would have the extension
+  // run from the checkout show the viewer as it was at packaging time
+  rmSync(bundled, { recursive: true, force: true });
+}

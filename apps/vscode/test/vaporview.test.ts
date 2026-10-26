@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { arrayShape, chooseDocument, documentLabels, openDocuments, parseIndexSpec, pathCandidates } from "../src/vaporview.js";
+import { arrayShape, chooseDocument, designTopName, documentLabels, dumpScopeKey, openDocuments, parseIndexSpec, pathCandidates,
+  sameDocument } from "../src/vaporview.js";
 
 describe("what vaporview answers", () => {
   it("takes the bare array of URIs that 1.5.4 returns", () => {
@@ -113,5 +114,23 @@ describe("choosing array elements", () => {
     expect(parseIndexSpec("", [0, 1])).toBeUndefined();
     expect(parseIndexSpec("All", [0, 1])).toBeUndefined();
     expect(parseIndexSpec("0-", [0, 1])).toBeUndefined();
+  });
+});
+
+describe("where a design sits in a dump", () => {
+  it("treats two encodings of one dump's URI as the same document", () => {
+    expect(sameDocument("file:///home/me/sim%20run/dump.fst", "file:///home/me/sim run/dump.fst")).toBe(true);
+    expect(sameDocument("file:///a/dump.fst", "file:///b/dump.fst")).toBe(false);
+  });
+
+  it("keeps a scope per dump and per design", () => {
+    expect(dumpScopeKey("file:///a/dump.fst", "fifo")).not.toBe(dumpScopeKey("file:///a/dump.fst", "core"));
+    expect(dumpScopeKey("file:///a/dump%20x.fst", "fifo")).toBe(dumpScopeKey("file:///a/dump x.fst", "fifo"));
+  });
+
+  it("names the design by its top module, and by nothing when the IR says nothing", () => {
+    expect(designTopName({ top: "m1", modules: { m1: { name: "svb_afifo" } } })).toBe("svb_afifo");
+    expect(designTopName({ top: "m9", modules: {} })).toBe("");
+    expect(designTopName(null)).toBe("");
   });
 });

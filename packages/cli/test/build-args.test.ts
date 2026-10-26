@@ -3,7 +3,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import { main, metaCandidates, planPassthrough, splitPassthrough } from "../src/main.js";
+import type { Design } from "@ossschem/ir";
+import { main, metaCandidates, missingSources, planPassthrough, splitPassthrough } from "../src/main.js";
 
 const fixture = resolve(dirname(fileURLToPath(import.meta.url)), "../../../fixtures/svb_afifo/verilator");
 
@@ -41,6 +42,17 @@ describe("the meta JSON next to a tree", () => {
   it("follows Verilator's naming, then build's", () => {
     expect(metaCandidates("out/Vtop.tree.json")).toEqual(["out/Vtop.tree.meta.json", "out/Vtop.meta.json"]);
     expect(metaCandidates("top.json")).toEqual(["top.meta.json"]);
+  });
+});
+
+describe("source text the build could not find", () => {
+  it("names real files with no text, not Verilator's built-in ones", () => {
+    const design = { files: {
+      a: { path: "<built-in>", language: "1800-2023" },
+      b: { path: "/elsewhere/rtl/top.sv", language: "1800-2023" },
+      c: { path: "rtl/sub.sv", language: "1800-2023" },
+    } } as unknown as Design;
+    expect(missingSources(design, { "sub.sv": "module sub; endmodule" })).toEqual(["/elsewhere/rtl/top.sv"]);
   });
 });
 

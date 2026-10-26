@@ -1078,11 +1078,18 @@ input:disabled {
   color: var(--fg-muted);
 }
 
-.ossschem-waveform select {
+.ossschem-waveform select,
+.ossschem-waveform input {
   flex: 1;
   min-width: 0;
   font-size: 11px;
 }
+
+/* where the design sits in that waveform, and whether it was found there */
+.ossschem-scope { margin-bottom: 8px; }
+.ossschem-scope .ossschem-waveform { margin-bottom: 0; }
+.ossschem-scope-status { margin: 3px 0 0; font-size: 10px; color: var(--fg-muted); }
+.ossschem-scope-missing { color: var(--logic-color); }
 
 .ossschem-hierarchy-actions { position: sticky; top: -8px; z-index: 1; background: var(--bg-raised); padding: 8px 0; }
 .ossschem-selection-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }

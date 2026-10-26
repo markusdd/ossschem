@@ -37,7 +37,10 @@ signal and choose **Reveal in schematic**; ossschem opens the path to it,
 highlights the signal, and shows its source, drivers, and loads. Turn on
 **Values** to label visible wires with their values at the waveform cursor.
 When several dumps are open, the sidebar's **Waveform** picker chooses which
-one these actions use. See the [extension guide](apps/vscode/README.md) for
+one these actions use. A design simulated under a testbench, such as a SystemC
+or cocotb harness, sits deeper in the dump than in the schematic; ossschem
+usually finds where, and the **Scope** field under the picker (or **Use as
+ossschem design root** on a scope in vaporview's netlist) sets it otherwise. See the [extension guide](apps/vscode/README.md) for
 array signals and the other cross probing controls.
 
 ## Install

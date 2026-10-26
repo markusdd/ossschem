@@ -10,8 +10,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import * as vscode from "vscode";
 
-import { arrayShape, chooseDocument, documentLabels, openDocuments, parseIndexSpec, pathCandidates,
-  SMALL_ARRAY, type OpenDocuments } from "./vaporview.js";
+import { arrayShape, chooseDocument, designTopName, documentLabels, dumpScopeKey, openDocuments, parseIndexSpec,
+  pathCandidates, sameDocument, SMALL_ARRAY, type DumpScopeEntry, type OpenDocuments, type ScopeSource } from "./vaporview.js";
 import { viewerHtml } from "./webview-html.js";
 
 /** What `ossschem build` writes, and what `ossschem dump --out` is called. */
@@ -61,9 +61,14 @@ let log: vscode.OutputChannel | undefined;
 let lastPicked: string[][] = [];
 /** The waveform in use, shown in the schematic's sidebar and switched from there. */
 let chosenWaveform: string | undefined;
-/** Open schematic panels, so a selection in the waveform can reach them. */
-const panels = new Set<vscode.WebviewPanel>();
+/** Open schematic panels, so a selection in the waveform can reach them, and the top each one shows. */
+const panels = new Map<vscode.WebviewPanel, { top: string }>();
+/** The schematic last in focus: the one a scope picked in vaporview's netlist is meant for. */
+let lastActivePanel: vscode.WebviewPanel | undefined;
 let listeningToViewer = false;
+/** Where each design sits in each dump, kept across sessions; see dumpScopeKey. */
+let workspaceState: vscode.Memento | undefined;
+const DUMP_SCOPES = "ossschem.dumpScopes";
 
 function trace(message: string): void {
   log?.appendLine(`${new Date().toISOString().slice(11, 19)} ${message}`);
@@ -130,18 +135,51 @@ async function activeWaveform(): Promise<string | undefined> {
   return uri;
 }
 
+/* Where a design sits in a dump: the dump's name for its top instance, when
+ * that is not simply the top's own name. Kept per dump and design, so a
+ * testbench's scope is found once, and a second schematic of another design
+ * against the same dump keeps its own. */
+function dumpScopes(): Record<string, DumpScopeEntry> {
+  return workspaceState?.get<Record<string, DumpScopeEntry>>(DUMP_SCOPES) ?? {};
+}
+
+function scopeFor(uri: string | undefined, top: string): DumpScopeEntry | undefined {
+  return uri === undefined ? undefined : dumpScopes()[dumpScopeKey(uri, top)];
+}
+
+async function setScope(panel: vscode.WebviewPanel, scope: string[] | undefined, source: ScopeSource): Promise<void> {
+  const top = panels.get(panel)?.top;
+  const uri = chosenWaveform;
+  if (top === undefined || uri === undefined) {
+    return;
+  }
+  const scopes = { ...dumpScopes() };
+  const key = dumpScopeKey(uri, top);
+  if (scope === undefined || scope.length === 0) {
+    delete scopes[key];
+    trace(`  ${top}: scope in ${uri} forgotten, to be found again`);
+  } else {
+    scopes[key] = { scope, source };
+    trace(`  ${top} is ${scope.join(".")} in ${uri} (${source === "auto" ? "found" : "set by hand"})`);
+  }
+  await workspaceState?.update(DUMP_SCOPES, scopes);
+  showWaveforms(await openWaveforms(), true);
+}
+
 /* What the schematic's picker shows. Sent on every change rather than asked
  * for, so the sidebar always names the dump the values came from -- and only
  * on a change, since the schematic re-reads its values whenever it is told. */
-let lastShown = "";
+const lastShown = new Map<vscode.WebviewPanel, string>();
 function showWaveforms(open: string[], force = false): void {
-  const state = { type: "ossschem/waveforms", documents: documentLabels(open), active: chosenWaveform };
-  const shown = JSON.stringify(state);
-  if (shown === lastShown && !force) {
-    return;
-  }
-  lastShown = shown;
-  for (const panel of panels) {
+  for (const [panel, { top }] of panels) {
+    const scope = scopeFor(chosenWaveform, top);
+    const state = { type: "ossschem/waveforms", documents: documentLabels(open), active: chosenWaveform,
+      scope: scope?.scope, scopeSource: scope?.source };
+    const shown = JSON.stringify(state);
+    if (shown === lastShown.get(panel) && !force) {
+      continue;
+    }
+    lastShown.set(panel, shown);
     void panel.webview.postMessage(state);
   }
 }
@@ -176,6 +214,11 @@ async function diagnose(): Promise<void> {
   trace(`diagnose: getOpenDocuments -> ${JSON.stringify(raw)}`);
   const uri = await activeWaveform();
   trace(`diagnose: target document ${uri ?? "none"}`);
+  for (const { top } of panels.values()) {
+    const scope = scopeFor(uri, top);
+    trace(`  ${top} is ${scope === undefined ? "not placed yet; taken as named in the schematic"
+      : `${scope.scope.join(".")} (${scope.source === "auto" ? "found" : "set by hand"})`}`);
+  }
   if (uri === undefined || lastPicked.length === 0) {
     trace("  open a waveform and pick a signal in the schematic first");
     return;
@@ -351,7 +394,9 @@ async function sendToWaveform(offered: string[][]): Promise<void> {
   }
   trace(`  not in this dump:\n    ${unresolved.join("\n    ")}`);
   void vscode.window.showWarningMessage(
-    `ossschem: ${unresolved.length} signal(s) are not in ${uri.split("/").pop() ?? "the dump"}. See the ossschem log.`,
+    `ossschem: ${unresolved.length} signal(s) are not in ${uri.split("/").pop() ?? "the dump"}. If the design sits`
+      + " under a testbench there, set its scope in the schematic's sidebar, or right-click it in the netlist view"
+      + " and choose Use as ossschem design root. See the ossschem log.",
   );
 }
 
@@ -395,8 +440,33 @@ async function answerValues(panel: vscode.WebviewPanel, request: ValuesRequest):
   void panel.webview.postMessage({ type: "ossschem/values", id: request.id, values });
 }
 
+/** A signal event: `instancePath` lists full dotted names, one per signal. */
+interface SignalEvent {
+  uri?: string;
+  instancePath?: unknown;
+}
+
 interface VaporviewApi {
   onDidSetMarker?: (cb: () => void) => vscode.Disposable;
+  onDidSelectSignal?: (cb: (event: SignalEvent) => void) => vscode.Disposable;
+  onDidAddVariable?: (cb: (event: SignalEvent) => void) => vscode.Disposable;
+}
+
+/* A signal the user picked out in the dump in use: the schematics learn from
+ * it where their design sits, while they do not know yet. */
+function forwardDumpSignal(event: SignalEvent): void {
+  if (event.uri === undefined || chosenWaveform === undefined || !sameDocument(event.uri, chosenWaveform)) {
+    return;
+  }
+  const paths = Array.isArray(event.instancePath) ? event.instancePath : [event.instancePath];
+  for (const path of paths) {
+    if (typeof path !== "string" || path === "") {
+      continue;
+    }
+    for (const panel of panels.keys()) {
+      void panel.webview.postMessage({ type: "ossschem/dumpSignal", instancePath: path.split(".") });
+    }
+  }
 }
 
 /* The cursor moving is worth following automatically; a selection changing is
@@ -421,11 +491,16 @@ async function listenToViewer(context: vscode.ExtensionContext): Promise<void> {
   }
   listeningToViewer = true;
   context.subscriptions.push(api.onDidSetMarker(() => {
-    for (const panel of panels) {
+    for (const panel of panels.keys()) {
       void panel.webview.postMessage({ type: "ossschem/cursorMoved" });
     }
   }));
   trace("following the cursor in vaporview");
+  for (const event of [api.onDidSelectSignal, api.onDidAddVariable]) {
+    if (typeof event === "function") {
+      context.subscriptions.push(event(forwardDumpSignal));
+    }
+  }
 }
 
 /* Both of vaporview's menus hand over the signal in the same two pieces: the
@@ -435,6 +510,8 @@ interface SignalContext {
   scopePath?: string | string[];
   signalName?: string;
   name?: string;
+  /** The netlist tree's items know their full dotted name. */
+  instancePath?: () => string;
 }
 
 function scopeSegments(scopePath: string | string[] | undefined): string[] {
@@ -455,10 +532,36 @@ function revealFromWaveform(target: SignalContext | undefined): void {
     void vscode.window.showWarningMessage("ossschem: open a schematic first.");
     return;
   }
-  for (const panel of panels) {
+  for (const panel of panels.keys()) {
     void panel.webview.postMessage({ type: "ossschem/revealSignal", instancePath });
     panel.reveal(undefined, true);
   }
+}
+
+/* A scope picked in vaporview's netlist, as where the design sits: the answer
+ * for a dump detection cannot place, and the user's, so it stands. It goes to
+ * the schematic last in focus, since several may show different designs. */
+async function useAsDesignRoot(target: SignalContext | undefined): Promise<void> {
+  const full = typeof target?.instancePath === "function" ? target.instancePath() : undefined;
+  const scope = full !== undefined && full !== ""
+    ? full.split(".").filter((part) => part.length > 0)
+    : [...scopeSegments(target?.scopePath), ...(target?.name === undefined ? [] : [target.name])];
+  const panel = lastActivePanel !== undefined && panels.has(lastActivePanel) ? lastActivePanel : panels.keys().next().value;
+  trace(`design root asked for ${scope.join(".")}`);
+  if (scope.length === 0) {
+    void vscode.window.showWarningMessage("ossschem: no scope to use.");
+    return;
+  }
+  if (panel === undefined) {
+    void vscode.window.showWarningMessage("ossschem: open a schematic first.");
+    return;
+  }
+  if (await activeWaveform() === undefined) {
+    void vscode.window.showWarningMessage("ossschem: no waveform is open in vaporview.");
+    return;
+  }
+  await setScope(panel, scope, "manual");
+  panel.reveal(undefined, true);
 }
 
 /** The editor the IR opens in, so a schematic is what a click on one gives. */
@@ -501,8 +604,17 @@ async function mountSchematic(
     localResourceRoots: [vscode.Uri.file(viewerRoot)],
   };
   trace(`opened ${name} with the viewer from ${viewerRoot}`);
-  panels.add(panel);
-  panel.onDidDispose(() => panels.delete(panel));
+  panels.set(panel, { top: designTopName(design) });
+  lastActivePanel = panel;
+  panel.onDidChangeViewState(() => {
+    if (panel.active) {
+      lastActivePanel = panel;
+    }
+  });
+  panel.onDidDispose(() => {
+    panels.delete(panel);
+    lastShown.delete(panel);
+  });
   // a waveform opening or closing changes what the picker offers, and can
   // retire the dump in use
   const tabs = vscode.window.tabGroups.onDidChangeTabs(() => { void refreshWaveforms(); });
@@ -517,6 +629,15 @@ async function mountSchematic(
         void refreshWaveforms(true);
       } else if (kind === "ossschem/useWaveform") {
         void useWaveform(String((message as { uri?: unknown }).uri ?? ""));
+      } else if (kind === "ossschem/useScope") {
+        const { scope, source } = message as { scope?: unknown; source?: unknown };
+        void setScope(panel, Array.isArray(scope) ? scope.filter((p): p is string => typeof p === "string") : undefined,
+          source === "auto" ? "auto" : "manual");
+      } else if (kind === "ossschem/notify") {
+        const { message: text, level } = message as { message?: unknown; level?: unknown };
+        trace(`  ${String(text)}`);
+        void (level === "info" ? vscode.window.showInformationMessage : vscode.window.showWarningMessage)(
+          `ossschem: ${String(text)}`);
       } else if (isValuesRequest(message)) {
         void answerValues(panel, message);
       } else if (isNetPicked(message)) {
@@ -572,6 +693,7 @@ async function openSchematic(target?: vscode.Uri): Promise<void> {
 
 export function activate(context: vscode.ExtensionContext): void {
   log = vscode.window.createOutputChannel("ossschem");
+  workspaceState = context.workspaceState;
   context.subscriptions.push(
     log,
     vscode.window.registerCustomEditorProvider(SCHEMATIC_VIEW, new SchematicEditorProvider(context), {
@@ -584,6 +706,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.commands.registerCommand("ossschem.revealFromWaveform", (target?: SignalContext) => {
       revealFromWaveform(target);
+    }),
+    vscode.commands.registerCommand("ossschem.useAsDesignRoot", (target?: SignalContext) => {
+      void useAsDesignRoot(target);
     }),
     vscode.commands.registerCommand("ossschem.diagnoseProbe", () => {
       void diagnose();

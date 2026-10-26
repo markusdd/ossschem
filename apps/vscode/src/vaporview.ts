@@ -133,3 +133,33 @@ export function parseIndexSpec(spec: string, available: number[]): number[] | un
   }
   return chosen.size === 0 ? undefined : [...chosen].sort((a, b) => a - b);
 }
+
+/* Two spellings of one dump's URI: vaporview's events and its document list
+ * need not encode them alike. */
+export function sameDocument(a: string, b: string): boolean {
+  const plain = (uri: string): string => decodeURIComponent(uri).replace(/\/+$/, "");
+  return plain(a) === plain(b);
+}
+
+/** Found from the dump's names, or given by the user -- which is never second-guessed. */
+export type ScopeSource = "auto" | "manual";
+
+/** Where one design sits in one dump: the dump's name for the design's top instance. */
+export interface DumpScopeEntry {
+  scope: string[];
+  source: ScopeSource;
+}
+
+/* Scopes are kept per dump and per design: the same testbench dump can hold a
+ * design at one scope and a second design at another. */
+export function dumpScopeKey(uri: string, top: string): string {
+  return `${decodeURIComponent(uri)}\n${top}`;
+}
+
+/* The design's top module by name, which is what a scope is kept against. The
+ * IR is taken as it comes off disk, so anything missing reads as no name. */
+export function designTopName(design: unknown): string {
+  const d = design as { top?: unknown; modules?: Record<string, { name?: unknown }> } | null;
+  const top = typeof d?.top === "string" ? d.modules?.[d.top]?.name : undefined;
+  return typeof top === "string" ? top : "";
+}

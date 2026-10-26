@@ -187,6 +187,15 @@ function collectSources(design: Design, explicitRoots: readonly string[]): Recor
   return sources;
 }
 
+/* The design's files that no source text was found for. JSON written in another
+ * checkout names files that are not here, and the source pane would just stay
+ * empty without saying why. */
+export function missingSources(design: Design, sources: Record<string, string>): string[] {
+  return Object.values(design.files)
+    .map((file) => file.path)
+    .filter((path) => !path.startsWith("<") && sources[basename(path)] === undefined);
+}
+
 function jsonForScript(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
 }
@@ -337,7 +346,14 @@ function build(argv: readonly string[]): number {
   }
   const design = loadDesign(tree, meta, top, version);
   const explicitSources = own.flatMap((arg, i) => arg === "--sources" && i + 1 < own.length ? [own[i + 1]] : []);
-  const indexPath = writeViewer(outDir, design, collectSources(design, explicitSources));
+  const sources = collectSources(design, explicitSources);
+  const missing = missingSources(design, sources);
+  if (missing.length > 0) {
+    process.stderr.write(`ossschem: no source text for ${missing.length} of the design's files, so the source pane`
+      + ` will not show them: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? ", ..." : ""}\n`
+      + "ossschem: point at them with --sources <dir>\n");
+  }
+  const indexPath = writeViewer(outDir, design, sources);
   process.stdout.write(`${indexPath}\n`);
   if (hasFlag(own, "--open")) openBrowser(indexPath);
   return 0;
