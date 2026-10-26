@@ -52,8 +52,10 @@ describe("build --json", () => {
 
   it("builds the viewer from JSON already written, finding the meta itself", () => {
     out = mkdtempSync(join(tmpdir(), "ossschem-json-"));
+    // the fixture's JSON names its sources by where they were dumped, which is
+    // not where this checkout is, so they are pointed at the way a user would
     const status = main(["build", "--json", "--out-dir", out, "--verilator-version", "5.046",
-      join(fixture, "svb_afifo.tree.json")]);
+      "--sources", join(fixture, "../src"), join(fixture, "svb_afifo.tree.json")]);
     expect(status).toBe(0);
     const design = JSON.parse(readFileSync(join(out, "schematic-ir.json"), "utf8")) as { top: string; modules: Record<string, { name: string }> };
     expect(design.modules[design.top]?.name).toBe("svb_afifo");
